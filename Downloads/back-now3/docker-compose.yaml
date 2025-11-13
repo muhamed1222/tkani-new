@@ -1,0 +1,166 @@
+# =============================================================================
+# DOCKER COMPOSE ДЛЯ РАЗРАБОТКИ - ТОЛЬКО ИНФРАСТРУКТУРА
+# =============================================================================
+# Поднимаем только базы данных и инструменты, микросервисы запускаем локально
+# Запуск: docker-compose -f docker-compose.dev.yaml up -d
+# =============================================================================
+
+# В новых версиях Docker Compose версия не обязательна
+# version: '3.8'
+
+services:
+  # ===========================================================================
+  # POSTGRESQL с PostGIS - для геоданных
+  # ===========================================================================
+  postgres:
+    image: kartoza/postgis:17-3.5--v2025.08.23
+    container_name: tropa-postgres-db
+    restart: unless-stopped
+    environment:
+      # Основные переменные PostgreSQL
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      
+      # Дополнительные переменные для наших скриптов
+      # Убираем TROPA_APP_PASSWORD - не используется
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      # Используем shell скрипт вместо SQL
+      # - ./scripts/init-postgres.sh:/docker-entrypoint-initdb.d/init-postgres.sh
+    networks:
+      - tropa-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================================================
+  # MONGODB - для Reviews сервиса
+  # ===========================================================================
+  mongodb:
+    image: mongo:8.0.13
+    container_name: tropa-mongodb-db
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
+      
+      # Исправляем переменные согласно вашему .env
+      TROPA_MONGO_USER: ${MONGO_USER}
+      TROPA_MONGO_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      # Стандартный порт MongoDB
+      - "27017:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+      # - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init.js:ro
+    networks:
+      - tropa-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================================================
+  # REDIS - кэширование и сессии
+  # ===========================================================================
+  redis:
+    image: redis:8-alpine
+    container_name: tropa-redis-dev
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - tropa-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================================================
+  # RABBITMQ - брокер сообщений
+  # ===========================================================================
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    container_name: tropa-rabbitmq-dev
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
+    ports:
+      - "5672:5672"    # AMQP порт
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_dev_data:/var/lib/rabbitmq
+    networks:
+      - tropa-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================================================
+  # ADMINER - веб-интерфейс для управления базами данных (БОНУС!)
+  # ===========================================================================
+  adminer:
+    image: adminer:latest
+    container_name: tropa-adminer-dev
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - tropa-network
+    # Adminer позволяет управлять PostgreSQL через веб-интерфейс
+    # Открыть: http://localhost:8080
+    # Сервер: postgres, Пользователь: tropa_user, Пароль: из .env
+
+  # ===========================================================================
+  # MONGO EXPRESS - веб-интерфейс для MongoDB (БОНУС!)
+  # ===========================================================================
+  mongo-express:
+    image: mongo-express:latest
+    container_name: tropa-mongo-express-dev
+    restart: unless-stopped
+    environment:
+      # Подключение к нашему MongoDB
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      # Настройки веб-интерфейса
+      ME_CONFIG_BASICAUTH_USERNAME: mongoTNadmin
+      ME_CONFIG_BASICAUTH_PASSWORD: mongoTNpass
+    ports:
+      - "8082:8081"
+    depends_on:
+      - mongodb
+    networks:
+      - tropa-network
+    # Открыть: http://localhost:8081 (admin/admin123)
+
+networks:
+  tropa-network:
+    driver: bridge
+    name: tropa-network
+
+volumes:
+  postgres_dev_data:
+    name: postgres_dev_data
+  mongodb_dev_data:
+    name: tropa-mongodb-dev-data
+  redis_dev_data:
+    name: tropa-redis-dev-data
+  rabbitmq_dev_data:
+    name: tropa-rabbitmq-dev-data
