@@ -1,8 +1,40 @@
 import styles from "./Footer.module.css";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { RatingBadge } from "./RatingBadge";
+import { CATALOG_ROUTE, CATALOG_CLOTHING_ROUTE } from "../../utils/consts";
+import { clothingCategories, homeCategories } from "../../utils/catalogCategories";
 
 export const Footer = () => {
+  const location = useLocation();
+  
+  // Определяем текущую категорию из URL
+  const pathname = location.pathname;
+  const isClothingCatalog = pathname.includes('/catalog-clothing');
+  
+  // Извлекаем slug категории из пути
+  const getCurrentCategorySlug = () => {
+    if (pathname.includes('/catalog-clothing/')) {
+      return pathname.split('/catalog-clothing/')[1]?.split('/')[0] || null;
+    }
+    if (pathname.includes('/catalog/')) {
+      return pathname.split('/catalog/')[1]?.split('/')[0] || null;
+    }
+    return null;
+  };
+  
+  const currentCategorySlug = getCurrentCategorySlug();
+  
+  // Проверяем, является ли категория активной
+  const isActiveCategory = (slug) => {
+    if (!currentCategorySlug) return false;
+    return currentCategorySlug === slug;
+  };
+
+  // Обработчик клика для прокрутки вверх
+  const handleCategoryClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className={styles.wrapper}>
       <section className={styles.top_section}>
@@ -21,78 +53,38 @@ export const Footer = () => {
           <div className={styles.footer_section}>
             <h3 className={styles.section_title}>Для одежды</h3>
             <nav className={styles.nav}>
-              <Link to="/" className={styles.link}>
-                Шёлк
-              </Link>
-              <Link to="/" className={styles.link}>
-                Футер
-              </Link>
-              <Link to="/" className={styles.link}>
-                Трикотаж
-              </Link>
-              <Link to="/" className={styles.link}>
-                Вискоза
-              </Link>
-              <Link to="/" className={styles.link}>
-                Тенсель
-              </Link>
-              <Link to="/" className={styles.link}>
-                Муслин
-              </Link>
-              <Link to="/" className={styles.link}>
-                Тенсель
-              </Link>
-              <Link to="/" className={styles.link}>
-                Лён
-              </Link>
-              <Link to="/" className={styles.link}>
-                Купра
-              </Link>
-              <Link to="/" className={styles.link}>
-                Хлопок
-              </Link>
-              <Link to="/" className={styles.link}>
-                Штапель
-              </Link>
-              <Link to="/" className={styles.link}>
-                Джинса
-              </Link>
+              {clothingCategories.map((category, index) => {
+                const isActive = isClothingCatalog && isActiveCategory(category.slug);
+                return (
+                  <Link 
+                    key={index}
+                    to={`${CATALOG_CLOTHING_ROUTE}/${category.slug}`} 
+                    className={`${styles.link} ${isActive ? styles.link_active : ''}`}
+                    onClick={handleCategoryClick}
+                  >
+                    {category.name}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
 
           <div className={styles.footer_section}>
             <h3 className={styles.section_title}>Для дома</h3>
             <nav className={styles.nav}>
-              <Link to="/" className={styles.link}>
-                Сатин Турция
-              </Link>
-              <Link to="/" className={styles.link}>
-                Сатин Китай
-              </Link>
-              <Link to="/" className={styles.link}>
-                Тенсель 60s
-              </Link>
-              <Link to="/" className={styles.link}>
-                Поплин Турция
-              </Link>
-              <Link to="/" className={styles.link}>
-                Дак
-              </Link>
-              <Link to="/" className={styles.link}>
-                Вафельное полотно
-              </Link>
-              <Link to="/" className={styles.link}>
-                Махра
-              </Link>
-              <Link to="/" className={styles.link}>
-                Пике косичка
-              </Link>
-              <Link to="/" className={styles.link}>
-                Фланель
-              </Link>
-              <Link to="/" className={styles.link}>
-                Муслин
-              </Link>
+              {homeCategories.map((category, index) => {
+                const isActive = !isClothingCatalog && isActiveCategory(category.slug);
+                return (
+                  <Link 
+                    key={index}
+                    to={`${CATALOG_ROUTE}/${category.slug}`} 
+                    className={`${styles.link} ${isActive ? styles.link_active : ''}`}
+                    onClick={handleCategoryClick}
+                  >
+                    {category.name}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
 

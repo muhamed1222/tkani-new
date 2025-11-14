@@ -96,6 +96,13 @@
 .link:hover {
     color: #161616;
 }
+.link_active {
+    color: #9B1E1C;
+    font-weight: 600;
+}
+.link_active:hover {
+    color: #9B1E1C;
+}
 
 
 .footer_bottom {

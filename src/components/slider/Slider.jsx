@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export const Slider = ({ 
   slides = [], 
@@ -9,27 +9,42 @@ export const Slider = ({
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
 
-  const nextSlide = () => setCurrent((prev) => (prev + 1) % slides.length);
-  const prevSlide = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+  const nextSlide = useCallback(() => {
+    setCurrent((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
 
   useEffect(() => {
+    if (slides.length === 0) return;
+    
     setProgress(0);
-    const duration = 5000;
-    const start = Date.now();
+    const duration = 5000; // 5 секунд на слайд
+    const startTime = Date.now();
+    let animationFrameId = null;
 
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - start;
+    const updateProgress = () => {
+      const elapsed = Date.now() - startTime;
       const percent = Math.min((elapsed / duration) * 100, 100);
+      
       setProgress(percent);
 
-      if (percent >= 100) {
-        clearInterval(interval);
-        nextSlide();
+      if (percent < 100) {
+        animationFrameId = requestAnimationFrame(updateProgress);
+      } else {
+        // После полного заполнения переключаемся на следующий слайд
+        setTimeout(() => {
+          nextSlide();
+        }, 100);
       }
-    }, 50);
+    };
 
-    return () => clearInterval(interval);
-  }, [current]);
+    animationFrameId = requestAnimationFrame(updateProgress);
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [current, nextSlide, slides.length]);
 
   return (
     <div className="relative flex-1 h-[559px] flex flex-col justify-between p-[27px] rounded-[14px] overflow-hidden">
@@ -54,9 +69,19 @@ export const Slider = ({
 
       {/* Текст поверх */}
       <div className={`relative z-20 w-full ${textPosition === "left" ? "text-left" : "text-right"}`}>
-        <p className="text-white text-[60px] font-bold leading-[1.2] uppercase whitespace-pre-wrap">
-          {title}
-        </p>
+        {Array.isArray(title) ? (
+          <p className="text-white text-[40px] md:text-[50px] lg:text-[60px] font-bold leading-[1.2] uppercase">
+            {title.map((line, index) => (
+              <span key={index} className="block">
+                {line}
+              </span>
+            ))}
+          </p>
+        ) : (
+          <p className="text-white text-[40px] md:text-[50px] lg:text-[60px] font-bold leading-[1.2] uppercase whitespace-pre-wrap">
+            {title}
+          </p>
+        )}
       </div>
 
       {/* Пагинация */}
@@ -65,21 +90,37 @@ export const Slider = ({
           const isActive = index === current;
           const isCompleted = index < current;
           
+          // Определяем ширину прогресс-бара
+          let progressWidth = 0;
+          if (isCompleted) {
+            progressWidth = 100;
+          } else if (isActive) {
+            progressWidth = progress;
+          }
+          
           return (
             <div 
               key={index} 
-              className={`h-[4px] rounded-[4px] ${isActive || isCompleted ? "bg-[#f1f0ee]" : "bg-[rgba(241,240,238,0.3)]"}`}
+              className="relative"
               style={{ 
                 width: "152px",
-                position: "relative"
+                height: "6px",
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                borderRadius: "4px",
+                overflow: "hidden",
+                boxShadow: "inset 0 1px 2px rgba(0, 0, 0, 0.1)"
               }}
             >
-              {isActive && (
-                <div 
-                  className="absolute h-[4px] bg-[#f1f0ee] rounded-[7px] top-0 left-0 transition-all duration-200"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              )}
+              {/* Прогресс-бар */}
+              <div 
+                className="absolute top-0 left-0 h-full rounded-[4px]"
+                style={{ 
+                  width: `${progressWidth}%`,
+                  backgroundColor: "#f1f0ee",
+                  transition: isActive ? "none" : "width 0.3s ease",
+                  boxShadow: "0 0 4px rgba(241, 240, 238, 0.5)"
+                }}
+              ></div>
             </div>
           );
         })}

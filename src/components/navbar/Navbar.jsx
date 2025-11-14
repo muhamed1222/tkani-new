@@ -252,7 +252,7 @@ export const NavBar = observer(() => {
       </div>
 
       {/* Анимация slide-down */}
-      <style jsx>{`
+      <style>{`
         @keyframes slideDown {
           0% {
             opacity: 0;

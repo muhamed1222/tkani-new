@@ -1,0 +1,159 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { TKAN_ROUTE } from "../../utils/consts";
+
+export const ProductCard = ({ product, showHover = false }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [quantity, setQuantity] = useState(1.0);
+  
+  // Цена за метр
+  const pricePerMeter = product.price || 800;
+  
+  // Итоговая цена (с учетом скидки от 5 метров - 50%)
+  const totalPrice = quantity >= 5 
+    ? (pricePerMeter * quantity * 0.5).toFixed(2)
+    : (pricePerMeter * quantity).toFixed(2);
+  
+  const handleDecrease = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (quantity > 0.5) {
+      const newValue = Math.max(0.5, quantity - 0.1);
+      setQuantity(Math.round(newValue * 10) / 10);
+    }
+  };
+  
+  const handleIncrease = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const newValue = quantity + 0.1;
+    setQuantity(Math.round(newValue * 10) / 10);
+  };
+  
+  return (
+    <div 
+      className="group bg-white border-[1.2px] border-[rgba(16,16,16,0.1)] rounded-[20px] w-full overflow-hidden transition-all duration-300 ease-in-out"
+      style={{ 
+        height: showHover && isHovered ? '608px' : '457px',
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Link 
+        to={`${TKAN_ROUTE}/${product.id}`}
+        className="flex flex-col items-center p-[10px] h-full"
+      >
+        {/* Изображение */}
+        <div className="h-[380px] overflow-hidden relative rounded-[10px] w-full flex-shrink-0">
+          <img 
+            src={product.img} 
+            alt={product.name} 
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[433px] w-[338px] object-cover"
+          />
+        </div>
+        
+        {/* Контент по умолчанию */}
+        <div className="flex flex-col gap-[20px] items-center pt-[14px] px-[10px] w-full group-hover:hidden">
+          <div className="flex flex-col gap-[5px] items-start justify-end w-full">
+            <p className="text-[#101010] text-[16px] font-semibold leading-[1.2] whitespace-pre-wrap">
+              {product.name}
+            </p>
+            <div className="flex gap-[10px] items-center justify-center">
+              <p className="text-[#9B1E1C] text-[16px] font-bold leading-[1.2]">
+                {product.price} ₽ /м
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Контент при наведении (если включен) */}
+        {showHover && (
+          <div className="hidden flex-col gap-[2px] items-center pt-[14px] px-[10px] w-full group-hover:flex">
+            <div className="flex flex-col gap-[14px] items-start w-full">
+              <div className="flex flex-col gap-[5px] items-start justify-end w-full">
+                <p className="text-[#101010] text-[16px] font-semibold leading-[1.2] whitespace-pre-wrap">
+                  {product.name}
+                </p>
+                <div className="flex gap-[10px] items-center justify-center">
+                  <p className="text-[#9B1E1C] text-[16px] font-bold leading-[1.2]">
+                    {product.price} ₽ /м
+                  </p>
+                </div>
+              </div>
+              <p className="text-[#888888] text-[14px] font-normal leading-[1.2] whitespace-pre-wrap w-full">
+                *Скидка от 5 метров
+              </p>
+            </div>
+            <div className="flex flex-col gap-[10px] items-start justify-center px-0 py-[10px] w-full">
+              <div className="flex flex-col gap-[12px] items-start w-full">
+                <div className="flex items-end justify-between w-full">
+                  <div className="flex flex-col gap-[10px] items-start">
+                    <div className="bg-[#E4E2DF] border border-[#E4E2DF] rounded-[8px] w-full">
+                      <div className="flex items-center justify-between overflow-hidden rounded-[inherit] w-full">
+                        <button
+                          onClick={handleDecrease}
+                          disabled={quantity <= 0.5}
+                          className={`bg-white border-r-[1.2px] border-[rgba(16,16,16,0.15)] flex gap-[10px] h-[46px] items-center justify-center px-[14px] py-[8px] w-[50px] transition-opacity ${
+                            quantity <= 0.5 ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-50 cursor-pointer"
+                          }`}
+                        >
+                          <p className="text-[#888888] text-[18px] font-bold leading-[1.2]">-</p>
+                        </button>
+                        <input
+                          type="number"
+                          step="0.1"
+                          value={quantity}
+                          onChange={(e) => {
+                            const inputValue = e.target.value;
+                            if (inputValue === '' || inputValue === '.') {
+                              setQuantity('');
+                              return;
+                            }
+                            const value = parseFloat(inputValue);
+                            if (!isNaN(value) && value >= 0) {
+                              setQuantity(value);
+                            }
+                          }}
+                          onBlur={(e) => {
+                            const value = parseFloat(e.target.value);
+                            if (isNaN(value) || value < 0.5 || e.target.value === '') {
+                              setQuantity(0.5);
+                            } else {
+                              setQuantity(value);
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-[#E4E2DE] h-[46px] px-[14px] py-[8px] w-[64px] text-[#101010] text-[18px] font-bold leading-[1.2] text-center border-none outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <button
+                          onClick={handleIncrease}
+                          className="bg-white border border-[#E4E2DF] flex gap-[10px] h-[46px] items-center justify-center px-[14px] py-[8px] w-[50px] hover:bg-gray-50 cursor-pointer transition-colors"
+                        >
+                          <p className="text-[#888888] text-[18px] font-bold leading-[1.2]">+</p>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-[#101010] text-[18px] font-bold leading-[1.2]">
+                    {totalPrice} ₽
+                  </p>
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Логика добавления в корзину
+                  }}
+                  className="bg-[#9B1E1C] flex gap-[10px] items-center justify-center px-[14px] py-[8px] rounded-[8px] w-full hover:bg-[#860202] transition-colors"
+                >
+                  <p className="text-white text-[16.8px] font-medium leading-[24px]">В корзину</p>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </Link>
+    </div>
+  );
+};
+
