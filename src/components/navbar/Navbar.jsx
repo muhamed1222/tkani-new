@@ -95,7 +95,7 @@ export const NavBar = observer(() => {
 
             {/* Работы из наших тканей */}
             <Link 
-              to="/" 
+              to="/our_works" 
               className="hidden lg:flex items-center px-[10px] py-[8px] text-[#101010] text-[16px] font-medium leading-[1.2] rounded-[8px] transition-colors whitespace-nowrap hover:bg-white"
             >
               Работы из наших тканей
@@ -103,7 +103,7 @@ export const NavBar = observer(() => {
 
             {/* Скидки и акции */}
             <Link 
-              to="/" 
+              to="/discounts" 
               className="hidden lg:flex items-center px-[10px] py-[8px] text-[#101010] text-[16px] font-medium leading-[1.2] rounded-[8px] transition-colors whitespace-nowrap hover:bg-white"
             >
               Скидки и акции
@@ -246,8 +246,8 @@ export const NavBar = observer(() => {
           <Link to={`${ABOUTUS_ROUTE}#questions`} className="hover:text-accent">Часто задаваемые вопросы</Link>
           <Link to={`${ABOUTUS_ROUTE}#contacts`} className="hover:text-accent">Контакты</Link>
           <hr />
-          <Link to="/" className="hover:text-accent">Работы из наших тканей</Link>
-          <Link to="/" className="hover:text-accent">Скидки и акции</Link>
+          <Link to="/our_works" className="hover:text-accent">Работы из наших тканей</Link>
+          <Link to="/discounts" className="hover:text-accent">Скидки и акции</Link>
         </nav>
       </div>
 

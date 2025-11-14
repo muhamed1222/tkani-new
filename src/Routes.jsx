@@ -7,7 +7,9 @@ import {
   SHOP_ROUTE,
   ABOUTUS_ROUTE,
   UIKIT_ROUTE,
-  CATALOG_ROUTE
+  CATALOG_ROUTE,
+  DISCOUNTS_ROUTE,
+  OUR_WORKS_ROUTE
 } from "./utils/consts";
 
 import { Basket } from "./pages/basket/Basket";
@@ -19,6 +21,8 @@ import { AboutUs } from "./pages/aboutUs/AboutUs";
 import { Admin } from "./pages/admin/Admin";
 import { UIKit } from "./pages/uikit/UIKit";
 import { Catalog } from "./pages/catalog/Catalog";
+import { Discounts } from "./pages/discounts/Discounts";
+import { OurWorks } from "./pages/ourWorks/OurWorks";
 
 export const authRoutes = [
   {
@@ -71,6 +75,14 @@ export const publicRoutes = [
   {
     path: UIKIT_ROUTE,
     element: <UIKit/>,
+  },
+  {
+    path: DISCOUNTS_ROUTE,
+    element: <Discounts/>,
+  },
+  {
+    path: OUR_WORKS_ROUTE,
+    element: <OurWorks/>,
   },
 
 ];
