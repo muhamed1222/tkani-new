@@ -2,38 +2,66 @@
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 80px;
+    background: #F1F0EE;
 }
 .top_section {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 48px;
-    border-bottom: 1px solid #1010102b;
     padding: 64px 0;
 }
 .top_section_title {
     font-size: 38px;
     font-weight: 600;
     line-height: 120%;
+    letter-spacing: -0.8px;
+    color: #101010;
+    max-width: 892px;
 }
 .top_section_btn {
-    padding: 10.5px 11.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: #9B1E1C;
+    color: #fff;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 14px;
     border: none;
     border-radius: 8px;
-}
-.top_section_btn_link {
+    font-size: 15.25px;
+    font-weight: 500;
+    line-height: 24px;
+    white-space: nowrap;
     text-decoration: none;
-    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.top_section_btn:hover {
+    background: #860202;
 }
 
 .bottom_section {
     display: flex;
     flex-direction: column;
+    max-width: 1440px;
+    width: 100%;
+    position: relative;
 }
 .footer_content {
     display: flex;
     justify-content: space-between;
+    padding-top: 48px;
+    gap: 64px;
+}
+.footer_content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(16, 16, 16, 0.15);
 }
 .footer_section {
     display: flex;
@@ -43,22 +71,30 @@
 .section_title {
     font-size: 17px;
     font-weight: 500;
+    line-height: 120%;
+    color: #101010;
+    margin-bottom: 8px;
 }
 .nav {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    margin-top: 13px;
 }
 
 .link {
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
-    color: #888;
+    line-height: 120%;
+    color: #686868;
+    white-space: nowrap;
+    transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    height: 27px;
 }
 .link:hover {
-    text-decoration: underline;
+    color: #161616;
 }
 
 
@@ -66,46 +102,74 @@
     display: flex;
     justify-content: space-between;
     padding: 64px 0 32px;
+    align-items: flex-end;
 }
 .logo_container {
     display: flex;
     flex-direction: column;
     gap: 34px;
-    text-align: center;
 }
 .logo {
     display: flex;
-    gap: 10.5px;
+    align-items: center;
+    gap: 7.412px;
+    height: 42px;
 }
 .logo_img {
-    width: 35px;
+    width: 35.824px;
+    height: 15.679px;
 }
 .logo_text {
-    width: 120px;
+    width: 119.824px;
+    height: 10.352px;
+}
+.logo_container p {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 120%;
+    color: #101010;
+    white-space: nowrap;
 }
 .links_container {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 16px;
-}
-.links_container img {
-    max-width: 169px;
+    gap: 28px;
+    max-width: 763px;
+    width: 100%;
 }
 .links {
     display: flex;
-    gap: 18.6px;
+    align-items: center;
+    gap: 0;
     font-size: 14px;
     font-weight: 500;
-    color: #888;
+    color: #888888;
+}
+.links p {
+    padding-right: 4px;
+    white-space: nowrap;
+}
+.links a {
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    position: relative;
+}
+.links a:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(16, 16, 16, 0.1);
+}
+.links a img {
+    width: 20px;
+    height: 20px;
 }
 
-.section_home {
-    margin-right: 316px;
-}
-.section_company {
-    margin-right: 90px;
-}
 
 
 
@@ -121,10 +185,7 @@
         font-size: 32px;
     }
     .top_section_btn {
-        font-size: 16px;
-        font-weight: 500;
-        padding: 8.5px 11.5px;
-        align-self: start;
+        align-self: flex-start;
     }
     .footer_content {
         justify-content: space-between;
@@ -143,6 +204,11 @@
     }
     .link {
         font-weight: 400;
+        color: #686868;
+    }
+    .link:hover {
+        color: #161616;
+        font-weight: 600;
     }
 
     .footer_bottom {

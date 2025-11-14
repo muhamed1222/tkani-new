@@ -1,5 +1,6 @@
 import styles from "./Footer.module.css";
 import { Link } from "react-router-dom";
+import { RatingBadge } from "./RatingBadge";
 
 export const Footer = () => {
   return (
@@ -9,49 +10,49 @@ export const Footer = () => {
           Широкий выбор высококачественных
           <br /> текстильных материалов со скидками до 50%
         </h3>
-        <button className={styles.top_section_btn}>
-          <Link to='/catalog_home' className={styles.top_section_btn_link}>Перейти в каталог</Link>
-        </button>
+        <Link to='/catalog_home' className={styles.top_section_btn}>
+          Перейти в каталог
+        </Link>
       </section>
 
       <section className={styles.bottom_section}>
         <div className={styles.footer_content}>
 
-          <div className={`${styles.footer_section}, ${styles.section_clothes}`}>
+          <div className={styles.footer_section}>
             <h3 className={styles.section_title}>Для одежды</h3>
             <nav className={styles.nav}>
               <Link to="/" className={styles.link}>
-                Шайм
+                Шёлк
               </Link>
               <Link to="/" className={styles.link}>
                 Футер
               </Link>
               <Link to="/" className={styles.link}>
-                Прохотник
+                Трикотаж
               </Link>
               <Link to="/" className={styles.link}>
-                Винозал
+                Вискоза
               </Link>
               <Link to="/" className={styles.link}>
-                Теместь
+                Тенсель
               </Link>
               <Link to="/" className={styles.link}>
                 Муслин
               </Link>
               <Link to="/" className={styles.link}>
-                Теместь
+                Тенсель
               </Link>
               <Link to="/" className={styles.link}>
-                Яма
+                Лён
               </Link>
               <Link to="/" className={styles.link}>
                 Купра
               </Link>
               <Link to="/" className={styles.link}>
-                Холмик
+                Хлопок
               </Link>
               <Link to="/" className={styles.link}>
-                Штампы
+                Штапель
               </Link>
               <Link to="/" className={styles.link}>
                 Джинса
@@ -59,35 +60,35 @@ export const Footer = () => {
             </nav>
           </div>
 
-          <div className={`${styles.footer_section}, ${styles.section_home}`}>
+          <div className={styles.footer_section}>
             <h3 className={styles.section_title}>Для дома</h3>
             <nav className={styles.nav}>
               <Link to="/" className={styles.link}>
-                Стиль Турция
+                Сатин Турция
               </Link>
               <Link to="/" className={styles.link}>
-                Стиль Китай
+                Сатин Китай
               </Link>
               <Link to="/" className={styles.link}>
-                Теместь 65л
+                Тенсель 60s
               </Link>
               <Link to="/" className={styles.link}>
-                Плохих Турция
+                Поплин Турция
               </Link>
               <Link to="/" className={styles.link}>
                 Дак
               </Link>
               <Link to="/" className={styles.link}>
-                Выбелимое полотно
+                Вафельное полотно
               </Link>
               <Link to="/" className={styles.link}>
                 Махра
               </Link>
               <Link to="/" className={styles.link}>
-                Поля космика
+                Пике косичка
               </Link>
               <Link to="/" className={styles.link}>
-                Фламин
+                Фланель
               </Link>
               <Link to="/" className={styles.link}>
                 Муслин
@@ -95,7 +96,7 @@ export const Footer = () => {
             </nav>
           </div>
 
-          <div className={`${styles.footer_section}, ${styles.section_company}`}>
+          <div className={styles.footer_section}>
             <h3 className={styles.section_title}>Компания</h3>
             <nav className={styles.nav}>
               <Link to="/personal_account" className={styles.link}>
@@ -141,7 +142,7 @@ export const Footer = () => {
             <p>© 2025 Центр Ткани. Все права защищены.</p>
           </div>
           <div className={styles.links_container}>
-            <img className={styles.links_img} src="/footer-img.jpg" alt="Оценка" />
+            <RatingBadge />
             <div className={styles.links}>
               <p>Подпишитесь на нас в соцсетях</p>
               <a href=""><img src="/insta.svg" alt="insta" /></a>

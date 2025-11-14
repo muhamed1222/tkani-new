@@ -13,8 +13,8 @@ export default {
         accentDark: "black",
       },
       fontFamily: {
-        inter: ['Inter', 'sans-serif'],
-        manrope: ['Manrope', 'sans-serif'],
+        inter: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        manrope: ['Manrope', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
     },
   },

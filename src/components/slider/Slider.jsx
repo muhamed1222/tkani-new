@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 
-
-export const Slider = () => {
-  const slides = [
-    "/Hero Image Right.jpg",
-    "/Hero Image Left.jpg",
-  ];
-
+export const Slider = ({ 
+  slides = [], 
+  title = "", 
+  textPosition = "left", // "left" or "right"
+  totalSlides = 4 
+}) => {
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -33,15 +32,17 @@ export const Slider = () => {
   }, [current]);
 
   return (
-    <div className="flex justify-between">
-    <div className="relative w-full mb-2 flex justify-center md:justify-start items-start md:w-[90%] h-[250px] md:h-[500px] overflow-hidden rounded-2xl ml-0 md:ml-[30px]">
+    <div className="relative flex-1 h-[559px] flex flex-col justify-between p-[27px] rounded-[14px] overflow-hidden">
+      {/* Градиентный оверлей */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(16,16,16,0.04)] to-[rgba(16,16,16,0.4)] rounded-[14px] pointer-events-none z-10"></div>
+      
       {/* Слайды */}
       <div
-        className="flex transition-transform duration-700 ease-in-out"
+        className="absolute inset-0 flex transition-transform duration-700 ease-in-out"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
         {slides.map((src, index) => (
-          <div key={index} className="min-w-full h-[500px]">
+          <div key={index} className="min-w-full h-full flex-shrink-0">
             <img
               src={src}
               alt={`Слайд ${index + 1}`}
@@ -51,50 +52,38 @@ export const Slider = () => {
         ))}
       </div>
 
-      {/* === Текст поверх === */}
-      <div className="absolute top-4 right-4 md:top-8 md:right-8 text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold uppercase tracking-wide drop-shadow-lg text-right">
-        Ткань <br/>для одежды
+      {/* Текст поверх */}
+      <div className={`relative z-20 w-full ${textPosition === "left" ? "text-left" : "text-right"}`}>
+        <p className="text-white text-[60px] font-bold leading-[1.2] uppercase whitespace-pre-wrap">
+          {title}
+        </p>
       </div>
 
-      {/* Стрелки */}
-      <button
-        onClick={prevSlide}
-        className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/60 hover:bg-white text-dark rounded-full p-2 shadow-md"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-
-      <button
-        onClick={nextSlide}
-        className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/60 hover:bg-white text-dark rounded-full p-2 shadow-md"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-
-      {/* Прогресс-линия */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 w-[80%] max-w-[600px]">
-        {slides.map((_, index) => {
-          let width = 0;
-          if (index < current) width = 100;
-          else if (index === current) width = progress;
-          else width = 0;
-
+      {/* Пагинация */}
+      <div className="relative z-20 flex gap-[10px] w-full">
+        {Array.from({ length: totalSlides }).map((_, index) => {
+          const isActive = index === current;
+          const isCompleted = index < current;
+          
           return (
-            <div key={index} className="flex-1 bg-white/40 h-1 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-white transition-all duration-200"
-                style={{ width: `${width}%` }}
-              ></div>
+            <div 
+              key={index} 
+              className={`h-[4px] rounded-[4px] ${isActive || isCompleted ? "bg-[#f1f0ee]" : "bg-[rgba(241,240,238,0.3)]"}`}
+              style={{ 
+                width: "152px",
+                position: "relative"
+              }}
+            >
+              {isActive && (
+                <div 
+                  className="absolute h-[4px] bg-[#f1f0ee] rounded-[7px] top-0 left-0 transition-all duration-200"
+                  style={{ width: `${progress}%` }}
+                ></div>
+              )}
             </div>
           );
         })}
       </div>
     </div>
-
-</div>
   );
 };
