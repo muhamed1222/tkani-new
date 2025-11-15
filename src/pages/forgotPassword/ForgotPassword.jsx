@@ -1,34 +1,39 @@
-import { useState, useContext } from "react";
-import { observer } from "mobx-react-lite";
-import { useNavigate, Link } from "react-router-dom";
-import styles from "./Auth.module.css";
-import { REGISTRATION_ROUTE, SHOP_ROUTE, FORGOT_PASSWORD_ROUTE } from "../../utils/consts";
-import { Context } from "../../main";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Email } from "../../components/input/Email";
-import { Password } from "../../components/input/Password";
+import { LOGIN_ROUTE, VERIFY_CODE_ROUTE } from "../../utils/consts";
+import { authAPI } from "../../http/api";
 
-export const Auth = observer(() => {
-  const { user } = useContext(Context);
+export const ForgotPassword = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [localError, setLocalError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLocalError("");
+    setError("");
+    setMessage("");
 
-    if (!email || !password) {
-      setLocalError("Пожалуйста, заполните все поля");
+    if (!email) {
+      setError("Пожалуйста, введите адрес электронной почты");
       return;
     }
 
-    const result = await user.login(email, password);
+    setIsLoading(true);
     
-    if (result.success) {
-      navigate(SHOP_ROUTE);
-    } else {
-      setLocalError(result.error || "Ошибка входа");
+    try {
+      await authAPI.forgotPassword(email);
+      setMessage("Код отправлен на вашу электронную почту");
+      // Переходим на страницу подтверждения кода через 1 секунду
+      setTimeout(() => {
+        navigate(VERIFY_CODE_ROUTE, { state: { email } });
+      }, 1000);
+    } catch (err) {
+      setError(err.message || "Не удалось отправить код. Проверьте email и попробуйте снова.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,23 +65,35 @@ export const Auth = observer(() => {
           {/* Заголовок */}
           <div className="flex flex-col">
             <h1 className="font-inter font-semibold text-[32px] leading-[1.2] text-[#101010] tracking-[-0.8px]">
-              Войти
+              Забыли свой пароль?
             </h1>
           </div>
 
+          {/* Описание */}
+          <p className="font-inter font-medium text-[14px] leading-[1.2] text-[#101010] m-0">
+            Введите свой адрес электронной почты ниже, и мы отправим вам код для входа в систему и сброса пароля.
+          </p>
+
           {/* Форма */}
           <form className="flex flex-col gap-[30px]" onSubmit={handleSubmit}>
-            {/* Сообщения об ошибках */}
-            {(localError || user.error) && (
+            {/* Сообщения об ошибках и успехе */}
+            {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-600 text-sm m-0">
-                  {localError || user.error}
+                  {error}
+                </p>
+              </div>
+            )}
+            {message && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-green-600 text-sm m-0">
+                  {message}
                 </p>
               </div>
             )}
 
             <div className="flex flex-col gap-[16px]">
-              {/* Поле Email */}
+              {/* Электронная почта */}
               <div className="flex flex-col gap-[8px]">
                 <label className="font-inter font-medium text-[14px] leading-[1.2] text-[#888888]">
                   Электронная почта
@@ -85,60 +102,37 @@ export const Auth = observer(() => {
                   placeholder="user@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  bgColor="#e4e2df"
-                  required
-                />
-              </div>
-
-              {/* Поле Пароль */}
-              <div className="flex flex-col gap-[8px]">
-                <div className="flex items-center gap-[8px]">
-                  <label className="font-inter font-medium text-[14px] leading-[1.2] text-[#888888] whitespace-nowrap">
-                    Пароль
-                  </label>
-                  <div className="flex-1 h-px bg-transparent" />
-                  <Link 
-                    to={FORGOT_PASSWORD_ROUTE} 
-                    className="font-inter font-medium text-[14px] leading-[1.2] text-[#4d4d4d] underline"
-                  >
-                    Забыли пароль?
-                  </Link>
-                </div>
-                <Password
-                  placeholder="Пароль"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   bgColor="#f1f0ee"
                   required
                 />
               </div>
             </div>
 
-            {/* Кнопка Войти */}
+            {/* Кнопка Отправить код */}
             <button
               type="submit"
-              disabled={user.isLoading}
-              className="bg-[#9b1e1c] h-[40px] rounded-[8px] flex items-center justify-center font-inter font-medium text-[16px] leading-[1.2] text-white hover:bg-[#860202] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading}
+              className="bg-[#9b1e1c] h-[40px] min-h-[40px] px-[14px] py-0 rounded-[8px] hover:bg-[#860202] transition-colors font-inter font-medium text-[16px] leading-[1.2] text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#9b1e1c]"
             >
-              {user.isLoading ? "Вход..." : "Войти"}
+              {isLoading ? "Отправка..." : "Отправить код"}
             </button>
           </form>
 
-          {/* Разделитель */}
-          <hr className="border-t border-[rgba(16,16,16,0.15)] w-full" />
+          {/* Разделительная линия */}
+          <div className="border-t border-[rgba(16,16,16,0.15)] h-px w-full" />
 
-          {/* Регистрация */}
-          <div className="flex items-center gap-[8px]">
-            <p className="font-inter font-medium text-[14px] leading-[1.2] text-[#101010] whitespace-nowrap">
-              Нет аккаунта?
+          {/* Помните свой пароль? */}
+          <div className="flex gap-[8px] items-center w-full">
+            <p className="font-inter font-medium text-[14px] leading-[1.2] text-[#101010] whitespace-nowrap m-0">
+              Помните свой пароль?
             </p>
-            <div className="flex-1 h-px bg-transparent" />
-            <Link to={REGISTRATION_ROUTE}>
+            <div className="flex-1 h-px" />
+            <Link to={LOGIN_ROUTE}>
               <button
                 type="button"
-                className="bg-white border border-[#c2c2c2] h-[40px] px-[17px] rounded-[8px] flex items-center justify-center font-inter font-medium text-[14px] leading-[1.2] text-[#101010] hover:bg-[#f1f0ee] transition-colors"
+                className="bg-white border border-[rgba(16,16,16,0.15)] h-[40px] min-h-[40px] px-[17px] py-0 rounded-[8px] hover:bg-[#E4E2DF] transition-colors font-inter font-medium text-[14px] leading-[1.2] text-[#101010]"
               >
-                Зарегистрируйтесь
+                Войти
               </button>
             </Link>
           </div>
@@ -146,4 +140,5 @@ export const Auth = observer(() => {
       </div>
     </div>
   );
-});
+};
+

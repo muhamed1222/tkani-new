@@ -2,9 +2,8 @@ import { Link, NavLink } from "react-router-dom";
 import { useState, useRef, useContext } from "react";
 import * as Avatar from "@radix-ui/react-avatar";
 import { Context } from "../../main";
-import styles from'./Navbar.module.css'
 import { observer } from "mobx-react-lite";
-import { ADMIN_ROUTE, LOGIN_ROUTE, SHOP_ROUTE, REGISTRATION_ROUTE, ABOUTUS_ROUTE, UIKIT_ROUTE, BASKET_ROUTE} from "../../utils/consts";
+import { ACCOUNT_ROUTE, LOGIN_ROUTE, SHOP_ROUTE, ABOUTUS_ROUTE, UIKIT_ROUTE, BASKET_ROUTE} from "../../utils/consts";
 import { Typebar } from "../typebar/Typebar";
 import { SearchInput } from "../search/SearchInput";
 
@@ -133,8 +132,7 @@ export const NavBar = observer(() => {
                 placeholder="Поиск по сайту"
                 products={tkans?.tkans || []}
                 onSearch={(value) => {
-                  // Обработка поиска
-                  console.log("Search:", value);
+                  // Обработка поиска будет реализована позже
                 }}
               />
             </div>
@@ -160,21 +158,21 @@ export const NavBar = observer(() => {
 
             {/* Профиль / Аватар */}
             {user.isAuth ? 
-              <NavLink to={ADMIN_ROUTE} className="hidden lg:block">
-                <Avatar.Root className="inline-flex h-6 w-6 select-none items-center justify-center overflow-hidden rounded-full bg-gray-200 align-middle">
+              <NavLink to={ACCOUNT_ROUTE} className="hidden lg:block">
+                <Avatar.Root className="inline-flex h-6 w-6 select-none items-center justify-center overflow-hidden rounded-full bg-gray-200 align-middle cursor-pointer hover:ring-2 hover:ring-accent transition-all">
                   <Avatar.Image
                     className="h-full w-full object-cover"
-                    src="https://i.pravatar.cc/100"
+                    src={user.user?.avatar || "https://i.pravatar.cc/100"}
                     alt="User avatar"
                   />
                   <Avatar.Fallback
                     className="text-gray-700 text-sm font-medium"
                     delayMs={600}
                   >
-                    JD
+                    {user.user?.firstName?.[0] || user.user?.email?.[0] || "U"}
                   </Avatar.Fallback>
                 </Avatar.Root>
-              </NavLink> 
+              </NavLink>
               :
               <Link to={LOGIN_ROUTE} className="hidden lg:block group">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

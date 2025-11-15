@@ -23,7 +23,6 @@ export default class WorksStore {
 
     try {
       // Если API недоступен, используем моковые данные
-      // В реальном проекте уберите этот блок try-catch и используйте только worksAPI
       let response;
       try {
         response = await worksAPI.getAll(page, limit);
@@ -34,24 +33,23 @@ export default class WorksStore {
       }
 
       // Обработка ответа от API
-      // Предполагаем, что API возвращает объект вида:
-      // { works: [...], total: 12, page: 1, totalPages: 1 }
-      if (!response.works && !Array.isArray(response)) {
-        throw new Error('Неверный формат ответа от API');
-      }
-
+      // Новый формат: { works: [...], total: 12, page: 1, totalPages: 1 }
+      // Старый формат: массив или объект без success
       runInAction(() => {
-        if (response.works) {
+        if (response.works && Array.isArray(response.works)) {
+          // Новый формат API
           this._works = response.works;
           this._totalItems = response.total || response.works.length;
           this._totalPages = response.totalPages || Math.ceil(this._totalItems / limit);
           this._currentPage = response.page || page;
         } else if (Array.isArray(response)) {
-          // Если API возвращает просто массив
+          // Если API возвращает просто массив (старый формат)
           this._works = response;
           this._totalItems = response.length;
           this._totalPages = Math.ceil(response.length / limit);
           this._currentPage = page;
+        } else {
+          throw new Error('Неверный формат ответа от API');
         }
       });
     } catch (error) {
@@ -140,4 +138,3 @@ export default class WorksStore {
     return this._error;
   }
 }
-

@@ -1,124 +1,247 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-.wrapper {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 32px 40px 80px 0;
-    display: grid;
-    grid-template-columns: 1fr 3fr;
-    gap: 64px;
-}
-.account_navigation {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    max-width: 227px;
-}
-.link {
-    text-decoration: none;
-    color: #101010;
-    font-size: 16px;
-    font-weight: 500;
+.account_container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: #fff;
+  padding: 32px;
+  border-radius: 20px;
 }
 
-.account_container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    background: #fff;
-    padding: 32px;
-    border-radius: 20px;
+.title {
+  font-family: 'Inter', sans-serif;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #101010;
+  letter-spacing: -0.8px;
+  margin: 0;
 }
-.account_container h3 {
-    font-size: 38px;
-    font-weight: 600;
-}
+
 .content {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
 .section {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 30px;
+  border-bottom: 1px solid #E4E2DF;
 }
+
+.section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
 .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
 .header h5 {
-    font-size: 20px;
-    font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #101010;
+  margin: 0;
 }
-.header button {
-    font-size: 14px;
-    font-weight: 500;
-    padding: 8px 14px;
-    background: #888;
-    border: none;
-    border-radius: 6px;
-    color: #fff;
+
+.saveButton {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 8px 14px;
+  background: #888888;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
-.header button:hover {
-    background: #4d4d4d;
-    border-radius: 6px;
+
+.saveButton:hover {
+  background: #4d4d4d;
 }
+
+.saveButtonActive {
+  background: #4d4d4d;
+}
+
 .photo_section {
-    display: flex;
-    gap: 20px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
 }
-.photo_section img {
-    background: #888;
-    height: 62px;
-    width: 62px;
-    border-radius: 50%;
+
+.avatar {
+  display: inline-flex;
+  height: 62px;
+  width: 62px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #E4E2DF;
 }
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarFallback {
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #101010;
+}
+
 .photo_actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 62px;
+  justify-content: space-between;
+  width: 413px;
 }
-.photo_actions button {
-    font-size: 16px;
-    font-weight: 400;
-    padding: 8px 14px;
-    border: 1px solid #C2C2C2;
-    border-radius: 6px;
-    align-self: self-start;
-    background: #fff;
+
+.uploadButton {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+  padding: 8px 14px;
+  border: 1px solid #C2C2C2;
+  border-radius: 6px;
+  background: #fff;
+  color: #101010;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background-color 0.2s;
 }
-.photo_actions p {
-    font-size: 14px;
-    font-weight: 400;
+
+.uploadButton:hover {
+  background: #F1F0EE;
+}
+
+.photoHint {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #4d4d4d;
+  text-align: center;
+  margin: 0;
 }
 
 .name_fields {
-    display: flex;
-    gap: 16px;
+  display: flex;
+  gap: 16px;
+  width: 100%;
 }
-.fields {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
 }
-.fields label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #888;
+
+.field label {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #888888;
 }
-.fields input {
-    background: #F1F0EE;
-    border-radius: 8px;
-    padding: 10px;
-    border: none;
-    width: 434px;
+
+.input {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #101010;
+  background: #F1F0EE;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 10px 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
+
+.input:focus {
+  outline: none;
+  background: #F1F0EE;
+}
+
+.email_field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 434px;
+}
+
 .password_fields {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 434px;
+}
+
+.passwordInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #F1F0EE;
+  border-radius: 8px;
+  height: 37px;
+}
+
+.passwordInputWrapperDisabled {
+  background: #E4E2DF;
+}
+
+.passwordInput {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #101010;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 10px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 40px;
+}
+
+.passwordInput:focus {
+  outline: none;
+}
+
+.eyeButton {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.eyeButton:hover {
+  opacity: 0.7;
 }

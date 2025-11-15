@@ -1,34 +1,56 @@
-import { useState, useContext } from "react";
-import { observer } from "mobx-react-lite";
-import { useNavigate, Link } from "react-router-dom";
-import styles from "./Auth.module.css";
-import { REGISTRATION_ROUTE, SHOP_ROUTE, FORGOT_PASSWORD_ROUTE } from "../../utils/consts";
-import { Context } from "../../main";
-import { Email } from "../../components/input/Email";
+import { useState } from "react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Password } from "../../components/input/Password";
+import { LOGIN_ROUTE } from "../../utils/consts";
+import { authAPI } from "../../http/api";
 
-export const Auth = observer(() => {
-  const { user } = useContext(Context);
+export const ResetPassword = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [localError, setLocalError] = useState("");
+  const location = useLocation();
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+
+  // Получаем email и code из location state
+  const email = location.state?.email || "";
+  const code = location.state?.code || "";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLocalError("");
+    setError("");
+    setMessage("");
 
-    if (!email || !password) {
-      setLocalError("Пожалуйста, заполните все поля");
+    // Валидация
+    if (!newPassword || !confirmPassword) {
+      setError("Пожалуйста, заполните все поля");
       return;
     }
 
-    const result = await user.login(email, password);
-    
-    if (result.success) {
-      navigate(SHOP_ROUTE);
-    } else {
-      setLocalError(result.error || "Ошибка входа");
+    if (newPassword.length < 6) {
+      setError("Пароль должен содержать минимум 6 символов");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("Пароли не совпадают");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await authAPI.resetPassword(email, code, newPassword);
+      setMessage("Пароль успешно изменен");
+      // Через 2 секунды переходим на страницу входа
+      setTimeout(() => {
+        navigate(LOGIN_ROUTE);
+      }, 2000);
+    } catch (err) {
+      setError(err.message || "Не удалось изменить пароль. Попробуйте снова.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -60,90 +82,80 @@ export const Auth = observer(() => {
           {/* Заголовок */}
           <div className="flex flex-col">
             <h1 className="font-inter font-semibold text-[32px] leading-[1.2] text-[#101010] tracking-[-0.8px]">
-              Войти
+              Измените свой пароль
             </h1>
           </div>
 
+          {/* Описание */}
+          <p className="font-inter font-medium text-[14px] leading-[1.2] text-[#101010] m-0">
+            Выберите новый пароль для своей учётной записи.
+          </p>
+
           {/* Форма */}
           <form className="flex flex-col gap-[30px]" onSubmit={handleSubmit}>
-            {/* Сообщения об ошибках */}
-            {(localError || user.error) && (
+            {/* Сообщения об ошибках и успехе */}
+            {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-600 text-sm m-0">
-                  {localError || user.error}
+                  {error}
+                </p>
+              </div>
+            )}
+            {message && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-green-600 text-sm m-0">
+                  {message}
                 </p>
               </div>
             )}
 
             <div className="flex flex-col gap-[16px]">
-              {/* Поле Email */}
+              {/* Поле Новый пароль */}
               <div className="flex flex-col gap-[8px]">
                 <label className="font-inter font-medium text-[14px] leading-[1.2] text-[#888888]">
-                  Электронная почта
+                  Пароль
                 </label>
-                <Email
-                  placeholder="user@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  bgColor="#e4e2df"
+                <Password
+                  placeholder="Новый пароль"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  bgColor="#f1f0ee"
                   required
+                  minLength={6}
                 />
               </div>
 
-              {/* Поле Пароль */}
+              {/* Поле Подтвердите пароль */}
               <div className="flex flex-col gap-[8px]">
                 <div className="flex items-center gap-[8px]">
                   <label className="font-inter font-medium text-[14px] leading-[1.2] text-[#888888] whitespace-nowrap">
-                    Пароль
+                    Подтвердите пароль
                   </label>
-                  <div className="flex-1 h-px bg-transparent" />
-                  <Link 
-                    to={FORGOT_PASSWORD_ROUTE} 
-                    className="font-inter font-medium text-[14px] leading-[1.2] text-[#4d4d4d] underline"
-                  >
-                    Забыли пароль?
-                  </Link>
+                  <div className="flex-1 h-px" />
                 </div>
                 <Password
-                  placeholder="Пароль"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Подтвердите новый пароль"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   bgColor="#f1f0ee"
                   required
+                  minLength={6}
                 />
               </div>
             </div>
 
-            {/* Кнопка Войти */}
+            {/* Кнопка Сменить пароль */}
             <button
               type="submit"
-              disabled={user.isLoading}
-              className="bg-[#9b1e1c] h-[40px] rounded-[8px] flex items-center justify-center font-inter font-medium text-[16px] leading-[1.2] text-white hover:bg-[#860202] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+              className="bg-[rgba(155,30,28,0.3)] h-[40px] min-h-[40px] px-[14px] py-0 rounded-[8px] hover:bg-[#9b1e1c] transition-colors font-inter font-medium text-[16px] leading-[1.2] text-white disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[rgba(155,30,28,0.3)]"
             >
-              {user.isLoading ? "Вход..." : "Войти"}
+              {isLoading ? "Смена пароля..." : "Сменить пароль"}
             </button>
           </form>
-
-          {/* Разделитель */}
-          <hr className="border-t border-[rgba(16,16,16,0.15)] w-full" />
-
-          {/* Регистрация */}
-          <div className="flex items-center gap-[8px]">
-            <p className="font-inter font-medium text-[14px] leading-[1.2] text-[#101010] whitespace-nowrap">
-              Нет аккаунта?
-            </p>
-            <div className="flex-1 h-px bg-transparent" />
-            <Link to={REGISTRATION_ROUTE}>
-              <button
-                type="button"
-                className="bg-white border border-[#c2c2c2] h-[40px] px-[17px] rounded-[8px] flex items-center justify-center font-inter font-medium text-[14px] leading-[1.2] text-[#101010] hover:bg-[#f1f0ee] transition-colors"
-              >
-                Зарегистрируйтесь
-              </button>
-            </Link>
-          </div>
         </div>
       </div>
     </div>
   );
-});
+};
+

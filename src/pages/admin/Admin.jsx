@@ -1,104 +1,116 @@
-import styles from "./Admin.module.css"
-import * as Avatar from "@radix-ui/react-avatar";
+import { useState, useEffect } from "react";
+import { AdminDashboard } from "./AdminDashboard";
+import { AdminProducts } from "./AdminProducts";
+import { AdminOrders } from "./AdminOrders";
+import { AdminUsers } from "./AdminUsers";
+import { authAPI } from "../../http/api";
+import { useNavigate } from "react-router-dom";
 
+export const Admin = () => {
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-export let Admin = () => {
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
-  return(
-    <>
-      <section className="bg-white md:min-w-[919px] flex flex-col rounded-3xl p-5">
-          <h1 className="text-accentDark mb-4 md: text-[38px] font-bold w-full h-[46px] font-medium
-          ">Личный кабинет</h1>
-          <div className="text-accentDark md: flex flex-row aligh-center justify-between ">
-          <h6 className="text-[20px] ml-4 font-medium">Личные данные</h6>
-          <button className=" mr-2 mb-2 w-[103px] h-[33px] bg-[#888888] text-light rounded-lg content-center
-          hover:bg-[#4D4D4D]"
-          >Сохранить
-          </button>
-          </div>   
+  const checkAuth = async () => {
+    try {
+      const data = await authAPI.checkAuth();
       
+      if (data.user && data.user.role === "admin") {
+        setUser(data.user);
+      } else {
+        // Перенаправляем, если не админ
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Ошибка проверки авторизации:", err);
+      // Если ошибка авторизации, перенаправляем на страницу входа
+      if (err.status === 401) {
+        navigate("/login");
+      } else {
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-          {/* Аватарка */}
-          <div className="flex items-center gap-4 p-4">
-              <Avatar.Root className="inline-flex h-12 w-12 select-none items-center justify-center overflow-hidden rounded-full bg-gray-200 align-middle"> //Главный контейнер
-                <Avatar.Image
-                  className="h-full w-full object-cover"
-                  src="https://i.pravatar.cc/100"//адрес картинки 
-                  alt="User avatar"
-                />
-                <Avatar.Fallback //картинка если не прогрузилась(JD)
-                  className="text-gray-700 text-sm font-medium"
-                  delayMs={600}
-                >
-                  JD
-                </Avatar.Fallback>
-              </Avatar.Root>
-              <div>
-                <button className=" mr-2 mb-2 w-full h-[33px] text-accentDark border border-black rounded-md"
-                >Загрузить фотографию
-                </button>
-              </div>
-          </div>
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-accentDark">Загрузка...</div>
+      </div>
+    );
+  }
 
-          {/* Имя Фамилия регистрация */}
-          <div className="mb-5 w-full flex flex-row justify-between">
-            <div className="w-1/2 mr-4 flex-col"> 
-              <p className="text-accentDark text-[14px]">Имя</p>
-              <input className="w-full bg-[#F1F0EE] min-h-[38px] rounded-md pl-2" name="myInput" />
-            </div> 
-            
-            <div className="w-1/2 flex-col">
-              <p className="text-accentDark text-[14px]">Фамилия</p>
-              <input className="w-full bg-[#F1F0EE] min-h-[38px] rounded-md pl-2" name="myInput" />
-            </div>
-          </div>
-          <hr/>
+  if (!user || user.role !== "admin") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Доступ запрещен</h2>
+          <p className="text-gray-600 mb-4">
+            У вас нет прав для доступа к админ-панели.
+          </p>
+          <p className="text-sm text-gray-500">
+            Ваша роль: {user?.role || "не определена"}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-          {/* Почта */}
-          <div className="flex justify-between align-top mt-5">
-            <div className="flex flex-col w-1/2">
-              <h6 className="text-[20px] text-accentDark m-8 ml-0 mt-3 font-medium"
-              >Почта
-              </h6>
-              <p className="text-accentDark text-[14px]">e-mail</p>
-              <input className="w-full bg-[#F1F0EE] min-h-[38px] rounded-md pl-2" name="myInput" />
-            </div>
+  const tabs = [
+    { id: "dashboard", label: "Панель управления", icon: "📊" },
+    { id: "products", label: "Товары", icon: "📦" },
+    { id: "orders", label: "Заказы", icon: "🛒" },
+    { id: "users", label: "Пользователи", icon: "👥" },
+  ];
 
-            <button className=" m-2 w-[103px] h-[33px] bg-[#888888] text-light rounded-lg content-center
-          hover:bg-[#4D4D4D]"
-            >Сохранить
-            </button>
-          </div>
-          <hr/>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Заголовок */}
+      <div className="bg-white shadow">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <h1 className="text-2xl font-bold text-accentDark">Админ-панель</h1>
+          <p className="text-gray-600 mt-1">
+            Добро пожаловать, {user.first_name} {user.last_name}
+          </p>
+        </div>
+      </div>
 
-          <div className="flex flex-row justify-between align-top mt-5">
-            <h6 className="text-[20px] text-accentDark font-medium"
-              >Смена пароля
-              </h6>
-           <button className=" p-2 w-auto bg-[#888888] text-light rounded-lg content-center
-            hover:bg-[#4D4D4D]"
-            >Изменить пароль
-            </button>
-          </div>
+      {/* Табы */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? "border-accentDark text-accentDark"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
+      </div>
 
-          <div className="w-1/2 flex-col mt-4">
-              <p className="text-accentDark text-[14px]">Старый пароль</p>
-              <input className="w-full bg-[#F1F0EE] min-h-[38px] rounded-md pl-2" name="myInput" />
-            </div>
-
-            <div className="w-1/2 flex-col mt-4">
-              <p className="text-accentDark text-[14px]">Новый пароль</p>
-              <input className="w-full bg-[#F1F0EE] min-h-[38px] rounded-md pl-2" name="myInput" />
-            </div>
-
-            <div className="w-1/2 flex-col mt-4">
-              <p className="text-accentDark text-[14px]">Потвердите пароль</p>
-              <input className="w-full bg-[#F1F0EE] min-h-[38px] rounded-md pl-2" name="myInput" />
-            </div>  
-
-      </section>
-   
-  
-    </>
-  )
-}
+      {/* Контент */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === "dashboard" && <AdminDashboard />}
+        {activeTab === "products" && <AdminProducts />}
+        {activeTab === "orders" && <AdminOrders />}
+        {activeTab === "users" && <AdminUsers />}
+      </div>
+    </div>
+  );
+};

@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
+import { observer } from "mobx-react-lite";
 import styles from "./Breadcrumbs.module.css";
 import { Link, useLocation } from "react-router-dom";
 import { getCategoryNameMap } from "../../utils/catalogCategories";
+import { Context } from "../../main";
 
-export const Breadcrumbs = () => {
+export const Breadcrumbs = observer(() => {
+    const { tkans } = useContext(Context);
     // Маппинг категорий каталога (используем единый источник данных)
     const catalogCategoryMapHome = getCategoryNameMap(false);
     const catalogCategoryMapClothing = getCategoryNameMap(true);
@@ -13,6 +16,7 @@ export const Breadcrumbs = () => {
         '/catalog' : 'Каталог',
         '/catalog_home' : 'Для дома',
         '/discounts' : 'Скидки и акции',
+        '/account' : 'Личный кабинет',
         '/personal_account' : 'Личный кабинет',
         '/our_works' : 'Работы из наших тканей',
         '/privacy_policy' : 'Политика конфиденциальности',
@@ -21,6 +25,9 @@ export const Breadcrumbs = () => {
   const location = useLocation();
   const pathname = location.pathname;
   const pathnames = pathname.split("/").filter((x) => x);
+
+  // Проверяем, находимся ли мы на странице товара
+  const isTkanPage = pathnames[0] === 'tkan' && pathnames[1] !== undefined;
 
   // Проверяем, находимся ли мы на странице категории каталога
   const isClothingCatalog = pathnames[0] === 'catalog-clothing';
@@ -41,6 +48,32 @@ export const Breadcrumbs = () => {
           <Link className={styles.title} to="/">Главная</Link>
         </li>
         {pathnames.map((value, index) => {
+          // Если это страница товара, обрабатываем специально
+          if (isTkanPage && index === 0) {
+            return (
+              <React.Fragment key={`tkan-breadcrumbs`}>
+                <li className={styles.chevron}>
+                  <ChevronIcon />
+                </li>
+                <li>
+                  <Link className={styles.title_path} to="/catalog">Каталог</Link>
+                </li>
+                <li className={styles.chevron}>
+                  <ChevronIcon />
+                </li>
+                <li>
+                  <span className={styles.title_path}>Для одежды</span>
+                </li>
+                <li className={styles.chevron}>
+                  <ChevronIcon />
+                </li>
+                <li>
+                  <span className={styles.title_path}>{tkans.selectedTkan?.name || 'Товар'}</span>
+                </li>
+              </React.Fragment>
+            );
+          }
+          
           // Если это страница категории каталога, обрабатываем специально
           if (isCatalogCategory) {
             // Пропускаем 'catalog', так как обработаем его отдельно
@@ -100,4 +133,4 @@ export const Breadcrumbs = () => {
       </ol>
     </nav>
   );
-};
+});

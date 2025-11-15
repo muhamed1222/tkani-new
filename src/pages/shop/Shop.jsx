@@ -1,14 +1,23 @@
 import { observer } from "mobx-react-lite"
 import styles from "./Shop.module.css"
 import { Context } from "../../main";
-import { useState, useRef, useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Slider } from "../../components/slider/Slider"
-import { ProductCard } from "../../components/productcard/ProductCard";
-import { Link } from "react-router-dom";
+import { ProductSection } from "../../components/productsection/ProductSection";
 import { SHOP_ROUTE } from "../../utils/consts";
 
 export let Shop = observer(() =>{
     const {tkans} = useContext(Context)
+    
+    // Загружаем товары при монтировании компонента
+    useEffect(() => {
+        if (tkans.tkans.length === 0 || tkans.tkans.length === 4) {
+            tkans.fetchTkans();
+        }
+        tkans.fetchTypes();
+        tkans.fetchBrands();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     
     const leftSlides = [
         "/Hero Image Left.jpg",
@@ -24,7 +33,7 @@ export let Shop = observer(() =>{
         "/Hero Image Right.jpg",
     ];
     
-    // Получаем первые 4 товара для блока "Новинки"
+    // Получаем первые 4 товара для блоков
     const newArrivals = tkans.tkans.slice(0, 4);
     
     return(
@@ -47,92 +56,36 @@ export let Shop = observer(() =>{
             </div>
         </div>
         
-        {/* Блок "Новинки" */}
-        <div className="max-w-[1440px] w-full mx-auto px-[20px] sm:px-[50px] py-[40px]">
-            <div className="flex flex-col gap-[16px]">
-                {/* Заголовок блока */}
-                <div className="flex items-center justify-between px-[10px] py-0 w-full">
-                    <div className="flex gap-[10px] items-center justify-center">
-                        <h2 className="font-inter font-semibold leading-[1.2] text-[#101010] text-[38px] tracking-[-0.8px] whitespace-nowrap">
-                            Новинки
-                        </h2>
-                    </div>
-                    <Link 
-                        to={SHOP_ROUTE}
-                        className="flex gap-[10px] items-center justify-center hover:opacity-80 transition-opacity"
-                    >
-                        <span className="font-inter font-medium leading-[1.2] text-[#9b1e1c] text-[16px] whitespace-nowrap">
-                            Посмотреть все
-                        </span>
-                    </Link>
-                </div>
-                
-                {/* Сетка товаров */}
-                <div className="flex flex-col sm:flex-row gap-[16px] items-start w-full">
-                    {newArrivals.map(tkan => (
-                        <ProductCard key={tkan.id} product={tkan} showHover={true} />
-                    ))}
-                </div>
+        {/* Блоки товаров */}
+        {tkans.isLoading ? (
+            <div className="flex justify-center items-center py-[40px]">
+                <div className="text-[#888888] text-[16px]">Загрузка товаров...</div>
             </div>
-        </div>
-        
-        {/* Блок "Акции и скидки" */}
-        <div className="max-w-[1440px] w-full mx-auto px-[20px] sm:px-[50px] py-[40px]">
-            <div className="flex flex-col gap-[16px]">
-                {/* Заголовок блока */}
-                <div className="flex items-center justify-between px-[10px] py-0 w-full">
-                    <div className="flex gap-[10px] items-center justify-center">
-                        <h2 className="font-inter font-semibold leading-[1.2] text-[#101010] text-[38px] tracking-[-0.8px] whitespace-nowrap">
-                            Акции и скидки
-                        </h2>
-                    </div>
-                    <Link 
-                        to={SHOP_ROUTE}
-                        className="flex gap-[10px] items-center justify-center hover:opacity-80 transition-opacity"
-                    >
-                        <span className="font-inter font-medium leading-[1.2] text-[#9b1e1c] text-[16px] whitespace-nowrap">
-                            Посмотреть все
-                        </span>
-                    </Link>
-                </div>
-                
-                {/* Сетка товаров */}
-                <div className="flex flex-col sm:flex-row gap-[16px] items-start w-full">
-                    {newArrivals.map(tkan => (
-                        <ProductCard key={`duplicate1-${tkan.id}`} product={tkan} showHover={true} />
-                    ))}
-                </div>
+        ) : tkans.error ? (
+            <div className="flex justify-center items-center py-[40px]">
+                <div className="text-[#9b1e1c] text-[16px]">Ошибка загрузки: {tkans.error}</div>
             </div>
-        </div>
-        
-        {/* Блок "Комбинации" */}
-        <div className="max-w-[1440px] w-full mx-auto px-[20px] sm:px-[50px] py-[40px]">
-            <div className="flex flex-col gap-[16px]">
-                {/* Заголовок блока */}
-                <div className="flex items-center justify-between px-[10px] py-0 w-full">
-                    <div className="flex gap-[10px] items-center justify-center">
-                        <h2 className="font-inter font-semibold leading-[1.2] text-[#101010] text-[38px] tracking-[-0.8px] whitespace-nowrap">
-                            Комбинации
-                        </h2>
-                    </div>
-                    <Link 
-                        to={SHOP_ROUTE}
-                        className="flex gap-[10px] items-center justify-center hover:opacity-80 transition-opacity"
-                    >
-                        <span className="font-inter font-medium leading-[1.2] text-[#9b1e1c] text-[16px] whitespace-nowrap">
-                            Посмотреть все
-                        </span>
-                    </Link>
-                </div>
-                
-                {/* Сетка товаров */}
-                <div className="flex flex-col sm:flex-row gap-[16px] items-start w-full">
-                    {newArrivals.map(tkan => (
-                        <ProductCard key={`duplicate2-${tkan.id}`} product={tkan} showHover={true} />
-                    ))}
-                </div>
-            </div>
-        </div>
+        ) : (
+            <>
+                <ProductSection 
+                    title="Новинки" 
+                    products={newArrivals} 
+                    linkTo={SHOP_ROUTE}
+                />
+                <ProductSection 
+                    title="Акции и скидки" 
+                    products={newArrivals} 
+                    linkTo={SHOP_ROUTE}
+                    keyPrefix="discounts"
+                />
+                <ProductSection 
+                    title="Комбинации" 
+                    products={newArrivals} 
+                    linkTo={SHOP_ROUTE}
+                    keyPrefix="combinations"
+                />
+            </>
+        )}
         
         {/* Блок "О нас" */}
         <div className="flex gap-[32px] items-start justify-center px-0 py-[32px] w-full">

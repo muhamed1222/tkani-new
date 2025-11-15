@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "-": "^0.0.1",
     "@radix-ui/themes": "^3.2.1",
     "bootstrap": "^5.3.8",
     "mobx": "^6.15.0",

@@ -1,9 +1,13 @@
 import {
   ADMIN_ROUTE,
+  ACCOUNT_ROUTE,
   BASKET_ROUTE,
   TKAN_ROUTE,
   LOGIN_ROUTE,
   REGISTRATION_ROUTE,
+  FORGOT_PASSWORD_ROUTE,
+  VERIFY_CODE_ROUTE,
+  RESET_PASSWORD_ROUTE,
   SHOP_ROUTE,
   ABOUTUS_ROUTE,
   UIKIT_ROUTE,
@@ -17,8 +21,12 @@ import { Shop } from "./pages/shop/Shop";
 import { Auth } from "./pages/auth/Auth";
 import { Tkanpage } from "./pages/tkanpage/Tkanpage";
 import { Registration } from "./pages/registration/Registration";
+import { ForgotPassword } from "./pages/forgotPassword/ForgotPassword";
+import { VerifyCode } from "./pages/verifyCode/VerifyCode";
+import { ResetPassword } from "./pages/resetPassword/ResetPassword";
 import { AboutUs } from "./pages/aboutUs/AboutUs";
 import { Admin } from "./pages/admin/Admin";
+import { Account } from "./pages/account/Account";
 import { UIKit } from "./pages/uikit/UIKit";
 import { Catalog } from "./pages/catalog/Catalog";
 import { Discounts } from "./pages/discounts/Discounts";
@@ -28,6 +36,10 @@ export const authRoutes = [
   {
     path: ADMIN_ROUTE,
     element: <Admin />,
+  },
+  {
+    path: ACCOUNT_ROUTE,
+    element: <Account />,
   },
   {
     path: BASKET_ROUTE,
@@ -63,6 +75,18 @@ export const publicRoutes = [
   {
     path: REGISTRATION_ROUTE,
     element: <Registration />,
+  },
+  {
+    path: FORGOT_PASSWORD_ROUTE,
+    element: <ForgotPassword />,
+  },
+  {
+    path: VERIFY_CODE_ROUTE,
+    element: <VerifyCode />,
+  },
+  {
+    path: RESET_PASSWORD_ROUTE,
+    element: <ResetPassword />,
   },
   {
     path: ABOUTUS_ROUTE,
