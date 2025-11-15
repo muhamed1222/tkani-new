@@ -3,18 +3,30 @@
   flex-direction: column;
   gap: 20px;
   background: #fff;
-  padding: 32px;
+  padding: 24px;
   border-radius: 20px;
+}
+
+@media (min-width: 640px) {
+  .account_container {
+    padding: 32px;
+  }
 }
 
 .title {
   font-family: 'Inter', sans-serif;
-  font-size: 38px;
+  font-size: 28px;
   font-weight: 600;
   line-height: 1.2;
   color: #101010;
   letter-spacing: -0.8px;
   margin: 0;
+}
+
+@media (min-width: 640px) {
+  .title {
+    font-size: 38px;
+  }
 }
 
 .content {
@@ -63,10 +75,16 @@
   color: #fff;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
-.saveButton:hover {
+.saveButton:hover:not(:disabled) {
   background: #4d4d4d;
+}
+
+.saveButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .saveButtonActive {
@@ -76,7 +94,15 @@
 .photo_section {
   display: flex;
   gap: 20px;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+@media (min-width: 640px) {
+  .photo_section {
+    align-items: center;
+    flex-wrap: nowrap;
+  }
 }
 
 .avatar {
@@ -108,9 +134,24 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  height: 62px;
+  min-height: 62px;
   justify-content: space-between;
-  width: 413px;
+  flex: 1;
+  min-width: 200px;
+}
+
+@media (min-width: 640px) {
+  .photo_actions {
+    width: 413px;
+    flex: 0 0 413px;
+  }
+}
+
+.uploadButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .uploadButton {
@@ -126,10 +167,31 @@
   cursor: pointer;
   align-self: flex-start;
   transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
-.uploadButton:hover {
+.uploadButton:hover:not(:disabled) {
   background: #F1F0EE;
+}
+
+.cancelButton {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.2;
+  padding: 8px 14px;
+  border: 1px solid #C2C2C2;
+  border-radius: 6px;
+  background: #fff;
+  color: #888888;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.cancelButton:hover {
+  background: #F1F0EE;
+  color: #101010;
 }
 
 .photoHint {
@@ -138,14 +200,27 @@
   font-weight: 400;
   line-height: 1.2;
   color: #4d4d4d;
-  text-align: center;
+  text-align: left;
   margin: 0;
+}
+
+@media (min-width: 640px) {
+  .photoHint {
+    text-align: center;
+  }
 }
 
 .name_fields {
   display: flex;
+  flex-direction: column;
   gap: 16px;
   width: 100%;
+}
+
+@media (min-width: 640px) {
+  .name_fields {
+    flex-direction: row;
+  }
 }
 
 .field {
@@ -169,44 +244,69 @@
   font-weight: 500;
   line-height: 1.2;
   color: #101010;
-  background: #F1F0EE;
+  background: #E4E2DF;
   border: none;
   border-radius: 8px;
   padding: 9px 10px 10px;
   width: 100%;
   box-sizing: border-box;
+  transition: background-color 0.2s;
 }
 
 .input:focus {
   outline: none;
-  background: #F1F0EE;
+  background: #E4E2DF;
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inputError {
+  background: #fee;
+  border: 1px solid #fcc;
 }
 
 .email_field {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 434px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .email_field {
+    width: 434px;
+  }
 }
 
 .password_fields {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 434px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .password_fields {
+    width: 434px;
+  }
 }
 
 .passwordInputWrapper {
   position: relative;
   display: flex;
   align-items: center;
-  background: #F1F0EE;
+  background: #E4E2DF;
   border-radius: 8px;
   height: 37px;
+  transition: background-color 0.2s;
 }
 
 .passwordInputWrapperDisabled {
   background: #E4E2DF;
+  opacity: 0.6;
 }
 
 .passwordInput {
@@ -228,6 +328,10 @@
   outline: none;
 }
 
+.passwordInput:disabled {
+  cursor: not-allowed;
+}
+
 .eyeButton {
   position: absolute;
   right: 10px;
@@ -237,11 +341,104 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
-  width: 18px;
-  height: 18px;
+  padding: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  transition: background-color 0.2s, opacity 0.2s;
 }
 
-.eyeButton:hover {
-  opacity: 0.7;
+.eyeButton:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.05);
+  opacity: 0.8;
+}
+
+.eyeButton:active:not(:disabled) {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.eyeButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.eyeButton svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Сообщения об ошибках и успехе */
+.message {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+.errorMessage {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #dc2626;
+  margin: 0;
+  background: #fee;
+  border: 1px solid #fcc;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.successMessage {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #16a34a;
+  margin: 0;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.fieldError {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: #dc2626;
+  margin: 4px 0 0 0;
+}
+
+.uploadButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.uploadButton:disabled:hover {
+  background: #fff;
+}
+
+.logoutButton {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 12px 24px;
+  background: #9b1e1c;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  max-width: 200px;
+  align-self: flex-start;
+}
+
+.logoutButton:hover {
+  background: #860202;
+}
+
+.logoutButton:active {
+  background: #6b0101;
 }

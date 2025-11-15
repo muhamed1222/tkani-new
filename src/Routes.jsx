@@ -13,7 +13,9 @@ import {
   UIKIT_ROUTE,
   CATALOG_ROUTE,
   DISCOUNTS_ROUTE,
-  OUR_WORKS_ROUTE
+  OUR_WORKS_ROUTE,
+  PRIVACY_POLICY_ROUTE,
+  TERMS_OF_SERVICE_ROUTE
 } from "./utils/consts";
 
 import { Basket } from "./pages/basket/Basket";
@@ -31,6 +33,8 @@ import { UIKit } from "./pages/uikit/UIKit";
 import { Catalog } from "./pages/catalog/Catalog";
 import { Discounts } from "./pages/discounts/Discounts";
 import { OurWorks } from "./pages/ourWorks/OurWorks";
+import { PrivacyPolicy } from "./pages/privacyPolicy/PrivacyPolicy";
+import { TermsOfService } from "./pages/termsOfService/TermsOfService";
 
 export const authRoutes = [
   {
@@ -107,6 +111,14 @@ export const publicRoutes = [
   {
     path: OUR_WORKS_ROUTE,
     element: <OurWorks/>,
+  },
+  {
+    path: PRIVACY_POLICY_ROUTE,
+    element: <PrivacyPolicy/>,
+  },
+  {
+    path: TERMS_OF_SERVICE_ROUTE,
+    element: <TermsOfService/>,
   },
 
 ];

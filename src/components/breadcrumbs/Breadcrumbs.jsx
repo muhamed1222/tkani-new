@@ -13,6 +13,7 @@ export const Breadcrumbs = observer(() => {
 
     const breadcrumbNameMap = {
         '/about_us' : 'О нас',
+        '/AboutUs' : 'О нас',
         '/catalog' : 'Каталог',
         '/catalog_home' : 'Для дома',
         '/discounts' : 'Скидки и акции',
@@ -20,6 +21,10 @@ export const Breadcrumbs = observer(() => {
         '/personal_account' : 'Личный кабинет',
         '/our_works' : 'Работы из наших тканей',
         '/privacy_policy' : 'Политика конфиденциальности',
+        '/privacy-policy' : 'Политика конфиденциальности',
+        '/terms_of_service' : 'Условия пользования',
+        '/terms-of-service' : 'Условия пользования',
+        '/basket' : 'Корзина',
     }
 
   const location = useLocation();
@@ -113,7 +118,8 @@ export const Breadcrumbs = observer(() => {
           // Обычная обработка для других страниц
           const to = `/${pathnames.slice(0, index + 1).join("/")}`;
           const isLast = index === pathnames.length - 1;
-          const name = breadcrumbNameMap[to] || value;
+          // Проверяем маппинг для полного пути и для отдельного значения
+          const name = breadcrumbNameMap[to] || breadcrumbNameMap[`/${value}`] || value;
 
           return (
             <React.Fragment key={to}>

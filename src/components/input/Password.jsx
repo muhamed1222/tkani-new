@@ -3,7 +3,7 @@ import { memo, useState } from "react";
 export const Password = memo(({
   value = "",
   onChange,
-  placeholder = "Пароль",
+  placeholder = "",
   className = "",
   required = false,
   disabled = false,

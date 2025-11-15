@@ -33,11 +33,18 @@ export default class WorksStore {
       }
 
       // Обработка ответа от API
-      // Новый формат: { works: [...], total: 12, page: 1, totalPages: 1 }
+      // Новый формат: { success: true, works: [...], total: 12, page: 1, totalPages: 1 }
       // Старый формат: массив или объект без success
       runInAction(() => {
-        if (response.works && Array.isArray(response.works)) {
-          // Новый формат API
+        // Поддержка нового формата с полем success
+        if (response.success !== undefined && response.works && Array.isArray(response.works)) {
+          // Новый формат API с полем success
+          this._works = response.works;
+          this._totalItems = response.total || response.works.length;
+          this._totalPages = response.totalPages || Math.ceil(this._totalItems / limit);
+          this._currentPage = response.page || page;
+        } else if (response.works && Array.isArray(response.works)) {
+          // Формат без поля success, но с полем works
           this._works = response.works;
           this._totalItems = response.total || response.works.length;
           this._totalPages = response.totalPages || Math.ceil(this._totalItems / limit);

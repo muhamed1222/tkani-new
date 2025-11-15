@@ -3,7 +3,7 @@ import { memo, useState } from "react";
 export const Email = memo(({
   value = "",
   onChange,
-  placeholder = "user@company.com",
+  placeholder = "",
   className = "",
   required = false,
   disabled = false,

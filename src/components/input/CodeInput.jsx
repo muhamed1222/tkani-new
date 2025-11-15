@@ -9,6 +9,9 @@ export const CodeInput = memo(({
   disabled = false,
   bgColor = "#f1f0ee",
   onComplete,
+  id,
+  "aria-label": ariaLabel,
+  "aria-describedby": ariaDescribedBy,
   ...props
 }) => {
   const [codes, setCodes] = useState(Array(length).fill(""));
@@ -90,8 +93,11 @@ export const CodeInput = memo(({
                 onPaste={handlePaste}
                 disabled={disabled}
                 required={required && index === 0}
+                id={index === 0 ? id : undefined}
+                aria-label={index === 0 ? ariaLabel : undefined}
+                aria-describedby={index === 0 ? ariaDescribedBy : undefined}
                 className={`w-full bg-transparent border-none outline-none text-[16px] font-inter font-medium text-[#888888] text-center caret-[#9B1E1C] leading-[1.2] ${disabled ? "cursor-not-allowed" : ""} focus:text-[#101010] transition-colors`}
-                {...props}
+                {...(index === 0 ? props : {})}
               />
               {index < length - 1 && (
                 <div className="absolute right-[-3px] top-1/2 -translate-y-1/2 w-px h-[20px] bg-[#E4E2DF]" />

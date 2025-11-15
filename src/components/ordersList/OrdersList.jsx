@@ -105,40 +105,58 @@ export const OrdersList = observer(() => {
 
   if (isLoading) {
     return (
-      <div className={styles.ordersList}>
-        <h3 className={styles.title}>Мои заказы</h3>
-        <p className={styles.loading}>Загрузка...</p>
-      </div>
+      <section className={styles.ordersList} aria-labelledby="orders-heading">
+        <h3 id="orders-heading" className={styles.title}>Мои заказы</h3>
+        <p className={styles.loading} role="status" aria-live="polite">Загрузка...</p>
+      </section>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.ordersList}>
-        <h3 className={styles.title}>Мои заказы</h3>
-        <p className={styles.error}>Ошибка загрузки: {error}</p>
-      </div>
+      <section className={styles.ordersList} aria-labelledby="orders-heading">
+        <h3 id="orders-heading" className={styles.title}>Мои заказы</h3>
+        <p className={styles.error} role="alert" aria-live="assertive">Ошибка загрузки: {error}</p>
+      </section>
     );
   }
 
   if (orders.length === 0) {
     return (
-      <div className={styles.ordersList}>
-        <h3 className={styles.title}>Мои заказы</h3>
+      <section className={styles.ordersList} aria-labelledby="orders-heading">
+        <h3 id="orders-heading" className={styles.title}>Мои заказы</h3>
         <p className={styles.empty}>У вас пока нет заказов</p>
-      </div>
+      </section>
     );
   }
 
+  const handleCancelOrder = async (orderId) => {
+    // TODO: Реализовать отмену заказа через API
+    // const response = await ordersAPI.updateOrderStatus(orderId, "cancelled", "Отменен пользователем");
+    // После успешной отмены обновить список заказов
+    console.log("Отмена заказа:", orderId);
+  };
+
+  const handleOrderUpdate = () => {
+    // Обновить список заказов после изменений
+    // TODO: Перезагрузить заказы через API
+    // useEffect будет вызван автоматически при изменении зависимостей
+  };
+
   return (
-    <div className={styles.ordersList}>
-      <h3 className={styles.title}>Мои заказы</h3>
-      <div className={styles.ordersGrid}>
+    <section className={styles.ordersList} aria-labelledby="orders-heading">
+      <h3 id="orders-heading" className={styles.title}>Мои заказы</h3>
+      <div className={styles.ordersGrid} role="list">
         {orders.map((order) => (
-          <OrderCard key={order.id} order={order} />
+          <OrderCard 
+            key={order.id} 
+            order={order}
+            onCancelOrder={handleCancelOrder}
+            onOrderUpdate={handleOrderUpdate}
+          />
         ))}
       </div>
-    </div>
+    </section>
   );
 });
 

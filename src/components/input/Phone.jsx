@@ -3,7 +3,7 @@ import { memo, useState } from "react";
 export const Phone = memo(({
   value = "",
   onChange,
-  placeholder = "Номер телефона",
+  placeholder = "",
   className = "",
   required = false,
   disabled = false,

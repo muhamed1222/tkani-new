@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import styles from "./AboutUs.module.css";
 import { Breadcrumbs } from "../../components/breadcrumbs/Breadcrumbs";
+import { ChevronIcon } from "../../components/ui/ChevronIcon";
+import { contactAPI } from "../../http/api";
 
 export const AboutUs = () => {
   const [overlayOpen, setOverlayOpen] = useState(null);
@@ -30,12 +32,30 @@ export const AboutUs = () => {
     setOverlayOpen(overlayOpen === index ? null : index);
   };
   
+  // Форматирование телефона
+  const formatPhone = (value) => {
+    const digits = value.replace(/\D/g, "");
+    if (digits.length === 0) return "";
+    if (digits.length <= 1) return `+7 (${digits}`;
+    if (digits.length <= 4) return `+7 (${digits.slice(1)}`;
+    if (digits.length <= 7) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4)}`;
+    if (digits.length <= 9) return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+    return `+7 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7, 9)}-${digits.slice(9, 11)}`;
+  };
+  
   // Обработка изменения полей
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Применяем маску для телефона
+    let processedValue = value;
+    if (name === "phone" && type !== "checkbox") {
+      processedValue = formatPhone(value);
+    }
+    
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: type === "checkbox" ? checked : processedValue,
     }));
     
     // Очистка ошибки при изменении поля
@@ -126,24 +146,12 @@ export const AboutUs = () => {
     setSubmitStatus(null);
     
     try {
-      // Здесь должен быть реальный API endpoint
-      // Пока используем заглушку с задержкой
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      await contactAPI.sendMessage({
           name: formData.name.trim(),
           phone: formData.phone.trim(),
           message: formData.message.trim(),
-        }),
       });
       
-      // Если API не настроен, используем заглушку
-      if (!response.ok && response.status === 404) {
-        // Имитация успешной отправки
-        await new Promise((resolve) => setTimeout(resolve, 1500));
         setSubmitStatus("success");
         // Очистка формы
         setFormData({
@@ -152,19 +160,6 @@ export const AboutUs = () => {
           message: "",
           privacy: false,
         });
-      } else if (response.ok) {
-        const data = await response.json();
-        setSubmitStatus("success");
-        // Очистка формы
-        setFormData({
-          name: "",
-          phone: "",
-          message: "",
-          privacy: false,
-        });
-      } else {
-        throw new Error("Ошибка при отправке формы");
-      }
     } catch (error) {
       console.error("Ошибка отправки формы:", error);
       setSubmitStatus("error");
@@ -173,87 +168,54 @@ export const AboutUs = () => {
     }
   };
 
+  // Плавный скролл к якорям
   useEffect(() => {
-    const scrollToHashElement = (hash) => {
-      if (!hash) return false;
+    const HEADER_HEIGHT = 100;
+    
+    const scrollToHash = (hash = null) => {
+      const targetHash = hash || window.location.hash.replace("#", "");
+      if (!targetHash) return;
       
-      const element = document.getElementById(hash);
+      const element = document.getElementById(targetHash);
       if (element) {
-        const headerHeight = 100;
         const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+        const offsetPosition = elementPosition + window.pageYOffset - HEADER_HEIGHT;
 
         window.scrollTo({
           top: Math.max(0, offsetPosition),
           behavior: 'smooth'
         });
-        return true;
       }
-      return false;
     };
-
-    const handleHashScroll = (hash = null) => {
-      const targetHash = hash || window.location.hash.replace("#", "");
-      if (targetHash) {
-        // Пробуем несколько раз с увеличивающейся задержкой для надежности
-        let attempts = 0;
-        const maxAttempts = 5;
+    
+    // Скролл при первой загрузке страницы
+    const timer = setTimeout(() => {
+      scrollToHash();
+    }, 100);
         
-        const tryScroll = () => {
-          attempts++;
-          if (scrollToHashElement(targetHash) || attempts >= maxAttempts) {
-            return;
-          }
-          setTimeout(tryScroll, 100);
-        };
-        
-        // Начальная задержка больше при переходе с другой страницы
-        const initialDelay = window.location.pathname.includes('AboutUs') ? 50 : 300;
-        setTimeout(tryScroll, initialDelay);
+    // Плавный скролл при изменении hash
+    const handleHashChange = () => {
+      setTimeout(() => {
+        scrollToHash();
+      }, 50);
+    };
+    
+    // Слушаем событие для программного изменения hash
+    const handleCustomHashChange = (e) => {
+      if (e.detail && e.detail.hash) {
+        setTimeout(() => {
+          scrollToHash(e.detail.hash);
+        }, 50);
       }
     };
     
-    // Обработка при первой загрузке страницы
-    handleHashScroll();
-    
-    // Обработка при изменении hash (клик на ссылку с якорем)
-    window.addEventListener("hashchange", () => handleHashScroll());
-    
-    // Обработка кликов на ссылки с якорями (когда уже на странице)
-    const handleLinkClick = (e) => {
-      const link = e.target.closest('a[href*="#"]');
-      if (link) {
-        const href = link.getAttribute('href');
-        if (href && href.includes('#') && href.includes('AboutUs')) {
-          const hash = href.split('#')[1];
-          if (hash) {
-            // Если уже на странице AboutUs, обрабатываем скролл напрямую
-            if (window.location.pathname.includes('AboutUs')) {
-              e.preventDefault();
-              window.history.pushState(null, '', `#${hash}`);
-              handleHashScroll(hash);
-            }
-          }
-        }
-      }
-    };
-    
-    // Добавляем обработчик клика на весь документ
-    document.addEventListener('click', handleLinkClick, true);
-    
-    // Обработка при изменении location (для React Router)
-    const checkHash = () => {
-      if (window.location.hash) {
-        handleHashScroll();
-      }
-    };
-    
-    // Проверяем hash после небольшой задержки для React Router
-    setTimeout(checkHash, 100);
+    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener("scrollToHash", handleCustomHashChange);
     
     return () => {
-      window.removeEventListener("hashchange", () => handleHashScroll());
-      document.removeEventListener('click', handleLinkClick, true);
+      clearTimeout(timer);
+      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("scrollToHash", handleCustomHashChange);
     };
   }, []);
   
@@ -282,6 +244,9 @@ export const AboutUs = () => {
               src="/Rectangle 01.jpg"
               alt="Ткани"
               className={styles.tiles_img}
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
             />
           </div>
 
@@ -290,6 +255,9 @@ export const AboutUs = () => {
               src="/Rectangle 02.jpg"
               alt="Ткани"
               className={styles.tiles_img}
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
             />
             <div className={styles.tiles_text}>
               <p>
@@ -306,10 +274,10 @@ export const AboutUs = () => {
             Мы всегда стараемся радовать вас актуальными коллекциями и качественным обслуживанием.
           </p>
           <div className={styles.icons}>
-            <img src="/rokt-logo.svg" alt="Логотип" />
-            <img src="/ideo-logo.svg" alt="Логотип" />
-            <img src="/finsweet-logo.svg" alt="Логотип" />
-            <img src="/vml-logo.svg" alt="Логотип" />
+            <img src="/rokt-logo.svg" alt="Логотип" onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="/ideo-logo.svg" alt="Логотип" onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="/finsweet-logo.svg" alt="Логотип" onError={(e) => { e.target.style.display = 'none'; }} />
+            <img src="/vml-logo.svg" alt="Логотип" onError={(e) => { e.target.style.display = 'none'; }} />
           </div>
         </div>
       </section>
@@ -321,15 +289,15 @@ export const AboutUs = () => {
         </div>
         <div className={styles.section_pay_cards}>
           <div className={styles.pay_card}>
-            <div id={styles.pay_card_img01}></div>
+            <div className={styles.pay_card_img01}></div>
             <p>Банковской картой на сайте</p>
           </div>
           <div className={styles.pay_card}>
-            <div id={styles.pay_card_img02}></div>
+            <div className={styles.pay_card_img02}></div>
             <p>Наличными при получении</p>
           </div>
           <div className={styles.pay_card}>
-            <div id={styles.pay_card_img03}></div>
+            <div className={styles.pay_card_img03}></div>
             <p>Оплата по счету на юридическое лицо</p>
           </div>
         </div>
@@ -351,7 +319,7 @@ export const AboutUs = () => {
               <span className={styles.delivery_badge}>1</span>
             </div>
             <p>
-              ул. Московская 21/3,<br />пн-пт 10:00-18:00
+              ул. Кабардинская 158, Нальчик, КБР<br />пн-пт 10:00-18:00
             </p>
           </div>
           <div className={styles.delivery_card}>
@@ -400,13 +368,11 @@ export const AboutUs = () => {
               >
                 <div className={styles.question_header} onClick={(e) => divClick(1, e)}>
                   <span>Как узнать трек-номер</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevron_icon}>
-                    <path d="M6 4L10 8L6 12" stroke="#C2C2C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronIcon className={styles.chevron_icon} isOpen={overlayOpen === 1} />
                 </div>
                 {overlayOpen === 1 && (
                   <div className={styles.answer}>
-                    <p>Текст</p>
+                    <p>Трек-номер отправки вы получите на указанный при оформлении заказа email и SMS на телефон. Также трек-номер можно найти в личном кабинете в разделе "Мои заказы".</p>
                   </div>
                 )}
               </div>
@@ -417,13 +383,11 @@ export const AboutUs = () => {
               >
                 <div className={styles.question_header} onClick={(e) => divClick(2, e)}>
                   <span>Сроки отправки заказа</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevron_icon}>
-                    <path d="M6 4L10 8L6 12" stroke="#C2C2C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronIcon className={styles.chevron_icon} isOpen={overlayOpen === 2} />
                 </div>
                 {overlayOpen === 2 && (
                   <div className={styles.answer}>
-                    <p>Текст</p>
+                    <p>Заказы отправляются два раза в неделю: по средам и субботам. После отправки вы получите уведомление с трек-номером. Время обработки заказа составляет 1-2 рабочих дня.</p>
                   </div>
                 )}
               </div>
@@ -434,13 +398,11 @@ export const AboutUs = () => {
               >
                 <div className={styles.question_header} onClick={(e) => divClick(3, e)}>
                   <span>Доставка в регионы</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevron_icon}>
-                    <path d="M6 4L10 8L6 12" stroke="#C2C2C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronIcon className={styles.chevron_icon} isOpen={overlayOpen === 3} />
                 </div>
                 {overlayOpen === 3 && (
                   <div className={styles.answer}>
-                    <p>Текст</p>
+                    <p>Мы доставляем заказы по всей России через СДЭК, Почту России и другие транспортные компании. Стоимость доставки рассчитывается автоматически при оформлении заказа в зависимости от веса, габаритов и пункта назначения.</p>
                   </div>
                 )}
               </div>
@@ -451,13 +413,11 @@ export const AboutUs = () => {
               >
                 <div className={styles.question_header} onClick={(e) => divClick(4, e)}>
                   <span>Самовывоз заказа</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevron_icon}>
-                    <path d="M6 4L10 8L6 12" stroke="#C2C2C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronIcon className={styles.chevron_icon} isOpen={overlayOpen === 4} />
                 </div>
                 {overlayOpen === 4 && (
                   <div className={styles.answer}>
-                    <p>Текст</p>
+                    <p>Вы можете забрать заказ самостоятельно по адресу: ул. Кабардинская 158, Нальчик, КБР. Режим работы: понедельник-пятница с 10:00 до 18:00. Пожалуйста, предварительно свяжитесь с нами для уточнения готовности заказа.</p>
                   </div>
                 )}
               </div>
@@ -468,13 +428,11 @@ export const AboutUs = () => {
               >
                 <div className={styles.question_header} onClick={(e) => divClick(5, e)}>
                   <span>Как рассчитать стоимость доставки</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevron_icon}>
-                    <path d="M6 4L10 8L6 12" stroke="#C2C2C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronIcon className={styles.chevron_icon} isOpen={overlayOpen === 5} />
                 </div>
                 {overlayOpen === 5 && (
                   <div className={styles.answer}>
-                    <p>Текст</p>
+                    <p>Стоимость доставки рассчитывается автоматически при оформлении заказа в корзине. Выберите способ доставки и укажите адрес - система покажет точную стоимость. Для оптовых заказов стоимость доставки согласовывается индивидуально с менеджером.</p>
                   </div>
                 )}
               </div>
@@ -490,13 +448,11 @@ export const AboutUs = () => {
               >
                 <div className={styles.question_header} onClick={(e) => divClick(6, e)}>
                   <span>Оплата заказа</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevron_icon}>
-                    <path d="M6 4L10 8L6 12" stroke="#C2C2C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronIcon className={styles.chevron_icon} isOpen={overlayOpen === 6} />
                 </div>
                 {overlayOpen === 6 && (
                   <div className={styles.answer}>
-                    <p>Текст</p>
+                    <p>Мы принимаем оплату банковской картой на сайте, наличными при получении заказа (для самовывоза и курьерской доставки), а также по счету для юридических лиц. Оплата банковской картой проходит через защищенный платежный шлюз.</p>
                   </div>
                 )}
               </div>
@@ -507,13 +463,11 @@ export const AboutUs = () => {
               >
                 <div className={styles.question_header} onClick={(e) => divClick(7, e)}>
                   <span>Обмен и возврат</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevron_icon}>
-                    <path d="M6 4L10 8L6 12" stroke="#C2C2C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronIcon className={styles.chevron_icon} isOpen={overlayOpen === 7} />
                 </div>
                 {overlayOpen === 7 && (
                   <div className={styles.answer}>
-                    <p>Текст</p>
+                    <p>Возврат товара возможен в течение 14 дней с момента получения при сохранении товарного вида, упаковки и этикеток. Товар должен быть не использованным. Для возврата свяжитесь с нами по телефону или email, мы предоставим инструкции по возврату.</p>
                   </div>
                 )}
               </div>
@@ -524,13 +478,11 @@ export const AboutUs = () => {
               >
                 <div className={styles.question_header} onClick={(e) => divClick(8, e)}>
                   <span>Оформление заказа</span>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.chevron_icon}>
-                    <path d="M6 4L10 8L6 12" stroke="#C2C2C2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <ChevronIcon className={styles.chevron_icon} isOpen={overlayOpen === 8} />
                 </div>
                 {overlayOpen === 8 && (
                   <div className={styles.answer}>
-                    <p>Текст</p>
+                    <p>Для оформления заказа добавьте товары в корзину, перейдите в корзину и заполните форму заказа: укажите контактные данные, выберите способ доставки и оплаты. После подтверждения заказа вы получите уведомление на email. Для оптовых заказов свяжитесь с нами по телефону.</p>
                   </div>
                 )}
               </div>
@@ -550,7 +502,14 @@ export const AboutUs = () => {
                   <img src="/location-01.svg" alt="Иконка" className={styles.info_icon} />
                   <p>Наш адрес</p>
                 </div>
+                <a 
+                  href="https://yandex.com/maps/-/CLGRvAp8" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={styles.info_text_link}
+                >
                 <p className={styles.info_text}>ул. Кабардинская 158, Нальчик, КБР</p>
+                </a>
               </div>
 
               <div className={styles.info_container}>
@@ -558,7 +517,12 @@ export const AboutUs = () => {
                   <img src="/call-01.svg" alt="Иконка" className={styles.info_icon} />
                   <p>Телефон</p>
                 </div>
+                <a 
+                  href="tel:+79287166626" 
+                  className={styles.info_text_link}
+                >
                 <p className={styles.info_text}>+7 (928) 716-66-26</p>
+                </a>
               </div>
 
               <div className={styles.info_container}>
@@ -566,7 +530,12 @@ export const AboutUs = () => {
                   <img src="/mail-01.svg" alt="Иконка" className={styles.info_icon} />
                   <p>E-mail</p>
                 </div>
+                <a 
+                  href="mailto:center.tkani@yandex.ru" 
+                  className={styles.info_text_link}
+                >
                 <p className={styles.info_text}>center.tkani@yandex.ru</p>
+                </a>
               </div>
 
               <div className={styles.info_container}>

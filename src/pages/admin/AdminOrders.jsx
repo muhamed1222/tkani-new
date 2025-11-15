@@ -14,6 +14,7 @@ export const AdminOrders = () => {
 
   useEffect(() => {
     loadOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, page]);
 
   const loadOrders = async () => {
@@ -196,7 +197,42 @@ export const AdminOrders = () => {
                   {selectedOrder.user?.first_name} {selectedOrder.user?.last_name}
                 </p>
                 <p className="text-gray-600">{selectedOrder.user?.email}</p>
+                {selectedOrder.phone && (
+                  <p className="text-gray-600 mt-1">
+                    Телефон: <a href={`tel:${selectedOrder.phone}`} className="text-blue-600 hover:underline">{selectedOrder.phone}</a>
+                  </p>
+                )}
               </div>
+
+              {/* Информация о доставке и оплате */}
+              {(selectedOrder.delivery_address || selectedOrder.delivery_method || selectedOrder.payment_method) && (
+                <div className="bg-gray-50 p-4 rounded">
+                  <h4 className="font-semibold mb-2">Доставка и оплата</h4>
+                  {selectedOrder.delivery_address && (
+                    <p className="text-gray-700 mb-1">
+                      <span className="font-medium">Адрес доставки:</span> {selectedOrder.delivery_address}
+                    </p>
+                  )}
+                  {selectedOrder.delivery_method && (
+                    <p className="text-gray-700 mb-1">
+                      <span className="font-medium">Способ доставки:</span> {selectedOrder.delivery_method}
+                    </p>
+                  )}
+                  {selectedOrder.payment_method && (
+                    <p className="text-gray-700">
+                      <span className="font-medium">Способ оплаты:</span> {selectedOrder.payment_method}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Комментарий к заказу */}
+              {selectedOrder.comment && (
+                <div className="bg-gray-50 p-4 rounded">
+                  <h4 className="font-semibold mb-2">Комментарий</h4>
+                  <p className="text-gray-700">{selectedOrder.comment}</p>
+                </div>
+              )}
 
               {/* Товары в заказе */}
               <div>

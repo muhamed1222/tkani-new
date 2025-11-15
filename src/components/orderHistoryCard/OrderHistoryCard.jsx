@@ -26,24 +26,24 @@ export const OrderHistoryCard = ({ order, onRepeatOrder }) => {
   };
 
   return (
-    <div className={styles.orderCard}>
-      <div className={styles.orderHeader}>
-        <h4 className={styles.orderDate}>
+    <article className={styles.orderCard} aria-labelledby={`order-history-${order.id}-title`}>
+      <header className={styles.orderHeader}>
+        <h4 id={`order-history-${order.id}-title`} className={styles.orderDate}>
           Заказ от {formatDate(order.created_at || order.date)}
         </h4>
-        <div className={styles.statusBadge}>
+        <div className={styles.statusBadge} role="status" aria-label="Статус заказа: Завершен">
           <span className={styles.statusText}>
             Завершен
           </span>
         </div>
-      </div>
+      </header>
 
       <div className={styles.orderContent}>
         {/* Изображения товаров */}
         {order.items && order.items.length > 0 && (
-          <div className={styles.productImages}>
+          <div className={styles.productImages} role="list" aria-label="Товары в заказе">
             {order.items.slice(0, 3).map((item, index) => (
-              <div key={index} className={styles.productImageContainer}>
+              <div key={index} className={styles.productImageContainer} role="listitem">
                 <img
                   src={item.image || item.product?.image || "/placeholder-product.jpg"}
                   alt={item.name || item.product?.name || "Товар"}
@@ -55,50 +55,51 @@ export const OrderHistoryCard = ({ order, onRepeatOrder }) => {
         )}
 
         {/* Информация о заказе */}
-        <div className={styles.orderInfo}>
+        <dl className={styles.orderInfo}>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>
+            <dt className={styles.infoLabel}>
               {order.items_count || order.items?.length || 0} товара на сумму
-            </span>
-            <span className={styles.infoValue}>
+            </dt>
+            <dd className={styles.infoValue}>
               {formatPrice(order.total || order.total_price || 0)}
-            </span>
+            </dd>
           </div>
 
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Способ получения</span>
-            <span className={styles.infoValue}>
+            <dt className={styles.infoLabel}>Способ получения</dt>
+            <dd className={styles.infoValue}>
               {order.delivery_method || "Почта России"}
-            </span>
+            </dd>
           </div>
 
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Способ оплаты</span>
-            <span className={styles.infoValue}>
+            <dt className={styles.infoLabel}>Способ оплаты</dt>
+            <dd className={styles.infoValue}>
               {order.payment_method || "Банковской картой на сайте"}
-            </span>
+            </dd>
           </div>
 
           <div className={styles.orderFooter}>
             {order.delivery_date && (
               <div className={styles.infoRow}>
-                <span className={styles.infoLabel}>Дата доставки</span>
-                <span className={styles.infoValue}>
+                <dt className={styles.infoLabel}>Дата доставки</dt>
+                <dd className={styles.infoValue}>
                   {order.delivery_date}
-                </span>
+                </dd>
               </div>
             )}
             <button
               type="button"
               onClick={handleRepeatOrder}
               className={styles.repeatButton}
+              aria-label={`Повторить заказ от ${formatDate(order.created_at || order.date)}`}
             >
               Повторить заказ
             </button>
           </div>
-        </div>
+        </dl>
       </div>
-    </div>
+    </article>
   );
 };
 

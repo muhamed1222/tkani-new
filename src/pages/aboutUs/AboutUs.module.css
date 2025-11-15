@@ -113,8 +113,6 @@
     object-fit: contain;
 }
 
-
-
 .section_delivery {
     display: flex;
     flex-direction: column;
@@ -261,43 +259,39 @@
     margin: 0;
 }
 
-#pay_card_img01 {
+.pay_card_img01 {
     height: 60px;
     width: 60px;
     background: url(/credit-card.svg) no-repeat center;
     background-size: contain;
     transition: background 0.2s ease;
 }
-.pay_card:hover #pay_card_img01 {
+.pay_card:hover .pay_card_img01 {
     background: url(/credit-card-red.svg) no-repeat center;
     background-size: contain;
 }
-#pay_card_img02 {
+.pay_card_img02 {
     height: 60px;
     width: 60px;
     background: url(/wallet.svg) no-repeat center;
     background-size: contain;
     transition: background 0.2s ease;
 }
-.pay_card:hover #pay_card_img02 {
+.pay_card:hover .pay_card_img02 {
     background: url(/wallet-red.svg) no-repeat center;
     background-size: contain;
 }
-#pay_card_img03 {
+.pay_card_img03 {
     height: 60px;
     width: 60px;
     background: url(/calculator.svg) no-repeat center;
     background-size: contain;
     transition: background 0.2s ease;
 }
-.pay_card:hover #pay_card_img03 {
+.pay_card:hover .pay_card_img03 {
     background: url(/calculator-red.svg) no-repeat center;
     background-size: contain;
 }
-
-
-
-
 .section_questions {
     display: flex;
     flex-direction: column;
@@ -453,6 +447,18 @@
     line-height: 1.2;
     color: #101010;
     margin: 0;
+}
+.info_text_link {
+    text-decoration: none;
+    display: inline-block;
+    transition: opacity 0.2s ease;
+}
+.info_text_link:hover {
+    opacity: 0.7;
+}
+.info_text_link:hover .info_text {
+    color: #9B1E1C;
+    transition: color 0.2s ease;
 }
 .info_name {
     display: flex;
@@ -769,27 +775,16 @@
     }
 }
 @media (max-width: 400px) {
-
+    .contacts_info {
+        grid-template-columns: 1fr;
+    }
+    .form_fields {
+        flex-direction: column;
+    }
+    .form_inputs {
+        width: 100%;
+    }
+    .input textarea {
+        width: 100%;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

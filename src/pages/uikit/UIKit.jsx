@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./UIKit.module.css";
 import * as Avatar from "@radix-ui/react-avatar";
 import { Card } from "@radix-ui/themes";
+import { OrderCard } from "../../components/orderCard/OrderCard";
 
 export const UIKit = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -1143,6 +1144,173 @@ export const UIKit = () => {
               <div className="flex flex-col items-center gap-2">
                 <img src="/clock-01.svg" alt="Время" className="w-8 h-8" />
                 <span className="text-xs text-dark/70">Время</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Карточки заказов */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-[#101010] mb-6">Карточки заказов</h2>
+          <div className="bg-white p-8 rounded-2xl">
+            <p className="text-[#888888] text-[16px] mb-8">
+              Различные состояния карточки заказа с разными статусами и действиями
+            </p>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+              {/* Оформлен */}
+              <div>
+                <h3 className="text-xl font-semibold text-[#101010] mb-4">Оформлен (placed)</h3>
+                <OrderCard
+                  order={{
+                    id: 1,
+                    date: "2025-09-02",
+                    created_at: "2025-09-02",
+                    status: "placed",
+                    items_count: 3,
+                    total: 1600,
+                    total_price: 1600,
+                    delivery_method: "Самовывоз",
+                    payment_method: "Наличными при получении",
+                    delivery_date: "11 сентября, 11:00 - 13:00",
+                    items: [
+                      { id: 1, name: "Ткань 1", image: "/textile-blue.jpg", product: { name: "Ткань 1", image: "/textile-blue.jpg" } },
+                      { id: 2, name: "Ткань 2", image: "/textile-brown.jpg", product: { name: "Ткань 2", image: "/textile-brown.jpg" } },
+                      { id: 3, name: "Ткань 3", image: "/textile-yellow.jpg", product: { name: "Ткань 3", image: "/textile-yellow.jpg" } }
+                    ]
+                  }}
+                  onCancelOrder={async (id) => {
+                    console.log("Отмена заказа:", id);
+                    return Promise.resolve();
+                  }}
+                />
+              </div>
+
+              {/* В обработке */}
+              <div>
+                <h3 className="text-xl font-semibold text-[#101010] mb-4">В обработке (processing)</h3>
+                <OrderCard
+                  order={{
+                    id: 2,
+                    date: "2025-09-01",
+                    created_at: "2025-09-01",
+                    status: "processing",
+                    items_count: 2,
+                    total: 1200,
+                    total_price: 1200,
+                    delivery_method: "Почта России",
+                    payment_method: "Банковской картой на сайте",
+                    delivery_date: "10 сентября, 14:00 - 16:00",
+                    items: [
+                      { id: 4, name: "Ткань 4", image: "/textile-green.jpg", product: { name: "Ткань 4", image: "/textile-green.jpg" } },
+                      { id: 5, name: "Ткань 5", image: "/textile-blue.jpg", product: { name: "Ткань 5", image: "/textile-blue.jpg" } }
+                    ]
+                  }}
+                  onCancelOrder={async (id) => {
+                    console.log("Отмена заказа:", id);
+                    return Promise.resolve();
+                  }}
+                />
+              </div>
+
+              {/* Доставляется */}
+              <div>
+                <h3 className="text-xl font-semibold text-[#101010] mb-4">Доставляется (delivering)</h3>
+                <OrderCard
+                  order={{
+                    id: 3,
+                    date: "2025-08-30",
+                    created_at: "2025-08-30",
+                    status: "delivering",
+                    items_count: 1,
+                    total: 800,
+                    total_price: 800,
+                    delivery_method: "Курьером",
+                    payment_method: "Банковской картой на сайте",
+                    delivery_date: "5 сентября, 10:00 - 12:00",
+                    items: [
+                      { id: 6, name: "Ткань 6", image: "/textile-yellow.jpg", product: { name: "Ткань 6", image: "/textile-yellow.jpg" } }
+                    ]
+                  }}
+                />
+              </div>
+
+              {/* Доставлен */}
+              <div>
+                <h3 className="text-xl font-semibold text-[#101010] mb-4">Доставлен (delivered)</h3>
+                <OrderCard
+                  order={{
+                    id: 4,
+                    date: "2025-08-25",
+                    created_at: "2025-08-25",
+                    status: "delivered",
+                    items_count: 4,
+                    total: 2400,
+                    total_price: 2400,
+                    delivery_method: "Самовывоз",
+                    payment_method: "Наличными при получении",
+                    delivery_date: "28 августа, 15:00 - 17:00",
+                    items: [
+                      { id: 7, name: "Ткань 7", image: "/textile-green.jpg", product: { name: "Ткань 7", image: "/textile-green.jpg" } },
+                      { id: 8, name: "Ткань 8", image: "/textile-brown.jpg", product: { name: "Ткань 8", image: "/textile-brown.jpg" } },
+                      { id: 9, name: "Ткань 9", image: "/textile-blue.jpg", product: { name: "Ткань 9", image: "/textile-blue.jpg" } }
+                    ]
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Заказ с ошибкой */}
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-[#101010] mb-4">Заказ с ошибкой при отмене</h3>
+              <div className="max-w-[486px]">
+                <OrderCard
+                  order={{
+                    id: 5,
+                    date: "2025-09-03",
+                    created_at: "2025-09-03",
+                    status: "placed",
+                    items_count: 1,
+                    total: 500,
+                    total_price: 500,
+                    delivery_method: "Самовывоз",
+                    payment_method: "Наличными при получении",
+                    items: [
+                      { id: 10, name: "Ткань 10", image: "/textile-yellow.jpg", product: { name: "Ткань 10", image: "/textile-yellow.jpg" } }
+                    ]
+                  }}
+                  onCancelOrder={async (id) => {
+                    throw new Error("Не удалось отменить заказ. Попробуйте позже.");
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Заказ без даты доставки */}
+            <div>
+              <h3 className="text-xl font-semibold text-[#101010] mb-4">Заказ без даты доставки</h3>
+              <div className="max-w-[486px]">
+                <OrderCard
+                  order={{
+                    id: 6,
+                    date: "2025-09-04",
+                    created_at: "2025-09-04",
+                    status: "placed",
+                    items_count: 2,
+                    total: 900,
+                    total_price: 900,
+                    delivery_method: "Самовывоз",
+                    payment_method: "Наличными при получении",
+                    items: [
+                      { id: 11, name: "Ткань 11", image: "/textile-green.jpg", product: { name: "Ткань 11", image: "/textile-green.jpg" } },
+                      { id: 12, name: "Ткань 12", image: "/textile-blue.jpg", product: { name: "Ткань 12", image: "/textile-blue.jpg" } }
+                    ]
+                  }}
+                  onCancelOrder={async (id) => {
+                    console.log("Отмена заказа:", id);
+                    return Promise.resolve();
+                  }}
+                />
               </div>
             </div>
           </div>

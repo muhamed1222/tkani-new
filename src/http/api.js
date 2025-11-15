@@ -37,12 +37,53 @@ class ApiService {
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
       
+      // Специфичные сообщения для разных статусов
+      if (response.status === 401) {
+        errorMessage = "Неверный email или пароль";
+      } else if (response.status === 403) {
+        errorMessage = "Доступ запрещен";
+      } else if (response.status === 404) {
+        errorMessage = "Ресурс не найден";
+      } else if (response.status === 500) {
+        errorMessage = "Ошибка сервера";
+      }
+      
       try {
-        const errorData = await response.json();
+        // Клонируем response для чтения, так как response.json() можно вызвать только один раз
+        const responseClone = response.clone();
+        const errorData = await responseClone.json();
+        
+        if (import.meta.env.DEV) {
+          console.error('API Error Response:', {
+            status: response.status,
+            statusText: response.statusText,
+            errorData
+          });
+        }
+        
         // Новый формат ошибок: { error: true, message: "..." }
-        errorMessage = errorData.message || errorData.error || errorMessage;
-      } catch {
-        // Если не удалось распарсить JSON, используем стандартное сообщение
+        // Приоритет: сообщение из ответа > стандартное сообщение по статусу
+        if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (errorData.error && typeof errorData.error === 'string') {
+          errorMessage = errorData.error;
+        } else if (typeof errorData === 'string') {
+          errorMessage = errorData;
+        }
+      } catch (parseError) {
+        // Если не удалось распарсить JSON, пытаемся прочитать как текст
+        try {
+          const text = await response.text();
+          if (text) {
+            errorMessage = text;
+          }
+        } catch {
+          // Если не удалось прочитать, используем стандартное сообщение
+        }
+        
+        if (import.meta.env.DEV) {
+          console.error('Failed to parse error response:', parseError);
+        }
       }
       
       const error = new Error(errorMessage);
@@ -84,17 +125,34 @@ class ApiService {
       const queryString = new URLSearchParams(params).toString();
       const url = `${this.baseURL}${endpoint}${queryString ? `?${queryString}` : ''}`;
       
+      console.log('API GET Request:', {
+        url,
+        endpoint,
+        baseURL: this.baseURL,
+        includeAuth,
+        headers: getHeaders(includeAuth)
+      });
+      
       const response = await fetch(url, {
         method: 'GET',
         headers: getHeaders(includeAuth),
       });
 
+      console.log('API GET Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
       return await this._handleResponse(response);
     } catch (error) {
-      // Логируем только в режиме разработки
-      if (import.meta.env.DEV) {
         console.error('API GET Error:', error);
-      }
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        status: error.status
+      });
       throw error;
     }
   }
@@ -103,16 +161,41 @@ class ApiService {
   async post(endpoint, data = {}, includeAuth = true, isFormData = false) {
     try {
       const body = isFormData ? data : JSON.stringify(data);
+      
+      if (import.meta.env.DEV) {
+        console.log('API POST Request:', {
+          url: `${this.baseURL}${endpoint}`,
+          endpoint,
+          includeAuth,
+          isFormData,
+          body: isFormData ? '[FormData]' : body
+        });
+      }
+      
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: 'POST',
         headers: getHeaders(includeAuth, isFormData),
         body: body,
       });
 
+      if (import.meta.env.DEV) {
+        console.log('API POST Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          ok: response.ok,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+      }
+
       return await this._handleResponse(response);
     } catch (error) {
       if (import.meta.env.DEV) {
         console.error('API POST Error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          status: error.status
+        });
       }
       throw error;
     }
@@ -289,7 +372,15 @@ export const authAPI = {
 export const cartAPI = {
   // Получить корзину
   getCart: async () => {
-    return api.get('/cart/', {}, false);
+    console.log('cartAPI.getCart: Начало запроса');
+    try {
+      const result = await api.get('/cart/', {}, false);
+      console.log('cartAPI.getCart: Успешный ответ:', result);
+      return result;
+    } catch (error) {
+      console.error('cartAPI.getCart: Ошибка:', error);
+      throw error;
+    }
   },
 
   // Добавить товар в корзину
@@ -350,8 +441,8 @@ export const ordersAPI = {
 // Методы для админ-панели
 export const adminAPI = {
   // Товары
-  getProducts: async () => {
-    return api.get('/admin/products', {}, true);
+  getProducts: async (params = {}) => {
+    return api.get('/admin/products', params, true);
   },
   
   createProduct: async (productData) => {
@@ -363,6 +454,19 @@ export const adminAPI = {
     if (productData.category_id) formData.append('category_id', productData.category_id);
     if (productData.brand_id) formData.append('brand_id', productData.brand_id);
     if (productData.image) formData.append('image', productData.image);
+    if (productData.discount !== undefined) formData.append('discount', productData.discount);
+    if (productData.discount_price !== undefined) formData.append('discount_price', productData.discount_price);
+    if (productData.article) formData.append('article', productData.article);
+    if (productData.composition) formData.append('composition', productData.composition);
+    if (productData.width) formData.append('width', productData.width);
+    if (productData.density) formData.append('density', productData.density);
+    if (productData.country) formData.append('country', productData.country);
+    formData.append('is_new', productData.is_new ? 'true' : 'false');
+    if (productData.images && productData.images.length > 0) {
+      productData.images.forEach((image) => {
+        formData.append('images', image);
+      });
+    }
     
     return api.post('/admin/products', formData, true, true);
   },
@@ -376,6 +480,19 @@ export const adminAPI = {
     if (productData.category_id !== undefined) formData.append('category_id', productData.category_id);
     if (productData.brand_id !== undefined) formData.append('brand_id', productData.brand_id);
     if (productData.image) formData.append('image', productData.image);
+    if (productData.discount !== undefined) formData.append('discount', productData.discount);
+    if (productData.discount_price !== undefined) formData.append('discount_price', productData.discount_price);
+    if (productData.article !== undefined) formData.append('article', productData.article || '');
+    if (productData.composition !== undefined) formData.append('composition', productData.composition || '');
+    if (productData.width !== undefined) formData.append('width', productData.width || '');
+    if (productData.density !== undefined) formData.append('density', productData.density || '');
+    if (productData.country !== undefined) formData.append('country', productData.country || '');
+    if (productData.is_new !== undefined) formData.append('is_new', productData.is_new ? 'true' : 'false');
+    if (productData.images && productData.images.length > 0) {
+      productData.images.forEach((image) => {
+        formData.append('images', image);
+      });
+    }
     
     return api.put(`/admin/products/${productId}`, formData, true, true);
   },
@@ -421,6 +538,71 @@ export const adminAPI = {
   getStats: async () => {
     return api.get('/admin/stats', {}, true);
   },
+  
+  // Категории
+  getCategories: async () => {
+    return api.get('/admin/categories', {}, true);
+  },
+  
+  createCategory: async (categoryData) => {
+    return api.post('/admin/categories', categoryData, true);
+  },
+  
+  updateCategory: async (categoryId, categoryData) => {
+    return api.put(`/admin/categories/${categoryId}`, categoryData, true);
+  },
+  
+  deleteCategory: async (categoryId) => {
+    return api.delete(`/admin/categories/${categoryId}`, true);
+  },
+  
+  // Бренды
+  getBrands: async () => {
+    return api.get('/admin/brands', {}, true);
+  },
+  
+  createBrand: async (brandData) => {
+    return api.post('/admin/brands', brandData, true);
+  },
+  
+  updateBrand: async (brandId, brandData) => {
+    return api.put(`/admin/brands/${brandId}`, brandData, true);
+  },
+  
+  deleteBrand: async (brandId) => {
+    return api.delete(`/admin/brands/${brandId}`, true);
+  },
+  
+  // Работы
+  getWorks: async () => {
+    return api.get('/admin/works', {}, true);
+  },
+  
+  createWork: async (workData) => {
+    const formData = new FormData();
+    formData.append('title', workData.title);
+    if (workData.description) formData.append('description', workData.description);
+    if (workData.image) formData.append('image', workData.image);
+    if (workData.link) formData.append('link', workData.link);
+    if (workData.tags) formData.append('tags', workData.tags);
+    
+    return api.post('/admin/works', formData, true, true);
+  },
+  
+  updateWork: async (workId, workData) => {
+    const formData = new FormData();
+    if (workData.title) formData.append('title', workData.title);
+    if (workData.description !== undefined) formData.append('description', workData.description);
+    if (workData.image) formData.append('image', workData.image);
+    if (workData.link !== undefined) formData.append('link', workData.link || '');
+    if (workData.tags !== undefined) formData.append('tags', workData.tags || '');
+    
+    return api.put(`/admin/works/${workId}`, formData, true, true);
+  },
+  
+  deleteWork: async (workId) => {
+    return api.delete(`/admin/works/${workId}`, true);
+  },
 };
 
 // Обратная совместимость: старые методы для tkans (перенаправляем на catalog)
@@ -436,6 +618,18 @@ export const tkansAPI = {
   },
   getBrands: async () => {
     return catalogAPI.getBrands();
+  },
+};
+
+// Методы для контактной формы
+export const contactAPI = {
+  // Отправить сообщение через контактную форму
+  sendMessage: async (contactData) => {
+    return api.post('/contact', {
+      name: contactData.name,
+      phone: contactData.phone,
+      message: contactData.message
+    }, false);
   },
 };
 

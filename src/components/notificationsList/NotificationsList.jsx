@@ -91,36 +91,38 @@ export const NotificationsList = observer(() => {
 
   if (isLoading) {
     return (
-      <div className={styles.notificationsList}>
-        <h3 className={styles.title}>Уведомления</h3>
-        <p className={styles.loading}>Загрузка...</p>
-      </div>
+      <section className={styles.notificationsList} aria-labelledby="notifications-heading">
+        <h3 id="notifications-heading" className={styles.title}>Уведомления</h3>
+        <p className={styles.loading} role="status" aria-live="polite">Загрузка...</p>
+      </section>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.notificationsList}>
-        <h3 className={styles.title}>Уведомления</h3>
-        <p className={styles.error}>Ошибка загрузки: {error}</p>
-      </div>
+      <section className={styles.notificationsList} aria-labelledby="notifications-heading">
+        <h3 id="notifications-heading" className={styles.title}>Уведомления</h3>
+        <p className={styles.error} role="alert" aria-live="assertive">Ошибка загрузки: {error}</p>
+      </section>
     );
   }
 
   return (
-    <div className={styles.notificationsList}>
-      <div className={styles.titleContainer}>
-        <h3 className={styles.title}>Уведомления</h3>
+    <section className={styles.notificationsList} aria-labelledby="notifications-heading">
+      <header className={styles.titleContainer}>
+        <h3 id="notifications-heading" className={styles.title}>Уведомления</h3>
         {newNotifications.length > 0 && (
-          <div className={styles.badge}>{newNotifications.length}</div>
+          <div className={styles.badge} aria-label={`Новых уведомлений: ${newNotifications.length}`}>
+            {newNotifications.length}
+          </div>
         )}
-      </div>
+      </header>
 
       {/* Новые уведомления */}
       {newNotifications.length > 0 && (
-        <div className={styles.section}>
-          <h4 className={styles.sectionTitle}>Новые</h4>
-          <div className={styles.notificationsGrid}>
+        <section className={styles.section} aria-labelledby="new-notifications-heading">
+          <h4 id="new-notifications-heading" className={styles.sectionTitle}>Новые</h4>
+          <div className={styles.notificationsGrid} role="list" aria-label="Новые уведомления">
             {newNotifications.map((notification) => (
               <NotificationCard
                 key={notification.id}
@@ -129,14 +131,14 @@ export const NotificationsList = observer(() => {
               />
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Прочитанные уведомления */}
       {readNotifications.length > 0 && (
-        <div className={styles.section}>
-          <h4 className={styles.sectionTitle}>Прочитанные</h4>
-          <div className={styles.notificationsGrid}>
+        <section className={styles.section} aria-labelledby="read-notifications-heading">
+          <h4 id="read-notifications-heading" className={styles.sectionTitle}>Прочитанные</h4>
+          <div className={styles.notificationsGrid} role="list" aria-label="Прочитанные уведомления">
             {readNotifications.map((notification) => (
               <NotificationCard
                 key={notification.id}
@@ -145,13 +147,13 @@ export const NotificationsList = observer(() => {
               />
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {notifications.length === 0 && (
         <p className={styles.empty}>У вас пока нет уведомлений</p>
       )}
-    </div>
+    </section>
   );
 });
 

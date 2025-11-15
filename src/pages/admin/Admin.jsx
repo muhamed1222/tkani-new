@@ -3,6 +3,9 @@ import { AdminDashboard } from "./AdminDashboard";
 import { AdminProducts } from "./AdminProducts";
 import { AdminOrders } from "./AdminOrders";
 import { AdminUsers } from "./AdminUsers";
+import { AdminCategories } from "./AdminCategories";
+import { AdminBrands } from "./AdminBrands";
+import { AdminWorks } from "./AdminWorks";
 import { authAPI } from "../../http/api";
 import { useNavigate } from "react-router-dom";
 
@@ -14,6 +17,7 @@ export const Admin = () => {
 
   useEffect(() => {
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAuth = async () => {
@@ -66,6 +70,9 @@ export const Admin = () => {
   const tabs = [
     { id: "dashboard", label: "Панель управления", icon: "📊" },
     { id: "products", label: "Товары", icon: "📦" },
+    { id: "categories", label: "Категории", icon: "📂" },
+    { id: "brands", label: "Бренды", icon: "🏷️" },
+    { id: "works", label: "Работы", icon: "🎨" },
     { id: "orders", label: "Заказы", icon: "🛒" },
     { id: "users", label: "Пользователи", icon: "👥" },
   ];
@@ -108,6 +115,9 @@ export const Admin = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === "dashboard" && <AdminDashboard />}
         {activeTab === "products" && <AdminProducts />}
+        {activeTab === "categories" && <AdminCategories />}
+        {activeTab === "brands" && <AdminBrands />}
+        {activeTab === "works" && <AdminWorks />}
         {activeTab === "orders" && <AdminOrders />}
         {activeTab === "users" && <AdminUsers />}
       </div>

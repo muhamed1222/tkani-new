@@ -1,4 +1,4 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useState, useRef, useContext } from "react";
 import * as Avatar from "@radix-ui/react-avatar";
 import { Context } from "../../main";
@@ -12,6 +12,7 @@ import { SearchInput } from "../search/SearchInput";
 export const NavBar = observer(() => {
 
     const {user, tkans} = useContext(Context)
+    const location = useLocation();
     
     const {brands} = useContext(Context)
     const [isOpen, setIsOpen] = useState(false); // Каталог
@@ -30,8 +31,22 @@ export const NavBar = observer(() => {
       timeoutRef.current = setTimeout(() => setIsOpen(false), 300);
     };
 
+    // Обработка клика на якорные ссылки AboutUs
+    const handleAboutUsLinkClick = (e, hash) => {
+      // Если уже на странице AboutUs, обновляем hash и делаем плавный скролл
+      if (location.pathname === ABOUTUS_ROUTE) {
+        e.preventDefault();
+        window.location.hash = hash;
+        // Вызываем событие для плавного скролла
+        window.dispatchEvent(new CustomEvent('scrollToHash', { detail: { hash: hash.replace('#', '') } }));
+        return false;
+      }
+      // Если не на странице AboutUs, разрешаем обычный переход
+      return true;
+    };
+
   return (
-    <header className="w-full bg-[#F1F0EE] text-dark font-inter relative z-50">
+    <header className="w-full bg-[#F1F0EE] text-dark font-inter sticky top-0 z-50 shadow-sm">
       {/* Верхняя панель (desktop only) */}
       <section className="hidden md:flex items-center py-[5px] text-sm bg-[#F1F0EE] border-b border-[#e4e2de] relative">
         <div className="max-w-[1440px] w-full mx-auto flex items-center relative px-[20px]">
@@ -45,13 +60,25 @@ export const NavBar = observer(() => {
             <NavLink to={ABOUTUS_ROUTE} className="text-[#888888] text-[14px] font-medium hover:text-accentDark transition-colors py-[5px] whitespace-nowrap">
               О нас
             </NavLink>
-            <Link to={`${ABOUTUS_ROUTE}#pay`} className="text-[#888888] text-[14px] font-medium hover:text-accentDark transition-colors py-[5px] whitespace-nowrap">
+            <Link 
+              to={`${ABOUTUS_ROUTE}#pay`} 
+              onClick={(e) => handleAboutUsLinkClick(e, '#pay')}
+              className="text-[#888888] text-[14px] font-medium hover:text-accentDark transition-colors py-[5px] whitespace-nowrap"
+            >
               Оплата и доставка
             </Link>
-            <Link to={`${ABOUTUS_ROUTE}#questions`} className="text-[#888888] text-[14px] font-medium hover:text-accentDark transition-colors py-[5px] whitespace-nowrap">
+            <Link 
+              to={`${ABOUTUS_ROUTE}#questions`} 
+              onClick={(e) => handleAboutUsLinkClick(e, '#questions')}
+              className="text-[#888888] text-[14px] font-medium hover:text-accentDark transition-colors py-[5px] whitespace-nowrap"
+            >
               Часто задаваемые вопросы
             </Link>
-            <Link to={`${ABOUTUS_ROUTE}#contacts`} className="text-[#888888] text-[14px] font-medium hover:text-accentDark transition-colors py-[5px] whitespace-nowrap">
+            <Link 
+              to={`${ABOUTUS_ROUTE}#contacts`} 
+              onClick={(e) => handleAboutUsLinkClick(e, '#contacts')}
+              className="text-[#888888] text-[14px] font-medium hover:text-accentDark transition-colors py-[5px] whitespace-nowrap"
+            >
               Контакты
             </Link>
           </nav>
@@ -240,9 +267,36 @@ export const NavBar = observer(() => {
         <nav className="flex flex-col gap-3 p-4">
           <NavLink to={ABOUTUS_ROUTE} className="hover:text-accent">О нас</NavLink>
           <NavLink to={UIKIT_ROUTE} className="hover:text-accent">UI Kit</NavLink>
-          <Link to={`${ABOUTUS_ROUTE}#pay`} className="hover:text-accent">Оплата и доставка</Link>
-          <Link to={`${ABOUTUS_ROUTE}#questions`} className="hover:text-accent">Часто задаваемые вопросы</Link>
-          <Link to={`${ABOUTUS_ROUTE}#contacts`} className="hover:text-accent">Контакты</Link>
+          <Link 
+            to={`${ABOUTUS_ROUTE}#pay`} 
+            onClick={(e) => {
+              handleAboutUsLinkClick(e, '#pay');
+              setMobileNav(false);
+            }}
+            className="hover:text-accent"
+          >
+            Оплата и доставка
+          </Link>
+          <Link 
+            to={`${ABOUTUS_ROUTE}#questions`} 
+            onClick={(e) => {
+              handleAboutUsLinkClick(e, '#questions');
+              setMobileNav(false);
+            }}
+            className="hover:text-accent"
+          >
+            Часто задаваемые вопросы
+          </Link>
+          <Link 
+            to={`${ABOUTUS_ROUTE}#contacts`} 
+            onClick={(e) => {
+              handleAboutUsLinkClick(e, '#contacts');
+              setMobileNav(false);
+            }}
+            className="hover:text-accent"
+          >
+            Контакты
+          </Link>
           <hr />
           <Link to="/our_works" className="hover:text-accent">Работы из наших тканей</Link>
           <Link to="/discounts" className="hover:text-accent">Скидки и акции</Link>

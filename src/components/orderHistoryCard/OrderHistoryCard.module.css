@@ -77,6 +77,13 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.orderInfo dt,
+.orderInfo dd {
+  margin: 0;
 }
 
 .infoRow {

@@ -25,25 +25,26 @@ export const NotificationCard = ({ notification, onViewOrder }) => {
     : styles.viewButtonNew;
 
   return (
-    <div className={styles.notificationCard}>
+    <article className={styles.notificationCard} role="listitem" aria-labelledby={`notification-${notification.id}-title`}>
       <div className={styles.notificationContent}>
-        <h4 className={styles.notificationTitle}>
+        <h4 id={`notification-${notification.id}-title`} className={styles.notificationTitle}>
           {notification.message || notification.title}
         </h4>
-        <p className={styles.notificationDate}>
+        <time className={styles.notificationDate} dateTime={notification.created_at || notification.date}>
           {formatDate(notification.created_at || notification.date)}
-        </p>
+        </time>
       </div>
       {notification.order_id && (
         <button
           type="button"
           onClick={handleViewOrder}
           className={buttonClass}
+          aria-label={`Перейти к заказу ${notification.order_id}`}
         >
           К заказу
         </button>
       )}
-    </div>
+    </article>
   );
 };
 

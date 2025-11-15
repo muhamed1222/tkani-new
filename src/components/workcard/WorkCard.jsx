@@ -1,16 +1,33 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 export const WorkCard = ({ work }) => {
+  const [imageError, setImageError] = useState(false);
+  // Используем placeholder по умолчанию, если изображение не указано
+  const defaultPlaceholder = "https://via.placeholder.com/800x600/F1F0EE/888888?text=Work+Image";
+  const [imageSrc, setImageSrc] = useState(work?.image || defaultPlaceholder);
+
+  const handleImageError = (e) => {
+    if (!imageError) {
+      setImageError(true);
+      // Используем placeholder, если изображение не загрузилось
+      setImageSrc(defaultPlaceholder);
+      // Предотвращаем бесконечный цикл ошибок
+      e.target.onerror = null;
+    }
+  };
+
   return (
     <div className="bg-white border-[1.2px] border-[rgba(16,16,16,0.1)] rounded-[20px] w-full overflow-hidden">
       <div className="flex flex-col items-center p-[10px]">
         <div className="flex flex-col gap-[14px] items-start w-full">
           {/* Изображение */}
-          <div className="h-[380px] relative rounded-[20px] overflow-hidden w-full">
+          <div className="h-[380px] relative rounded-[20px] overflow-hidden w-full bg-[#F1F0EE]">
             <img 
-              src={work.image || "/placeholder-work.jpg"} 
+              src={imageSrc} 
               alt={work.title} 
               className="absolute inset-0 w-full h-full object-cover rounded-[20px]"
+              onError={handleImageError}
             />
           </div>
           

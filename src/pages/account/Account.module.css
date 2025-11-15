@@ -1,10 +1,22 @@
 .account {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 32px 50px 80px 50px;
+  padding: 24px 16px 40px 16px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .account {
+    padding: 32px 24px 80px 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .account {
+    padding: 32px 50px 80px 50px;
+  }
 }
 
 .breadcrumbsContainer {
@@ -13,17 +25,36 @@
 
 .tabsRoot {
   display: flex;
-  gap: 32px;
+  flex-direction: column;
+  gap: 24px;
   align-items: flex-start;
-  min-height: 857px;
+  min-height: auto;
+}
+
+@media (min-width: 768px) {
+  .tabsRoot {
+    flex-direction: row;
+    gap: 32px;
+    min-height: 857px;
+  }
 }
 
 .tabsList {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 4px;
-  width: 227px;
+  width: 100%;
   padding-bottom: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+  .tabsList {
+    flex-direction: column;
+    width: 227px;
+    overflow-x: visible;
+  }
 }
 
 .tabButton {
@@ -35,13 +66,22 @@
   background: transparent;
   border-radius: 8px;
   font-family: 'Inter', sans-serif;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.2;
   color: #101010;
   text-align: left;
   cursor: pointer;
   transition: background-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .tabButton {
+    font-size: 16px;
+    width: 100%;
+  }
 }
 
 .tabButton:hover {

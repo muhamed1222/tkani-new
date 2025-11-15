@@ -108,6 +108,13 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.orderInfo dt,
+.orderInfo dd {
+  margin: 0;
 }
 
 .infoRow {
@@ -131,5 +138,55 @@
   line-height: 1.2;
   color: #101010;
   white-space: nowrap;
+}
+
+.errorMessage {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #9b1e1c;
+  padding: 8px 12px;
+  background: rgba(155, 30, 28, 0.1);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.orderActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.cancelButton {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+  background: rgba(155, 30, 28, 0.1);
+  color: #9b1e1c;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: rgba(155, 30, 28, 0.2);
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .orderActions {
+    flex-direction: column;
+  }
+
+  .cancelButton {
+    width: 100%;
+  }
 }
 

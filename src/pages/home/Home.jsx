@@ -1,4 +1,4 @@
-import { Slider } from "../../library/slider/Slider"
+import { Slider } from "../../components/slider/Slider"
 import styles from "./Home.module.css"
 
 export const Home =()=> {

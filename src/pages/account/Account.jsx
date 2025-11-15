@@ -26,57 +26,61 @@ export let Account = observer(() => {
   }
 
   return (
-    <div className={styles.account}>
-      <div className={styles.breadcrumbsContainer}>
+    <main className={styles.account}>
+      <nav className={styles.breadcrumbsContainer} aria-label="Хлебные крошки">
         <Breadcrumbs />
-      </div>
+      </nav>
       <div className={styles.tabsRoot}>
-        <div className={styles.tabsList}>
+        <nav className={styles.tabsList} aria-label="Навигация по разделам личного кабинета">
           <button
             className={`${styles.tabButton} ${activeTab === "account" ? styles.tabButtonActive : ""}`}
             onClick={() => setActiveTab("account")}
+            aria-current={activeTab === "account" ? "page" : undefined}
           >
             Аккаунт
           </button>
           <button
             className={`${styles.tabButton} ${activeTab === "orders" ? styles.tabButtonActive : ""}`}
             onClick={() => setActiveTab("orders")}
+            aria-current={activeTab === "orders" ? "page" : undefined}
           >
             Мои заказы
           </button>
           <button
             className={`${styles.tabButton} ${activeTab === "history" ? styles.tabButtonActive : ""}`}
             onClick={() => setActiveTab("history")}
+            aria-current={activeTab === "history" ? "page" : undefined}
           >
             История заказов
           </button>
           <button
             className={`${styles.tabButton} ${activeTab === "notifications" ? styles.tabButtonActive : ""}`}
             onClick={() => setActiveTab("notifications")}
+            aria-current={activeTab === "notifications" ? "page" : undefined}
           >
             Уведомления
           </button>
-        </div>
+        </nav>
 
         <div className={styles.contentArea}>
           {activeTab === "account" && <Personal_account />}
           {activeTab === "orders" && (
-            <div className={styles.tabContent}>
+            <section className={styles.tabContent} aria-labelledby="orders-heading">
               <OrdersList />
-            </div>
+            </section>
           )}
           {activeTab === "history" && (
-            <div className={styles.tabContent}>
+            <section className={styles.tabContent} aria-labelledby="history-heading">
               <OrderHistoryList />
-            </div>
+            </section>
           )}
           {activeTab === "notifications" && (
-            <div className={styles.tabContent}>
+            <section className={styles.tabContent} aria-labelledby="notifications-heading">
               <NotificationsList />
-            </div>
+            </section>
           )}
         </div>
       </div>
-    </div>
+    </main>
   );
 });

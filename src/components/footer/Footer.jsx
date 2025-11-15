@@ -1,7 +1,14 @@
 import styles from "./Footer.module.css";
 import { Link, useLocation } from "react-router-dom";
 import { RatingBadge } from "./RatingBadge";
-import { CATALOG_ROUTE, CATALOG_CLOTHING_ROUTE } from "../../utils/consts";
+import { 
+  CATALOG_ROUTE, 
+  CATALOG_CLOTHING_ROUTE,
+  ACCOUNT_ROUTE,
+  ABOUTUS_ROUTE,
+  PRIVACY_POLICY_ROUTE,
+  TERMS_OF_SERVICE_ROUTE
+} from "../../utils/consts";
 import { clothingCategories, homeCategories } from "../../utils/catalogCategories";
 
 export const Footer = () => {
@@ -36,13 +43,13 @@ export const Footer = () => {
   };
 
   return (
-    <div className={styles.wrapper}>
+    <footer className={styles.wrapper}>
       <section className={styles.top_section}>
         <h3 className={styles.top_section_title}>
           Широкий выбор высококачественных
           <br /> текстильных материалов со скидками до 50%
         </h3>
-        <Link to='/catalog_home' className={styles.top_section_btn}>
+        <Link to={CATALOG_ROUTE} className={styles.top_section_btn}>
           Перейти в каталог
         </Link>
       </section>
@@ -52,7 +59,7 @@ export const Footer = () => {
 
           <div className={styles.footer_section}>
             <h3 className={styles.section_title}>Для одежды</h3>
-            <nav className={styles.nav}>
+            <nav className={styles.nav} aria-label="Категории для одежды">
               {clothingCategories.map((category, index) => {
                 const isActive = isClothingCatalog && isActiveCategory(category.slug);
                 return (
@@ -71,7 +78,7 @@ export const Footer = () => {
 
           <div className={styles.footer_section}>
             <h3 className={styles.section_title}>Для дома</h3>
-            <nav className={styles.nav}>
+            <nav className={styles.nav} aria-label="Категории для дома">
               {homeCategories.map((category, index) => {
                 const isActive = !isClothingCatalog && isActiveCategory(category.slug);
                 return (
@@ -90,26 +97,26 @@ export const Footer = () => {
 
           <div className={styles.footer_section}>
             <h3 className={styles.section_title}>Компания</h3>
-            <nav className={styles.nav}>
-              <Link to="/personal_account" className={styles.link}>
+            <nav className={styles.nav} aria-label="Информация о компании">
+              <Link to={ACCOUNT_ROUTE} className={styles.link}>
                 Личный кабинет
               </Link>
-              <Link to="/about_us" className={styles.link}>
+              <Link to={ABOUTUS_ROUTE} className={styles.link}>
                 О нас
               </Link>
-              <Link to="/404" className={styles.link}>
+              <Link to={`${ABOUTUS_ROUTE}#contacts`} className={styles.link}>
                 Контакты
               </Link>
-              <Link to="/404-delivery" className={styles.link}>
+              <Link to={`${ABOUTUS_ROUTE}#pay`} className={styles.link}>
                 Оплата и доставка
               </Link>
-              <Link to="/404" className={styles.link}>
+              <Link to={ABOUTUS_ROUTE} className={styles.link}>
                 Часто задаваемые вопросы
               </Link>
-              <Link to="/privacy_policy" className={styles.link}>
+              <Link to={PRIVACY_POLICY_ROUTE} className={styles.link}>
                 Политика конфиденциальности
               </Link>
-              <Link to="/404" className={styles.link}>
+              <Link to={TERMS_OF_SERVICE_ROUTE} className={styles.link}>
                 Пользовательское соглашение
               </Link>
             </nav>
@@ -137,14 +144,35 @@ export const Footer = () => {
             <RatingBadge />
             <div className={styles.links}>
               <p>Подпишитесь на нас в соцсетях</p>
-              <a href=""><img src="/insta.svg" alt="insta" /></a>
-              <a href=""><img src="/whatsapp.svg" alt="whatsapp" /></a>
-              <a href=""><img src="/telegram.svg" alt="telegram" /></a>
+              <a 
+                href="https://www.instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
+                <img src="/insta.svg" alt="Instagram" />
+              </a>
+              <a 
+                href="https://wa.me" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+              >
+                <img src="/whatsapp.svg" alt="WhatsApp" />
+              </a>
+              <a 
+                href="https://t.me" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Telegram"
+              >
+                <img src="/telegram.svg" alt="Telegram" />
+              </a>
             </div>
           </div>
         </div>
       </section>
-    </div>
+    </footer>
   );
 };
 

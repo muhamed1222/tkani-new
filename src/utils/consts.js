@@ -14,3 +14,21 @@ export const CATALOG_ROUTE = '/catalog'
 export const CATALOG_CLOTHING_ROUTE = '/catalog-clothing'
 export const DISCOUNTS_ROUTE = '/discounts'
 export const OUR_WORKS_ROUTE = '/our_works'
+export const PRIVACY_POLICY_ROUTE = '/privacy-policy'
+export const TERMS_OF_SERVICE_ROUTE = '/terms-of-service'
+
+// Константы для товаров
+export const DEFAULT_PRODUCT_VALUES = {
+  composition: '100% хлопок',
+  width: '150см',
+  density: '90гр',
+  country: 'Россия'
+};
+
+export const DISCOUNT_TIERS = [
+  { minQuantity: 5, price: 640 },
+  { minQuantity: 10, price: 420 }
+];
+
+export const CONTACT_PHONE = '+79287166626';
+export const TELEGRAM_LINK = 'https://t.me/centertkani';

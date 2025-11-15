@@ -93,35 +93,35 @@ export const OrderHistoryList = observer(() => {
 
   if (isLoading) {
     return (
-      <div className={styles.orderHistoryList}>
-        <h3 className={styles.title}>История заказов</h3>
-        <p className={styles.loading}>Загрузка...</p>
-      </div>
+      <section className={styles.orderHistoryList} aria-labelledby="history-heading">
+        <h3 id="history-heading" className={styles.title}>История заказов</h3>
+        <p className={styles.loading} role="status" aria-live="polite">Загрузка...</p>
+      </section>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.orderHistoryList}>
-        <h3 className={styles.title}>История заказов</h3>
-        <p className={styles.error}>Ошибка загрузки: {error}</p>
-      </div>
+      <section className={styles.orderHistoryList} aria-labelledby="history-heading">
+        <h3 id="history-heading" className={styles.title}>История заказов</h3>
+        <p className={styles.error} role="alert" aria-live="assertive">Ошибка загрузки: {error}</p>
+      </section>
     );
   }
 
   if (orders.length === 0) {
     return (
-      <div className={styles.orderHistoryList}>
-        <h3 className={styles.title}>История заказов</h3>
+      <section className={styles.orderHistoryList} aria-labelledby="history-heading">
+        <h3 id="history-heading" className={styles.title}>История заказов</h3>
         <p className={styles.empty}>У вас пока нет завершенных заказов</p>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className={styles.orderHistoryList}>
-      <h3 className={styles.title}>История заказов</h3>
-      <div className={styles.ordersGrid}>
+    <section className={styles.orderHistoryList} aria-labelledby="history-heading">
+      <h3 id="history-heading" className={styles.title}>История заказов</h3>
+      <div className={styles.ordersGrid} role="list">
         {orders.map((order) => (
           <OrderHistoryCard
             key={order.id}
@@ -130,7 +130,7 @@ export const OrderHistoryList = observer(() => {
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 });
 

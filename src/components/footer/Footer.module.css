@@ -187,6 +187,7 @@
     .top_section {
         flex-direction: column;
         gap: 30px;
+        align-items: flex-start;
     }
     .top_section_title {
         font-size: 32px;
@@ -195,16 +196,11 @@
         align-self: flex-start;
     }
     .footer_content {
-        justify-content: space-between;
+        flex-direction: column;
+        gap: 32px;
     }
     .footer_section {
-        width: 0;
-    }
-    .section_home {
-        margin: 0;
-    }
-    .section_company {
-        margin: 0;
+        width: 100%;
     }
     .nav {
         gap: 10px;
@@ -219,25 +215,37 @@
     }
 
     .footer_bottom {
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 32px;
+    }
+    .links_container {
+        align-items: flex-start;
+        width: 100%;
     }
     .logo_container p {
         font-size: 12px;
         font-weight: 500;
+    }
+    .links {
+        flex-wrap: wrap;
     }
     .links p {
         font-size: 12px;
     }
 }
 @media (max-width: 400px) {
-    .footer_content {
-        flex-wrap: wrap;
+    .wrapper {
+        padding: 0 20px;
     }
-    .section_clothes {
-        margin-bottom: 20px;
+    .top_section_title {
+        font-size: 28px;
+    }
+    .footer_content {
+        gap: 24px;
     }
     .links {
-        gap: 10px;
+        gap: 8px;
     }
 }
 
