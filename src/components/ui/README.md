@@ -337,3 +337,5 @@ function ProductCard({ product }) {
 2. Создайте файлы `ComponentName.jsx` и `ComponentName.module.css`
 3. Экспортируйте компонент в `src/components/ui/index.js`
 
+
+
