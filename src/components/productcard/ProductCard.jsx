@@ -1,10 +1,20 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { TKAN_ROUTE } from "../../utils/consts";
 
 export const ProductCard = ({ product, showHover = false }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [quantity, setQuantity] = useState(1.0);
+  const location = useLocation();
+  
+  // Сохраняем информацию о каталоге при переходе на товар
+  const handleProductClick = () => {
+    const isClothingCatalog = location.pathname.includes('/catalog-clothing');
+    const isHomeCatalog = location.pathname.includes('/catalog') && !location.pathname.includes('/catalog-clothing');
+    if (isClothingCatalog || isHomeCatalog) {
+      sessionStorage.setItem('productCatalogType', isClothingCatalog ? 'clothing' : 'home');
+    }
+  };
   
   // Цена за метр
   const pricePerMeter = product.price || 800;
@@ -42,6 +52,7 @@ export const ProductCard = ({ product, showHover = false }) => {
       <Link 
         to={`${TKAN_ROUTE}/${product.id}`}
         className="flex flex-col items-center p-[10px] h-full"
+        onClick={handleProductClick}
       >
         {/* Изображение */}
         <div className="h-[380px] overflow-hidden relative rounded-[10px] w-full flex-shrink-0">

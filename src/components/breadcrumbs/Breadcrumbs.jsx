@@ -12,10 +12,10 @@ export const Breadcrumbs = observer(() => {
     const catalogCategoryMapClothing = getCategoryNameMap(true);
 
     const breadcrumbNameMap = {
-        '/about_us' : 'О нас',
         '/AboutUs' : 'О нас',
+        '/about_us' : 'О нас',
         '/catalog' : 'Каталог',
-        '/catalog_home' : 'Для дома',
+        '/catalog-clothing' : 'Каталог',
         '/discounts' : 'Скидки и акции',
         '/account' : 'Личный кабинет',
         '/personal_account' : 'Личный кабинет',
@@ -25,6 +25,13 @@ export const Breadcrumbs = observer(() => {
         '/terms_of_service' : 'Условия пользования',
         '/terms-of-service' : 'Условия пользования',
         '/basket' : 'Корзина',
+        '/login' : 'Вход',
+        '/registration' : 'Регистрация',
+        '/forgot-password' : 'Восстановление пароля',
+        '/verify-code' : 'Подтверждение кода',
+        '/reset-password' : 'Сброс пароля',
+        '/admin' : 'Админ-панель',
+        '/uikit' : 'UI Kit',
     }
 
   const location = useLocation();
@@ -34,17 +41,58 @@ export const Breadcrumbs = observer(() => {
   // Проверяем, находимся ли мы на странице товара
   const isTkanPage = pathnames[0] === 'tkan' && pathnames[1] !== undefined;
 
+  // Определяем тип каталога для страницы товара
+  const getProductCatalogType = () => {
+    // Сначала проверяем sessionStorage (сохранено при переходе с каталога)
+    const savedType = sessionStorage.getItem('productCatalogType');
+    if (savedType === 'clothing' || savedType === 'home') {
+      return savedType;
+    }
+    
+    // Если нет в sessionStorage, проверяем referrer
+    if (typeof document !== 'undefined' && document.referrer) {
+      if (document.referrer.includes('/catalog-clothing')) {
+        return 'clothing';
+      }
+      if (document.referrer.includes('/catalog')) {
+        return 'home';
+      }
+    }
+    
+    // По умолчанию возвращаем 'home' (более общий каталог)
+    return 'home';
+  };
+
   // Проверяем, находимся ли мы на странице категории каталога
   const isClothingCatalog = pathnames[0] === 'catalog-clothing';
+  const isHomeCatalog = pathnames[0] === 'catalog' && pathnames.length === 1;
   const isCatalogCategory = pathnames.length >= 2 && (pathnames[0] === 'catalog' || pathnames[0] === 'catalog-clothing') && pathnames[1] !== undefined;
   const catalogSectionName = isClothingCatalog ? 'Для одежды' : 'Для дома';
   const catalogCategoryMap = isClothingCatalog ? catalogCategoryMapClothing : catalogCategoryMapHome;
+  
+  // Для страницы товара определяем тип каталога отдельно
+  const productCatalogType = isTkanPage ? getProductCatalogType() : null;
+  const productCatalogSectionName = productCatalogType === 'clothing' ? 'Для одежды' : 'Для дома';
+  const productCatalogLink = productCatalogType === 'clothing' ? '/catalog-clothing' : '/catalog';
 
   const ChevronIcon = () => (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M6 4L10 8L6 12" stroke="#101010" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
+
+  // Если мы на главной странице, показываем только "Главная"
+  if (pathnames.length === 0) {
+    return (
+      <nav aria-label="breadcrumb" className={styles.breadcrumbs}>
+        <ol>
+          <li>
+            <span className={styles.title_path}>Главная</span>
+          </li>
+        </ol>
+      </nav>
+    );
+  }
 
   return (
     <nav aria-label="breadcrumb" className={styles.breadcrumbs}>
@@ -61,13 +109,13 @@ export const Breadcrumbs = observer(() => {
                   <ChevronIcon />
                 </li>
                 <li>
-                  <Link className={styles.title_path} to="/catalog">Каталог</Link>
+                  <Link className={styles.title_path} to={productCatalogLink}>Каталог</Link>
                 </li>
                 <li className={styles.chevron}>
                   <ChevronIcon />
                 </li>
                 <li>
-                  <span className={styles.title_path}>Для одежды</span>
+                  <span className={styles.title_path}>{productCatalogSectionName}</span>
                 </li>
                 <li className={styles.chevron}>
                   <ChevronIcon />
@@ -79,9 +127,23 @@ export const Breadcrumbs = observer(() => {
             );
           }
           
+          // Если это базовая страница каталога (без категории)
+          if ((isHomeCatalog || isClothingCatalog) && pathnames.length === 1) {
+            return (
+              <React.Fragment key={`catalog-base`}>
+                <li className={styles.chevron}>
+                  <ChevronIcon />
+                </li>
+                <li>
+                  <span className={styles.title_path}>{catalogSectionName}</span>
+                </li>
+              </React.Fragment>
+            );
+          }
+          
           // Если это страница категории каталога, обрабатываем специально
           if (isCatalogCategory) {
-            // Пропускаем 'catalog', так как обработаем его отдельно
+            // Пропускаем 'catalog' или 'catalog-clothing', так как обработаем его отдельно
             if (index === 0) {
               return null;
             }

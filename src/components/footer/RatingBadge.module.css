@@ -4,7 +4,6 @@
   align-items: flex-end;
   gap: 8px;
   max-width: 169px;
-  height: 56px;
 }
 
 .rating_content {
@@ -24,13 +23,5 @@
   display: flex;
   gap: 2px;
   align-items: center;
-}
-
-.rating_text {
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.2;
-  color: #888888;
-  margin: 0;
 }
 

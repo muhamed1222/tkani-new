@@ -2,16 +2,27 @@ import { observer } from "mobx-react-lite"
 import styles from "./TkanItem.module.css"
 import { useContext } from "react"
 import { Context } from "../../main"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { TKAN_ROUTE } from "../../utils/consts"
 
 export let TkanItem = observer(({tkan}) => {
     const {tkans} = useContext(Context)
+    const location = useLocation();
+    
+    // Сохраняем информацию о каталоге при переходе на товар
+    const handleProductClick = () => {
+        const isClothingCatalog = location.pathname.includes('/catalog-clothing');
+        const isHomeCatalog = location.pathname.includes('/catalog') && !location.pathname.includes('/catalog-clothing');
+        if (isClothingCatalog || isHomeCatalog) {
+            sessionStorage.setItem('productCatalogType', isClothingCatalog ? 'clothing' : 'home');
+        }
+    };
     
     return (
         <Link 
             to={`${TKAN_ROUTE}/${tkan.id}`}
             className="bg-white border-[1.2px] border-[rgba(16,16,16,0.1)] w-full sm:flex-[1_0_0] min-h-px min-w-px relative rounded-[20px] shrink-0 hover:shadow-lg transition-shadow"
+            onClick={handleProductClick}
         >
             <div className="box-border flex flex-col items-center overflow-clip p-[10px] relative rounded-[inherit] w-full">
                 {/* Изображение */}

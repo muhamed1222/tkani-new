@@ -129,45 +129,61 @@ export const Footer = () => {
             <div className={styles.logo}>
               <img
                 src="/Logo Icon.svg"
-                alt="Логотип"
+                alt="Логотип Центр Ткани"
                 className={styles.logo_img}
               />
               <img
                 src="/CENTER TKANI.svg"
-                alt="Название"
+                alt="Центр Ткани"
                 className={styles.logo_text}
               />
             </div>
-            <p>© 2025 Центр Ткани. Все права защищены.</p>
+            <div className={styles.social_links}>
+              <div className={styles.social_icons}>
+                <a 
+                  href="https://www.instagram.com/your_account" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Подписаться на Instagram"
+                  className={styles.social_link}
+                >
+                  <img src="/insta.svg" alt="" aria-hidden="true" />
+                  <span className={styles.sr_only}>Instagram</span>
+                </a>
+                <a 
+                  href="https://wa.me/79001234567" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Написать в WhatsApp"
+                  className={styles.social_link}
+                >
+                  <img src="/whatsapp.svg" alt="" aria-hidden="true" />
+                  <span className={styles.sr_only}>WhatsApp</span>
+                </a>
+                <a 
+                  href="https://t.me/your_account" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  aria-label="Подписаться на Telegram"
+                  className={styles.social_link}
+                >
+                  <img src="/telegram.svg" alt="" aria-hidden="true" />
+                  <span className={styles.sr_only}>Telegram</span>
+                </a>
+              </div>
+            </div>
+            <div className={styles.copyright_container}>
+              <small className={styles.copyright}>
+                © {new Date().getFullYear()} Центр Ткани. Все права защищены.
+              </small>
+            </div>
           </div>
           <div className={styles.links_container}>
             <RatingBadge />
-            <div className={styles.links}>
-              <p>Подпишитесь на нас в соцсетях</p>
-              <a 
-                href="https://www.instagram.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-              >
-                <img src="/insta.svg" alt="Instagram" />
-              </a>
-              <a 
-                href="https://wa.me" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="WhatsApp"
-              >
-                <img src="/whatsapp.svg" alt="WhatsApp" />
-              </a>
-              <a 
-                href="https://t.me" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                aria-label="Telegram"
-              >
-                <img src="/telegram.svg" alt="Telegram" />
-              </a>
+            <div className={styles.studio_credit}>
+              <small className={styles.studio_copyright}>
+                Разработано <a href="https://outcasts.dev" target="_blank" rel="noopener noreferrer" className={styles.studio_link}>outcasts.dev</a>
+              </small>
             </div>
           </div>
         </div>

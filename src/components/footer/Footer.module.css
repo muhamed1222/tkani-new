@@ -114,7 +114,6 @@
 .logo_container {
     display: flex;
     flex-direction: column;
-    gap: 34px;
 }
 .logo {
     display: flex;
@@ -130,12 +129,39 @@
     width: 119.824px;
     height: 10.352px;
 }
-.logo_container p {
+.social_links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 20px;
+}
+.copyright_container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 24px;
+}
+.copyright {
     font-size: 14px;
     font-weight: 500;
     line-height: 120%;
     color: #101010;
     white-space: nowrap;
+}
+.studio_copyright {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 120%;
+    color: #888888;
+}
+.studio_link {
+    color: #888888;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.studio_link:hover {
+    color: #9B1E1C;
 }
 .links_container {
     display: flex;
@@ -145,25 +171,40 @@
     max-width: 763px;
     width: 100%;
 }
-.links {
+.studio_credit {
     display: flex;
-    align-items: center;
-    gap: 0;
+    align-items: flex-end;
+}
+.social_links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 20px;
+}
+.social_label {
     font-size: 14px;
     font-weight: 500;
     color: #888888;
-}
-.links p {
-    padding-right: 4px;
     white-space: nowrap;
 }
-.links a {
+.social_icons {
     display: flex;
     align-items: center;
+    gap: 0;
+}
+.social_link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0 8px;
     position: relative;
+    transition: opacity 0.2s ease;
 }
-.links a:not(:last-child)::after {
+.social_link:hover {
+    opacity: 0.7;
+}
+.social_link:not(:last-child)::after {
     content: '';
     position: absolute;
     right: 0;
@@ -172,9 +213,21 @@
     width: 1px;
     background: rgba(16, 16, 16, 0.1);
 }
-.links a img {
+.social_link img {
     width: 20px;
     height: 20px;
+    display: block;
+}
+.sr_only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
 
@@ -223,15 +276,20 @@
         align-items: flex-start;
         width: 100%;
     }
-    .logo_container p {
+    .copyright {
         font-size: 12px;
-        font-weight: 500;
     }
-    .links {
+    .studio_copyright {
+        font-size: 11px;
+    }
+    .social_label {
+        font-size: 12px;
+    }
+    .social_icons {
         flex-wrap: wrap;
     }
-    .links p {
-        font-size: 12px;
+    .studio_credit {
+        align-items: flex-start;
     }
 }
 @media (max-width: 400px) {
@@ -248,6 +306,7 @@
         gap: 8px;
     }
 }
+
 
 
 

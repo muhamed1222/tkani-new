@@ -2,10 +2,10 @@ import styles from "./RatingBadge.module.css";
 
 export const RatingBadge = () => {
   return (
-    <div className={styles.rating_badge}>
+    <div className={styles.rating_badge} aria-label="Рейтинг компании">
       <div className={styles.rating_content}>
-        <span className={styles.rating_value}>4,9</span>
-        <div className={styles.stars}>
+        <span className={styles.rating_value} aria-label="Рейтинг 4.9 из 5">4,9</span>
+        <div className={styles.stars} aria-hidden="true">
           {[...Array(5)].map((_, i) => (
             <svg
               key={i}
@@ -23,7 +23,6 @@ export const RatingBadge = () => {
           ))}
         </div>
       </div>
-      <p className={styles.rating_text}>2025 IAFSTUDIO.RU</p>
     </div>
   );
 };
