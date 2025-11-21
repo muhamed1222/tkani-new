@@ -139,39 +139,39 @@ export const AboutUs = () => {
   };
   
   // Обработка отправки формы
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  // Валидация
+  if (!validateForm()) {
+    return;
+  }
+  
+  setIsSubmitting(true);
+  setSubmitStatus(null);
+  
+  try {
+    await contactAPI.sendMessage({ 
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        message: formData.message.trim(),
+    });
     
-    // Валидация
-    if (!validateForm()) {
-      return;
-    }
-    
-    setIsSubmitting(true);
-    setSubmitStatus(null);
-    
-    try {
-      await contactAPI.sendMessage({
-          name: formData.name.trim(),
-          phone: formData.phone.trim(),
-          message: formData.message.trim(),
+      setSubmitStatus("success");
+      // Очистка формы
+      setFormData({
+        name: "",
+        phone: "",
+        message: "",
+        privacy: false,
       });
-      
-        setSubmitStatus("success");
-        // Очистка формы
-        setFormData({
-          name: "",
-          phone: "",
-          message: "",
-          privacy: false,
-        });
-    } catch (error) {
-      console.error("Ошибка отправки формы:", error);
-      setSubmitStatus("error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (error) {
+    console.error("Ошибка отправки формы:", error);
+    setSubmitStatus("error");  
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // Плавный скролл к якорям
   useEffect(() => {
@@ -582,6 +582,7 @@ export const AboutUs = () => {
                         onChange={handleChange}
                         className={errors.name ? styles.input_error : ""}
                         disabled={isSubmitting}
+                        placeholder="Введите ваше имя"
                       />
                       {errors.name && (
                         <span className={styles.error_message}>{errors.name}</span>
@@ -613,6 +614,8 @@ export const AboutUs = () => {
                       onChange={handleChange}
                       className={errors.message ? styles.input_error : ""}
                       disabled={isSubmitting}
+                      placeholder="Напишите ваше сообщение здесь..."
+                      rows="5"
                     ></textarea>
                     {errors.message && (
                       <span className={styles.error_message}>{errors.message}</span>
@@ -665,7 +668,7 @@ export const AboutUs = () => {
                   className={styles.subm_btn}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Отправка..." : "Отправить"}
+                  {isSubmitting ? "Отправка..." : "Отправить сообщение"}
                 </button>
               </div>
             </form>
@@ -676,6 +679,7 @@ export const AboutUs = () => {
               src="https://yandex.ru/map-widget/v1/?ll=43.629167%2C43.492385&utm_campaign=desktop&utm_medium=search&utm_source=maps&z=18"
               frameBorder="0"
               allowFullScreen={true}
+              title="Карта расположения магазина"
             ></iframe>
           </div>
         </div>

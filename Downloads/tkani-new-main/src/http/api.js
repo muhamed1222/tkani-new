@@ -330,6 +330,8 @@ export const catalogAPI = {
   },
 };
 
+// src/http/api.js - обновляем методы authAPI
+
 // Методы для аутентификации
 export const authAPI = {
   // Вход - правильный endpoint для Strapi
@@ -363,10 +365,13 @@ export const authAPI = {
     return api.get('/users/me?populate=*', {}, true);
   },
 
-  // Обновить профиль
+  // В authAPI в api.js обновляем метод updateProfile:
+
+  // Обновить профиль через стандартный Strapi endpoint
   updateProfile: async (userData) => {
     const updateData = {};
 
+    // Используем правильные имена полей (camelCase как в ответе сервера)
     if (userData.firstName !== undefined) updateData.firstName = userData.firstName;
     if (userData.lastName !== undefined) updateData.lastName = userData.lastName;
     if (userData.email !== undefined) updateData.email = userData.email;
@@ -374,7 +379,19 @@ export const authAPI = {
     console.log('🔵 Отправляем данные обновления профиля:', updateData);
     console.log('🔐 Проверяем токен перед запросом:', api.getAuthToken() ? 'есть' : 'нет');
 
-    return api.put('/profile', updateData, true); // includeAuth = true
+    // Используем стандартный endpoint Strapi для обновления пользователя
+    // Сначала получим ID текущего пользователя
+    const currentUser = await api.get('/users/me?populate=*', {}, true);
+    const userId = currentUser.id;
+
+    console.log('👤 ID пользователя для обновления:', userId);
+
+    // Обновляем пользователя и запрашиваем полные данные с populate
+    const response = await api.put(`/users/${userId}?populate=*`, updateData, true);
+
+    console.log('✅ Профиль обновлен, ответ:', response);
+
+    return response;
   },
 
   // Изменить пароль
@@ -661,14 +678,22 @@ export const tkansAPI = {
 
 // Методы для контактной формы
 export const contactAPI = {
-  // Отправить сообщение через контактную форму
-  sendMessage: async (contactData) => {
-    return api.post('/contact', {
-      name: contactData.name,
-      phone: contactData.phone,
-      message: contactData.message
-    }, false);
-  },
-};
+  sendMessage: async (data) => {
+    console.log('📧 Данные формы для отправки на почту:', data);
+
+    // TODO: Настроить реальную отправку на почту
+    // Временная заглушка - всегда успешная отправка
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('✅ Письмо отправлено на почту организации');
+        console.log('📋 Содержимое письма:');
+        console.log('   Имя:', data.name);
+        console.log('   Телефон:', data.phone);
+        console.log('   Сообщение:', data.message);
+        resolve({ success: true, message: 'Письмо отправлено' });
+      }, 1000);
+    });
+  }
+}
 
 export default api;

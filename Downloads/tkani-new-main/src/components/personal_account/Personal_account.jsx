@@ -8,6 +8,8 @@ import { LOGIN_ROUTE } from "../../utils/consts";
 import styles from "./Personal_account.module.css";
 import api from "../../http/api"; 
 
+
+
 const EyeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
     <path d="M9 3.375C5.25 3.375 2.0475 5.67 0.75 8.625C2.0475 11.58 5.25 13.875 9 13.875C12.75 13.875 15.9525 11.58 17.25 8.625C15.9525 5.67 12.75 3.375 9 3.375ZM9 12.375C7.0725 12.375 5.5 10.8025 5.5 8.875C5.5 6.9475 7.0725 5.375 9 5.375C10.9275 5.375 12.5 6.9475 12.5 8.875C12.5 10.8025 10.9275 12.375 9 12.375ZM9 6.75C8.205 6.75 7.5 7.305 7.5 8.0625C7.5 8.82 8.205 9.375 9 9.375C9.795 9.375 10.5 8.82 10.5 8.0625C10.5 7.305 9.795 6.75 9 6.75Z" fill="#888888"/>
@@ -41,19 +43,14 @@ export const Personal_account = observer(() => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [personalDataError, setPersonalDataError] = useState("");
   const [personalDataSuccess, setPersonalDataSuccess] = useState("");
-  const [avatarError, setAvatarError] = useState("");
-  const [avatarSuccess, setAvatarSuccess] = useState("");
   const [emailError, setEmailError] = useState("");
   const [emailSuccess, setEmailSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
-  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [firstNameError, setFirstNameError] = useState("");
   const [lastNameError, setLastNameError] = useState("");
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const fileInputRef = useRef(null);
 
   // Исходные значения для сравнения
   const [originalFirstName, setOriginalFirstName] = useState("");
@@ -61,73 +58,57 @@ export const Personal_account = observer(() => {
   const [originalEmail, setOriginalEmail] = useState("");
 
   // Функция для получения URL аватара
-// Функция для получения URL аватара
-const getAvatarUrl = () => {
-  console.log('🔍 Full user data for avatar:', user.user);
-  
-  // Если пользователь загружен
-  if (user.user) {
-    // Формат 1: avatar как объект с data (Strapi v4)
-    if (user.user.avatar && user.user.avatar.data && user.user.avatar.data.attributes) {
-      const url = `http://localhost:1337${user.user.avatar.data.attributes.url}`;
-      console.log('✅ Avatar URL from data.attributes:', url);
-      return url;
+  const getAvatarUrl = () => {
+    if (user.user) {
+      // Формат 1: avatar как объект с data (Strapi v4)
+      if (user.user.avatar && user.user.avatar.data && user.user.avatar.data.attributes) {
+        const url = `http://localhost:1337${user.user.avatar.data.attributes.url}`;
+        return url;
+      }
+      
+      // Формат 2: avatar как массив файлов (из upload)
+      if (user.user.avatar && Array.isArray(user.user.avatar) && user.user.avatar.length > 0) {
+        const url = `http://localhost:1337${user.user.avatar[0].url}`;
+        return url;
+      }
+      
+      // Формат 3: avatar как объект с url
+      if (user.user.avatar && user.user.avatar.url) {
+        const url = `http://localhost:1337${user.user.avatar.url}`;
+        return url;
+      }
+      
+      // Формат 4: avatar как ID файла
+      if (user.user.avatar && typeof user.user.avatar === 'number') {
+        const url = `http://localhost:1337/api/upload/files/${user.user.avatar}`;
+        return url;
+      }
+      
+      // Формат 5: avatar как строка (путь)
+      if (user.user.avatar && typeof user.user.avatar === 'string') {
+        const url = `http://localhost:1337${user.user.avatar}`;
+        return url;
+      }
     }
     
-    // Формат 2: avatar как массив файлов (из upload)
-    if (user.user.avatar && Array.isArray(user.user.avatar) && user.user.avatar.length > 0) {
-      const url = `http://localhost:1337${user.user.avatar[0].url}`;
-      console.log('✅ Avatar URL from array:', url);
-      return url;
-    }
-    
-    // Формат 3: avatar как объект с url
-    if (user.user.avatar && user.user.avatar.url) {
-      const url = `http://localhost:1337${user.user.avatar.url}`;
-      console.log('✅ Avatar URL from object.url:', url);
-      return url;
-    }
-    
-    // Формат 4: avatar как ID файла
-    if (user.user.avatar && typeof user.user.avatar === 'number') {
-      const url = `http://localhost:1337/api/upload/files/${user.user.avatar}`;
-      console.log('✅ Avatar URL from file ID:', url);
-      return url;
-    }
-    
-    // Формат 5: avatar как строка (путь)
-    if (user.user.avatar && typeof user.user.avatar === 'string') {
-      const url = `http://localhost:1337${user.user.avatar}`;
-      console.log('✅ Avatar URL from string:', url);
-      return url;
-    }
-  }
-  
-  console.log('❌ No avatar found in user data, using fallback');
-  return "https://i.pravatar.cc/100"; // fallback аватар
-};
+    return "https://i.pravatar.cc/100"; // fallback аватар
+  };
 
   // Синхронизация данных из store
-useEffect(() => {
-  if (user.user) {
-    const firstNameValue = user.user.firstName || user.user.first_name || "";
-    const lastNameValue = user.user.lastName || user.user.last_name || "";
-    const emailValue = user.user.email || "";
-    
-    setFirstName(firstNameValue);
-    setLastName(lastNameValue);
-    setEmail(emailValue);
-    setOriginalFirstName(firstNameValue);
-    setOriginalLastName(lastNameValue);
-    setOriginalEmail(emailValue);
-    // Очищаем предпросмотр при обновлении данных пользователя
-    setAvatarPreview(null);
-    
-    // ДЛЯ ОТЛАДКИ - выводим структуру данных пользователя
-    console.log('👤 Full user data structure:', user.user);
-    console.log('🖼️ Avatar structure:', user.user?.avatar);
-  }
-}, [user.user]);
+  useEffect(() => {
+    if (user.user) {
+      const firstNameValue = user.user.firstName || user.user.first_name || "";
+      const lastNameValue = user.user.lastName || user.user.last_name || "";
+      const emailValue = user.user.email || "";
+      
+      setFirstName(firstNameValue);
+      setLastName(lastNameValue);
+      setEmail(emailValue);
+      setOriginalFirstName(firstNameValue);
+      setOriginalLastName(lastNameValue);
+      setOriginalEmail(emailValue);
+    }
+  }, [user.user]);
 
   // Проверка изменений личных данных
   useEffect(() => {
@@ -193,76 +174,9 @@ useEffect(() => {
     }
     return "";
   };
-const handleFileChange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) {
-    setAvatarPreview(null);
-    return;
-  }
 
-  // Валидация файла
-  const maxSize = 5 * 1024 * 1024;
-  if (file.size > maxSize) {
-    setAvatarError("Размер файла не должен превышать 5MB");
-    setTimeout(() => setAvatarError(""), 5000);
-    setAvatarPreview(null);
-    return;
-  }
+  // В handleSavePersonalData и handleSaveEmail - убираем автоматический выход при ошибке
 
-  if (!file.type.match(/^image\/(png|jpeg|jpg|gif|webp)$/)) {
-    setAvatarError("Поддерживаются только файлы PNG, JPG, GIF и WebP");
-    setTimeout(() => setAvatarError(""), 5000);
-    setAvatarPreview(null);
-    return;
-  }
-
-  // Проверяем авторизацию
-  if (!user.isAuth) {
-    setAvatarError("Вы должны быть авторизованы для загрузки аватара");
-    return;
-  }
-
-  // Создаем предпросмотр
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    setAvatarPreview(reader.result);
-  };
-  reader.readAsDataURL(file);
-
-  setIsUploadingAvatar(true);
-  setAvatarError("");
-  setAvatarSuccess("");
-
-  try {
-    console.log('🔄 Начало загрузки аватара для пользователя:', user.user?.id);
-    
-    const result = await user.uploadAvatar(file);
-    console.log('✅ Результат загрузки аватара:', result);
-    
-    if (result.success) {
-      setAvatarSuccess("Фотография успешно загружена");
-      // Обновляем данные пользователя
-      await user.checkAuth();
-      setAvatarPreview(null);
-      setTimeout(() => setAvatarSuccess(""), 5000);
-    } else {
-      setAvatarError(result.error || "Ошибка загрузки фотографии");
-      setTimeout(() => setAvatarError(""), 5000);
-      setAvatarPreview(null);
-    }
-  } catch (error) {
-    console.error('❌ Ошибка загрузки аватара:', error);
-    setAvatarError(error.message || "Ошибка загрузки фотографии");
-    setTimeout(() => setAvatarError(""), 5000);
-    setAvatarPreview(null);
-  } finally {
-    setIsUploadingAvatar(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  }
-};
-// В handleSavePersonalData
 const handleSavePersonalData = async (e) => {
   e.preventDefault();
   console.log('🔵 handleSavePersonalData - начало', { firstName, lastName });
@@ -289,15 +203,6 @@ const handleSavePersonalData = async (e) => {
 
   try {
     console.log('🔵 handleSavePersonalData - вызов user.updateProfile с данными:', { firstName, lastName });
-    
-    // Проверяем и обновляем токен перед запросом
-    const token = user.user?.jwt || api.getAuthToken();
-    if (token) {
-      api.setAuthToken(token);
-      console.log('🔐 Токен установлен для запроса');
-    } else {
-      console.warn('⚠️ Токен не найден, возможна ошибка авторизации');
-    }
     
     const result = await user.updateProfile({ 
       firstName: firstName.trim(),
@@ -327,7 +232,6 @@ const handleSavePersonalData = async (e) => {
   }
 };
 
-// В handleSaveEmail
 const handleSaveEmail = async (e) => {
   e.preventDefault();
   console.log('🔵 handleSaveEmail - начало', { email });
@@ -345,15 +249,6 @@ const handleSaveEmail = async (e) => {
 
   try {
     console.log('🔵 handleSaveEmail - вызов user.updateProfile с данными:', { email });
-    
-    // Проверяем и обновляем токен перед запросом
-    const token = user.user?.jwt || api.getAuthToken();
-    if (token) {
-      api.setAuthToken(token);
-      console.log('🔐 Токен установлен для запроса');
-    } else {
-      console.warn('⚠️ Токен не найден, возможна ошибка авторизации');
-    }
     
     const result = await user.updateProfile({ 
       email: email.trim() 
@@ -415,7 +310,6 @@ const handleSaveEmail = async (e) => {
         setOldPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        // Автоматически скрываем сообщение через 5 секунд
         setTimeout(() => setPasswordSuccess(""), 5000);
       } else {
         setPasswordError(result.error || "Ошибка смены пароля");
@@ -480,10 +374,9 @@ const handleSaveEmail = async (e) => {
             <Avatar.Root className={styles.avatar}>
               <Avatar.Image
                 className={styles.avatarImage}
-                src={avatarPreview || getAvatarUrl()}
+                src={getAvatarUrl()}
                 alt="Фото пользователя"
                 onError={(e) => {
-                  console.log('❌ Ошибка загрузки аватара, используем fallback');
                   e.target.src = "https://i.pravatar.cc/100";
                 }}
               />
@@ -492,53 +385,7 @@ const handleSaveEmail = async (e) => {
               </Avatar.Fallback>
             </Avatar.Root>
             <div className={styles.photo_actions}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-                aria-label="Загрузить фотографию"
-              />
-              <div className={styles.uploadButtons}>
-                <button 
-                  type="button" 
-                  onClick={() => fileInputRef.current?.click()}
-                  className={styles.uploadButton}
-                  disabled={isUploadingAvatar}
-                  aria-label="Загрузить фотографию профиля"
-                >
-                  {isUploadingAvatar ? "Загрузка..." : "Загрузить фотографию"}
-                </button>
-                {avatarPreview && !isUploadingAvatar && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setAvatarPreview(null);
-                      if (fileInputRef.current) {
-                        fileInputRef.current.value = "";
-                      }
-                    }}
-                    className={styles.cancelButton}
-                    aria-label="Отменить загрузку фотографии"
-                  >
-                    Отменить
-                  </button>
-                )}
-              </div>
-              <p className={styles.photoHint}>Рекомендованный размер 160×160px в формате PNG, JPG, GIF или WebP (макс. 5MB)</p>
-              
-              {/* Сообщения для загрузки фото */}
-              {avatarError && (
-                <div className={styles.message} role="alert" aria-live="assertive">
-                  <p className={styles.errorMessage}>{avatarError}</p>
-                </div>
-              )}
-              {avatarSuccess && (
-                <div className={styles.message} role="status" aria-live="polite">
-                  <p className={styles.successMessage}>{avatarSuccess}</p>
-                </div>
-              )}
+              <p className={styles.photoHint}>Функционал загрузки фото временно недоступен</p>
             </div>
           </div>
           
