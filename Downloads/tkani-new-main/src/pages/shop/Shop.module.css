@@ -12,6 +12,8 @@
   padding-right: 20px;
   padding-top: 40px;
   padding-bottom: 40px;
+  overflow: hidden;
+  /* Добавляем чтобы содержимое не выходило за пределы */
 }
 
 .aboutSection {
@@ -90,6 +92,10 @@
     height: 269px !important;
     padding-left: 16px;
     padding-right: 16px;
+    max-width: 100vw;
+    /* Ограничиваем максимальную ширину */
+    overflow: hidden;
+    /* Скрываем переполнение */
   }
 
   .productGrid {
@@ -131,5 +137,24 @@
 
   .aboutSection {
     padding: 16px !important;
+  }
+}
+
+/* Дополнительные стили для гарантии что ничего не выпирает */
+@media (max-width: 743px) {
+  body {
+    overflow-x: hidden;
+    /* Скрываем горизонтальный скролл */
+  }
+
+  .sliderContainer>div {
+    max-width: 100%;
+    /* Ограничиваем ширину внутреннего контейнера */
+  }
+
+  .sliderContainer img {
+    max-width: 100%;
+    /* Ограничиваем ширину изображений */
+    height: auto;
   }
 }

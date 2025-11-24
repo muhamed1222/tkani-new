@@ -378,14 +378,165 @@ export const NavBar = observer(() => {
     </div>
   </div>
 
+{/* ====== Мобильное меню (полноэкранное) ====== */}
+<div
+  className={`fixed inset-0 bg-[#F1F0EE] z-40 transform transition-transform duration-300 ${
+    mobileNav ? "translate-x-0" : "translate-x-full"
+  }`}
+>
+  {/* Шапка мобильного меню */}
+  <div className="flex justify-between items-center px-6 py-4 border-b border-[#e4e2de]">
+    {/* Логотип по центру */}
+    <NavLink 
+      to={SHOP_ROUTE} 
+      onClick={() => setMobileNav(false)}
+      className="flex items-center gap-2"
+    >
+      <div className="flex items-center justify-center w-8 h-8 bg-[#F1F0EE] rounded-lg">
+        <img src="/Logo Icon.svg" alt="Логотип" className="w-6 h-3" />
+      </div>
+      <img
+        src="/CENTER TKANI.svg"
+        alt="CENTER TKANI"
+        className="h-3 w-20"
+      />
+    </NavLink>
+
+    {/* Правая часть - поиск, корзина и крестик */}
+    <div className="flex items-center gap-3">
+      {/* Поиск */}
+      <button
+        onClick={() => {
+          setShowSearch(true);
+          setMobileNav(false);
+        }}
+        className="p-2 hover:bg-white rounded-lg transition-colors"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="#101010" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+
+      {/* Корзина */}
+      <NavLink 
+        to={BASKET_ROUTE} 
+        onClick={() => setMobileNav(false)}
+        className="p-2 hover:bg-white rounded-lg transition-colors"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fillRule="evenodd" clipRule="evenodd" d="M7.49951 6V6.75H5.51238C4.55284 6.75 3.74813 7.47444 3.64768 8.42872L2.38453 20.4287C2.26799 21.5358 3.13603 22.5 4.24922 22.5H19.75C20.8631 22.5 21.7312 21.5358 21.6147 20.4287L20.3515 8.42872C20.251 7.47444 19.4463 6.75 18.4868 6.75H16.4995V6C16.4995 3.51472 14.4848 1.5 11.9995 1.5C9.51423 1.5 7.49951 3.51472 7.49951 6ZM11.9995 3C10.3427 3 8.99951 4.34315 8.99951 6V6.75H14.9995V6C14.9995 4.34315 13.6564 3 11.9995 3ZM8.99951 11.25C8.99951 12.9069 10.3427 14.25 11.9995 14.25C13.6564 14.25 14.9995 12.9069 14.9995 11.25V10.5C14.9995 10.0858 15.3353 9.75 15.7495 9.75C16.1637 9.75 16.4995 10.0858 16.4995 10.5V11.25C16.4995 13.7353 14.4848 15.75 11.9995 15.75C9.51423 15.75 7.49951 13.7353 7.49951 11.25V10.5C7.49951 10.0858 7.8353 9.75 8.24951 9.75C8.66373 9.75 8.99951 10.0858 8.99951 10.5V11.25Z" fill="#101010"/>
+        </svg>
+      </NavLink>
+
+      {/* Крестик справа */}
+      <button 
+        onClick={() => setMobileNav(false)}
+        className="p-2 hover:bg-white rounded-lg transition-colors"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 6L6 18M6 6L18 18" stroke="#101010" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
   {/* Основное содержимое меню */}
-  <div className="px-6 py-6 h-[calc(100vh-80px)] flex flex-col">
+  <div className="px-6 py-6 h-[calc(100vh-80px)] overflow-y-auto">
+    {/* Кнопка Каталог сверху с выпадающим списком */}
+    <div className="mb-6">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between px-4 py-3 bg-[#9B1E1C] text-white rounded-lg text-[16px] font-medium leading-[1.2] hover:bg-[#860202] transition-colors w-full"
+      >
+        <span>Каталог</span>
+        <svg 
+          width="16" 
+          height="16" 
+          viewBox="0 0 16 16" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        >
+          <path 
+            d="M5 3L9 7L5 11" 
+            stroke="white" 
+            strokeWidth="1.5" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      {/* Выпадающий список категорий */}
+      {isOpen && (
+        <div className="mt-2 bg-white rounded-lg border border-[#e4e2de] shadow-lg max-h-60 overflow-y-auto">
+          <Typebar onItemClick={() => {
+            setIsOpen(false);
+            setMobileNav(false);
+          }} />
+        </div>
+      )}
+    </div>
+
+    {/* Кнопки под каталогом и над "О нас" */}
+    {/* Кнопки под каталогом и над "О нас" */}
+<div className="flex flex-col gap-3 mb-6">
+  {/* Работы из наших тканей */}
+  <Link 
+    to="/our_works" 
+    onClick={() => setMobileNav(false)}
+    className="hover:text-[#9B1E1C] transition-colors"
+    style={{ 
+      display: 'flex',
+      padding: '6px 0',
+      alignItems: 'flex-start',
+      fontFamily: 'Inter', 
+      fontSize: '16px', 
+      fontStyle: 'normal', 
+      fontWeight: '500', 
+      lineHeight: '120%',
+      color: '#101010'
+    }}
+  >
+    Работы из наших тканей
+  </Link>
+  
+  {/* Скидки и акции */}
+  <Link 
+    to="/discounts" 
+    onClick={() => setMobileNav(false)}
+    className="hover:text-[#9B1E1C] transition-colors"
+    style={{ 
+      display: 'flex',
+      padding: '6px 0',
+      alignItems: 'flex-start',
+      fontFamily: 'Inter', 
+      fontSize: '16px', 
+      fontStyle: 'normal', 
+      fontWeight: '500', 
+      lineHeight: '120%',
+      color: '#101010'
+    }}
+  >
+    Скидки и акции
+  </Link>
+  
+  {/* Разделительная полоска под скидками и акциями */}
+  <div 
+    style={{ 
+      height: '1px',
+      alignSelf: 'stretch',
+      backgroundColor: '#e4e2de'
+    }}
+  />
+</div>
+
     {/* Навигационные ссылки */}
     <nav className="space-y-6 mb-8">
       <NavLink 
         to={ABOUTUS_ROUTE} 
         onClick={() => setMobileNav(false)}
-        className="block text-[18px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+        className="block text-[18px] font-medium text-[#888] hover:text-[#9B1E1C] transition-colors"
       >
         О нас
       </NavLink>
@@ -396,7 +547,7 @@ export const NavBar = observer(() => {
           handleAboutUsLinkClick(e, '#pay');
           setMobileNav(false);
         }}
-        className="block text-[18px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+        className="block text-[18px] font-medium text-[#888] hover:text-[#9B1E1C] transition-colors"
       >
         Оплата и доставка
       </Link>
@@ -407,7 +558,7 @@ export const NavBar = observer(() => {
           handleAboutUsLinkClick(e, '#questions');
           setMobileNav(false);
         }}
-        className="block text-[18px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+        className="block text-[18px] font-medium text-[#888] hover:text-[#9B1E1C] transition-colors"
       >
         Часто задаваемые вопросы
       </Link>
@@ -418,62 +569,22 @@ export const NavBar = observer(() => {
           handleAboutUsLinkClick(e, '#contacts');
           setMobileNav(false);
         }}
-        className="block text-[18px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+        className="block text-[18px] font-medium text-[#888] hover:text-[#9B1E1C] transition-colors"
       >
         Контакты
       </Link>
     </nav>
 
-    {/* Дополнительные ссылки */}
-    <div className="space-y-4 mb-8">
-      <Link 
-        to="/our_works" 
-        onClick={() => setMobileNav(false)}
-        className="block text-[16px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
-      >
-        Работы из наших тканей
-      </Link>
-      
-      <Link 
-        to="/discounts" 
-        onClick={() => setMobileNav(false)}
-        className="block text-[16px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
-      >
-        Скидки и акции
-      </Link>
-    </div>
-
-    {/* Маркетплейсы и аватарка */}
-    <div className="mt-auto space-y-6">
-      {/* Маркетплейсы - прижаты к правому краю */}
-      <div className="border-t border-[#e4e2de] pt-6">
-        <div className="flex justify-end">
-          <div className="text-right space-y-3">
-            <a 
-              href="#" 
-              className="block text-[16px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
-            >
-              Мы на WB
-            </a>
-            
-            <a 
-              href="#" 
-              className="block text-[16px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
-            >
-              Мы на OZON
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Аватарка - прижата к правому краю */}
-      <div className="border-t border-[#e4e2de] pt-4">
-        <div className="flex justify-end">
+    {/* Маркетплейсы и аватарка - на одной строке */}
+    <div className="border-t border-[#e4e2de] pt-6 mt-auto">
+      <div className="flex justify-between items-center">
+        {/* Аватарка - прижата к левому краю */}
+        <div>
           {user.isAuth ? (
             <NavLink 
               to={ACCOUNT_ROUTE} 
               onClick={() => setMobileNav(false)}
-              className="p-2 hover:bg-white rounded-lg transition-colors"
+              className="p-2 hover:bg-white rounded-lg transition-colors inline-block"
             >
               <Avatar.Root className="inline-flex h-10 w-10 select-none items-center justify-center overflow-hidden rounded-full bg-gray-200 align-middle">
                 <Avatar.Image
@@ -496,7 +607,7 @@ export const NavBar = observer(() => {
             <Link 
               to={LOGIN_ROUTE} 
               onClick={() => setMobileNav(false)}
-              className="p-2 hover:bg-white rounded-lg transition-colors"
+              className="p-2 hover:bg-white rounded-lg transition-colors inline-block"
             >
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -507,9 +618,27 @@ export const NavBar = observer(() => {
             </Link>
           )}
         </div>
+
+        {/* Маркетплейсы - прижаты к правому краю */}
+        <div className="text-right space-y-2">
+          <a 
+            href="#" 
+            className="block text-[16px] font-medium text-[#888] hover:text-[#9B1E1C] transition-colors"
+          >
+            Мы на WB
+          </a>
+          
+          <a 
+            href="#" 
+            className="block text-[16px] font-medium text-[#888] hover:text-[#9B1E1C] transition-colors"
+          >
+            Мы на OZON
+          </a>
+        </div>
       </div>
     </div>
   </div>
+</div>
 </div>
     </header>
   );
