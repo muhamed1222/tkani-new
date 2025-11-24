@@ -1,24 +1,61 @@
+// src/http/api.js
 // Базовый URL API (можно вынести в переменные окружения)
 // Поддерживаем оба варианта: /api/v1/ (новый) и /api/ (старый для обратной совместимости)
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337/api';
 
-// Утилита для получения токена из localStorage
+// Утилита для работы с куками
+const cookieUtils = {
+  get(name) {
+    if (typeof document === 'undefined') return null;
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  },
+
+  set(name, value, days = 7, path = '/') {
+    if (typeof document === 'undefined') return;
+    let expires = "";
+    if (days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=" + path + "; SameSite=Lax";
+  },
+
+  remove(name, path = '/') {
+    if (typeof document === 'undefined') return;
+    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + ';';
+  }
+};
+
+// Утилита для получения токена из всех возможных источников
 const getAuthToken = () => {
-  return localStorage.getItem('authToken') || null;
+  // Пробуем получить токен из разных источников в порядке приоритета
+  const token =
+    localStorage.getItem('authToken') ||
+    cookieUtils.get('authToken') ||
+    null;
+
+  console.log('🔐 getAuthToken - Токен найден:', token ? `присутствует (${token.substring(0, 20)}...)` : 'отсутствует');
+  return token;
 };
 
 // Утилита для получения заголовков с авторизацией
 const getHeaders = (includeAuth = true, isFormData = false) => {
   const headers = {};
 
-  // Не добавляем Content-Type для FormData (браузер установит автоматически)
   if (!isFormData) {
     headers['Content-Type'] = 'application/json';
   }
 
   if (includeAuth) {
     const token = getAuthToken();
-    console.log('🔐 getHeaders - Токен для запроса:', token ? `присутствует (${token.substring(0, 20)}...)` : 'отсутствует');
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -40,12 +77,16 @@ class ApiService {
 
   // Улучшенная обработка ошибок с поддержкой нового формата
   async _handleResponse(response) {
+    console.log('🔵 API Response Status:', response.status, response.statusText);
+
     if (!response.ok) {
       let errorMessage = `HTTP error! status: ${response.status}`;
 
       // Специфичные сообщения для разных статусов
       if (response.status === 401) {
-        errorMessage = "Неверный email или пароль";
+        errorMessage = "Необходима авторизация";
+        // Очищаем невалидный токен
+        localStorage.removeItem('authToken');
       } else if (response.status === 403) {
         errorMessage = "Доступ запрещен";
       } else if (response.status === 404) {
@@ -59,13 +100,11 @@ class ApiService {
         const responseClone = response.clone();
         const errorData = await responseClone.json();
 
-        if (import.meta.env.DEV) {
-          console.error('API Error Response:', {
-            status: response.status,
-            statusText: response.statusText,
-            errorData
-          });
-        }
+        console.error('🔴 API Error Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
 
         // Новый формат ошибок: { error: true, message: "..." }
         // Приоритет: сообщение из ответа > стандартное сообщение по статусу
@@ -87,9 +126,7 @@ class ApiService {
           // Если не удалось прочитать, используем стандартное сообщение
         }
 
-        if (import.meta.env.DEV) {
-          console.error('Failed to parse error response:', parseError);
-        }
+        console.error('🔴 Failed to parse error response:', parseError);
       }
 
       const error = new Error(errorMessage);
@@ -104,6 +141,7 @@ class ApiService {
     }
 
     const data = await response.json();
+    console.log('🟢 API Success Data:', data);
 
     // Обработка нового формата ответов: { success: true, data: {...} }
     // Если есть success: false, это ошибка
@@ -168,15 +206,13 @@ class ApiService {
     try {
       const body = isFormData ? data : JSON.stringify(data);
 
-      if (import.meta.env.DEV) {
-        console.log('API POST Request:', {
-          url: `${this.baseURL}${endpoint}`,
-          endpoint,
-          includeAuth,
-          isFormData,
-          body: isFormData ? '[FormData]' : body
-        });
-      }
+      console.log('API POST Request:', {
+        url: `${this.baseURL}${endpoint}`,
+        endpoint,
+        includeAuth,
+        isFormData,
+        body: isFormData ? '[FormData]' : body
+      });
 
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: 'POST',
@@ -184,25 +220,21 @@ class ApiService {
         body: body,
       });
 
-      if (import.meta.env.DEV) {
-        console.log('API POST Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          ok: response.ok,
-          headers: Object.fromEntries(response.headers.entries())
-        });
-      }
+      console.log('API POST Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      });
 
       return await this._handleResponse(response);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('API POST Error:', error);
-        console.error('Error details:', {
-          message: error.message,
-          stack: error.stack,
-          status: error.status
-        });
-      }
+      console.error('API POST Error:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        status: error.status
+      });
       throw error;
     }
   }
@@ -219,9 +251,7 @@ class ApiService {
 
       return await this._handleResponse(response);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('API PUT Error:', error);
-      }
+      console.error('API PUT Error:', error);
       throw error;
     }
   }
@@ -236,9 +266,7 @@ class ApiService {
 
       return await this._handleResponse(response);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error('API DELETE Error:', error);
-      }
+      console.error('API DELETE Error:', error);
       throw error;
     }
   }
@@ -272,9 +300,11 @@ export const worksAPI = {
     }, false);
   },
 
-  // Получить работу по ID
+  // Получить работу по ID - ДОБАВЬТЕ populate=*
   getById: async (id) => {
-    return api.get(`/works/${id}`, {}, false);
+    return api.get(`/works/${id}`, {
+      'populate': '*' // ВАЖНО: добавляем для загрузки изображений
+    }, false);
   },
 };
 
@@ -330,16 +360,26 @@ export const catalogAPI = {
   },
 };
 
-// src/http/api.js - обновляем методы authAPI
-
 // Методы для аутентификации
 export const authAPI = {
   // Вход - правильный endpoint для Strapi
   login: async (email, password) => {
-    return api.post('/auth/local', {
+    const response = await api.post('/auth/local', {
       identifier: email, // Strapi использует 'identifier' вместо 'email'
       password: password
     }, false);
+
+    // После успешного входа получаем полные данные пользователя
+    if (response.jwt) {
+      api.setAuthToken(response.jwt);
+      const userData = await api.get('/users/me?populate=avatar', {}, true);
+      return {
+        ...response,
+        user: userData
+      };
+    }
+
+    return response;
   },
 
   // Регистрация через кастомный endpoint
@@ -362,32 +402,29 @@ export const authAPI = {
 
   // Получить информацию о текущем пользователе
   checkAuth: async () => {
-    return api.get('/users/me?populate=*', {}, true);
+    return api.get('/users/me?populate=avatar', {}, true);
   },
 
-  // В authAPI в api.js обновляем метод updateProfile:
-
-  // Обновить профиль через стандартный Strapi endpoint
+  // Обновление профиля
   updateProfile: async (userData) => {
     const updateData = {};
 
-    // Используем правильные имена полей (camelCase как в ответе сервера)
+    // Используем правильные имена полей
     if (userData.firstName !== undefined) updateData.firstName = userData.firstName;
     if (userData.lastName !== undefined) updateData.lastName = userData.lastName;
     if (userData.email !== undefined) updateData.email = userData.email;
+    if (userData.avatar !== undefined) updateData.avatar = userData.avatar;
 
     console.log('🔵 Отправляем данные обновления профиля:', updateData);
-    console.log('🔐 Проверяем токен перед запросом:', api.getAuthToken() ? 'есть' : 'нет');
 
-    // Используем стандартный endpoint Strapi для обновления пользователя
-    // Сначала получим ID текущего пользователя
-    const currentUser = await api.get('/users/me?populate=*', {}, true);
+    // Получаем ID текущего пользователя с populate avatar
+    const currentUser = await api.get('/users/me?populate=avatar', {}, true);
     const userId = currentUser.id;
 
     console.log('👤 ID пользователя для обновления:', userId);
 
-    // Обновляем пользователя и запрашиваем полные данные с populate
-    const response = await api.put(`/users/${userId}?populate=*`, updateData, true);
+    // Обновляем пользователя и запрашиваем полные данные с populate avatar
+    const response = await api.put(`/users/${userId}?populate=avatar`, updateData, true);
 
     console.log('✅ Профиль обновлен, ответ:', response);
 
@@ -423,13 +460,13 @@ export const authAPI = {
   },
 };
 
-// Методы для корзины
+// Методы для корзины - ОБНОВЛЕННЫЕ С АВТОРИЗАЦИЕЙ
 export const cartAPI = {
-  // Получить корзину
+  // Получить корзину - теперь с авторизацией
   getCart: async () => {
     console.log('cartAPI.getCart: Начало запроса');
     try {
-      const result = await api.get('/cart/', {}, false);
+      const result = await api.get('/cart', {}, true); // true - includeAuth
       console.log('cartAPI.getCart: Успешный ответ:', result);
       return result;
     } catch (error) {
@@ -438,58 +475,64 @@ export const cartAPI = {
     }
   },
 
-  // Добавить товар в корзину
+  // Добавить товар в корзину - с авторизацией
   addToCart: async (productId, quantity = 1) => {
-    return api.post('/cart/add', {
-      product_id: productId,
-      quantity: quantity
-    }, false);
+    console.log('cartAPI.addToCart: Добавление товара:', { productId, quantity });
+    try {
+      const result = await api.post('/cart/add', {
+        product_id: productId,
+        quantity: quantity
+      }, true); // true - includeAuth
+      console.log('cartAPI.addToCart: Успешный ответ:', result);
+      return result;
+    } catch (error) {
+      console.error('cartAPI.addToCart: Ошибка:', error);
+      throw error;
+    }
   },
 
-  // Обновить количество товара
+  // Обновить количество товара - с авторизацией
   updateCart: async (productId, quantity) => {
-    return api.post('/cart/update', {
-      product_id: productId,
-      quantity: quantity
-    }, false);
+    console.log('cartAPI.updateCart: Обновление товара:', { productId, quantity });
+    try {
+      const result = await api.post('/cart/update', {
+        product_id: productId,
+        quantity: quantity
+      }, true); // true - includeAuth
+      console.log('cartAPI.updateCart: Успешный ответ:', result);
+      return result;
+    } catch (error) {
+      console.error('cartAPI.updateCart: Ошибка:', error);
+      throw error;
+    }
   },
 
-  // Удалить товар из корзины
+  // Удалить товар из корзины - с авторизацией
   removeFromCart: async (productId) => {
-    return api.post('/cart/remove', {
-      product_id: productId
-    }, false);
+    console.log('cartAPI.removeFromCart: Удаление товара:', { productId });
+    try {
+      const result = await api.post('/cart/remove', {
+        product_id: productId
+      }, true); // true - includeAuth
+      console.log('cartAPI.removeFromCart: Успешный ответ:', result);
+      return result;
+    } catch (error) {
+      console.error('cartAPI.removeFromCart: Ошибка:', error);
+      throw error;
+    }
   },
 
-  // Очистить корзину
+  // Очистить корзину - с авторизацией
   clearCart: async () => {
-    return api.post('/cart/clear', {}, false);
-  },
-};
-
-// Методы для заказов
-export const ordersAPI = {
-  // Создать заказ из корзины
-  createOrder: async (orderData = {}) => {
-    return api.post('/orders/create', orderData, true);
-  },
-
-  // Получить список заказов пользователя
-  getMyOrders: async (params = {}) => {
-    return api.get('/orders/my', params, true);
-  },
-
-  // Получить детали заказа
-  getOrder: async (orderId) => {
-    return api.get(`/orders/${orderId}`, {}, true);
-  },
-
-  // Обновить статус заказа
-  updateOrderStatus: async (orderId, status, comment) => {
-    return api.put(`/orders/${orderId}/status`, {
-      status: status,
-      comment: comment
-    }, true);
+    console.log('cartAPI.clearCart: Очистка корзины');
+    try {
+      const result = await api.post('/cart/clear', {}, true); // true - includeAuth
+      console.log('cartAPI.clearCart: Успешный ответ:', result);
+      return result;
+    } catch (error) {
+      console.error('cartAPI.clearCart: Ошибка:', error);
+      throw error;
+    }
   },
 };
 
@@ -694,6 +737,147 @@ export const contactAPI = {
       }, 1000);
     });
   }
-}
+};
+
+// В разделе методов для заказов добавьте:
+export const ordersAPI = {
+  // Создать заказ из корзины
+  createOrder: async (orderData = {}) => {
+    return api.post('/orders', orderData, true);
+  },
+
+  // Получить список заказов пользователя - базовый populate
+  getMyOrders: async (params = {}) => {
+    return api.get('/orders', {
+      ...params,
+      'populate[items]': '*', // Базовый populate для компонента
+    }, true);
+  },
+
+  // Получить список заказов с глубоким populate
+  getMyOrdersDeep: async (params = {}) => {
+    return api.get('/orders', {
+      ...params,
+      'populate': 'deep,3' // Глубокий populate до 3 уровня
+    }, true);
+  },
+
+  // Получить список заказов с вложенным populate
+  getMyOrdersNested: async (params = {}) => {
+    return api.get('/orders', {
+      ...params,
+      'populate[0]': 'items', // populate компонента items
+      'populate[1]': 'items.image' // populate изображений внутри компонента
+    }, true);
+  },
+
+
+  // Получить завершенные заказы
+  getCompletedOrders: async (params = {}) => {
+    return api.get('/orders', {
+      ...params,
+      'filters[status][$eq]': 'confirmed', // Фильтр по статусу
+      'populate[items]': '*',
+    }, true);
+  },
+
+  // Получить детали заказа
+  getOrder: async (orderId) => {
+    return api.get(`/orders/${orderId}`, {
+      'populate[items][populate][image]': '*'
+    }, true);
+  },
+
+  // Обновить статус заказа
+  updateOrderStatus: async (orderId, status, comment) => {
+    return api.put(`/orders/${orderId}`, {
+      data: {
+        status: status
+      }
+    }, true);
+  },
+};
+
+// Функция для получения URL изображения из данных Strapi
+export const getImageUrl = (imageData) => {
+  console.log('🖼️ Получение URL изображения:', imageData);
+
+  if (!imageData) {
+    console.log('❌ Изображение не найдено');
+    return '/default-textile.jpg';
+  }
+
+  // Формат Strapi v4 с глубоким populate
+  if (imageData.data) {
+    // Если это массив (multiple: true)
+    if (Array.isArray(imageData.data) && imageData.data.length > 0) {
+      const url = `http://localhost:1337${imageData.data[0].attributes?.url}`;
+      console.log('✅ URL из массива данных:', url);
+      return url;
+    }
+    // Если это одиночный файл
+    if (imageData.data.attributes?.url) {
+      const url = `http://localhost:1337${imageData.data.attributes.url}`;
+      console.log('✅ URL из одиночных данных:', url);
+      return url;
+    }
+  }
+
+  // Прямой доступ к attributes (альтернативный формат)
+  if (imageData.attributes?.url) {
+    const url = `http://localhost:1337${imageData.attributes.url}`;
+    console.log('✅ URL из прямых attributes:', url);
+    return url;
+  }
+
+  // Прямой URL (для обратной совместимости)
+  if (imageData.url) {
+    const url = imageData.startsWith('http') ? imageData : `http://localhost:1337${imageData}`;
+    console.log('✅ Прямой URL:', url);
+    return url;
+  }
+
+  // Если это строка (старый формат)
+  if (typeof imageData === 'string') {
+    const url = imageData.startsWith('http') ? imageData : `http://localhost:1337${imageData}`;
+    console.log('✅ URL из строки:', url);
+    return url;
+  }
+
+  console.log('❌ Неизвестный формат изображения');
+  return '/default-textile.jpg';
+};
+
+
+// Методы для уведомлений
+export const notificationsAPI = {
+  // Получить все уведомления пользователя
+  getNotifications: async (params = {}) => {
+    return api.get('/notifications', {
+      'sort': 'createdAt:desc',
+      ...params
+    }, true);
+  },
+
+  // Получить уведомление по ID
+  getNotification: async (id) => {
+    return api.get(`/notifications/${id}`, {}, true);
+  },
+
+  // Пометить уведомление как прочитанное
+  markAsRead: async (id) => {
+    return api.put(`/notifications/${id}/read`, {}, true);
+  },
+
+  // Пометить все уведомления как прочитанные
+  markAllAsRead: async () => {
+    return api.put('/notifications/read-all', {}, true);
+  },
+
+  // Получить количество непрочитанных уведомлений
+  getUnreadCount: async () => {
+    return api.get('/notifications/unread/count', {}, true);
+  }
+};
 
 export default api;

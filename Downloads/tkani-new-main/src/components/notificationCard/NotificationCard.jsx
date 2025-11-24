@@ -1,6 +1,6 @@
 import styles from "./NotificationCard.module.css";
 
-export const NotificationCard = ({ notification, onViewOrder }) => {
+export const NotificationCard = ({ notification, onViewOrder, onMarkAsRead }) => {
   if (!notification) {
     return null;
   }
@@ -18,6 +18,11 @@ export const NotificationCard = ({ notification, onViewOrder }) => {
     if (onViewOrder && notification.order_id) {
       onViewOrder(notification.order_id);
     }
+    
+    // Помечаем как прочитанное при клике
+    if (onMarkAsRead && !notification.is_read) {
+      onMarkAsRead();
+    }
   };
 
   const buttonClass = notification.is_read
@@ -25,7 +30,11 @@ export const NotificationCard = ({ notification, onViewOrder }) => {
     : styles.viewButtonNew;
 
   return (
-    <article className={styles.notificationCard} role="listitem" aria-labelledby={`notification-${notification.id}-title`}>
+    <article 
+      className={`${styles.notificationCard} ${!notification.is_read ? styles.unread : ''}`} 
+      role="listitem" 
+      aria-labelledby={`notification-${notification.id}-title`}
+    >
       <div className={styles.notificationContent}>
         <h4 id={`notification-${notification.id}-title`} className={styles.notificationTitle}>
           {notification.message || notification.title}
@@ -34,17 +43,28 @@ export const NotificationCard = ({ notification, onViewOrder }) => {
           {formatDate(notification.created_at || notification.date)}
         </time>
       </div>
-      {notification.order_id && (
-        <button
-          type="button"
-          onClick={handleViewOrder}
-          className={buttonClass}
-          aria-label={`Перейти к заказу ${notification.order_id}`}
-        >
-          К заказу
-        </button>
-      )}
+      <div className={styles.notificationActions}>
+        {notification.order_id && (
+          <button
+            type="button"
+            onClick={handleViewOrder}
+            className={buttonClass}
+            aria-label={`Перейти к заказу ${notification.order_id}`}
+          >
+            К заказу
+          </button>
+        )}
+        {!notification.is_read && onMarkAsRead && (
+          <button
+            type="button"
+            onClick={onMarkAsRead}
+            className={styles.markAsReadButton}
+            aria-label="Пометить как прочитанное"
+          >
+
+          </button>
+        )}
+      </div>
     </article>
   );
 };
-

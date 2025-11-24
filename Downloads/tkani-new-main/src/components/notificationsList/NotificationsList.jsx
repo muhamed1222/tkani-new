@@ -3,6 +3,8 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import { Context } from "../../main";
 import { NotificationCard } from "../notificationCard/NotificationCard";
+import { notificationsAPI } from "../../http/api";
+import { useTokenSync } from "../../hooks/useTokenSync";
 import styles from "./NotificationsList.module.css";
 
 export const NotificationsList = observer(() => {
@@ -12,88 +14,106 @@ export const NotificationsList = observer(() => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  useTokenSync();
+
   useEffect(() => {
-    // TODO: Реализовать загрузку уведомлений через API
-    // Пока используем моковые данные
-    const mockNotifications = [
-      {
-        id: 1,
-        message: "Ваш заказ от 02.09.2025 оформлен и ожидает сборки",
-        date: "2025-09-02",
-        created_at: "2025-09-02",
-        is_read: false,
-        order_id: 1,
-      },
-      {
-        id: 2,
-        message: "Ваш заказ от 02.09.2025 оформлен и ожидает сборки",
-        date: "2025-09-02",
-        created_at: "2025-09-02",
-        is_read: false,
-        order_id: 2,
-      },
-      {
-        id: 3,
-        message: "Ваш заказ от 02.09.2025 оформлен и ожидает сборки",
-        date: "2025-09-02",
-        created_at: "2025-09-02",
-        is_read: true,
-        order_id: 3,
-      },
-      {
-        id: 4,
-        message: "Ваш заказ от 02.09.2025 оформлен и ожидает сборки",
-        date: "2025-09-02",
-        created_at: "2025-09-02",
-        is_read: true,
-        order_id: 4,
-      },
-      {
-        id: 5,
-        message: "Ваш заказ от 02.09.2025 оформлен и ожидает сборки",
-        date: "2025-09-02",
-        created_at: "2025-09-02",
-        is_read: true,
-        order_id: 5,
-      },
-      {
-        id: 6,
-        message: "Ваш заказ от 02.09.2025 оформлен и ожидает сборки",
-        date: "2025-09-02",
-        created_at: "2025-09-02",
-        is_read: true,
-        order_id: 6,
-      },
-    ];
+    const loadNotifications = async () => {
+      try {
+        console.log('🔄 Начинаем загрузку уведомлений...');
+        
+        setIsLoading(true);
+        setError(null);
 
-    setIsLoading(false);
-    setNotifications(mockNotifications);
+        if (!user.isAuth) {
+          console.log('👤 Пользователь не авторизован');
+          setNotifications([]);
+          return;
+        }
 
-    // TODO: Реализовать загрузку через API
-    // try {
-    //   const response = await notificationsAPI.getNotifications();
-    //   setNotifications(response.notifications || []);
-    // } catch (err) {
-    //   setError(err.message);
-    // } finally {
-    //   setIsLoading(false);
-    // }
-  }, [user.isAuth]);
+        const response = await notificationsAPI.getNotifications();
+        console.log('✅ Ответ от API уведомлений:', response);
+
+        const apiNotifications = response.data || [];
+        console.log('📦 Уведомления из API:', apiNotifications);
+        
+        setNotifications(apiNotifications);
+      } catch (err) {
+        console.error('❌ Ошибка загрузки уведомлений:', err);
+        setError(err.message);
+        setNotifications([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadNotifications();
+  }, [user.isAuth, user.token]);
 
   const handleViewOrder = (orderId) => {
-    // TODO: Реализовать переход к заказу
-    // navigate(`/account?tab=orders&order=${orderId}`);
+    // Переход к заказу в личном кабинете
+    navigate(`/account?tab=orders&order=${orderId}`);
     console.log("View order:", orderId);
   };
 
-  const newNotifications = notifications.filter((n) => !n.is_read);
-  const readNotifications = notifications.filter((n) => n.is_read);
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await notificationsAPI.markAsRead(notificationId);
+      
+      // Обновляем локальное состояние
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, attributes: { ...notification.attributes, is_read: true } }
+            : notification
+        )
+      );
+    } catch (err) {
+      console.error('❌ Ошибка пометки уведомления как прочитанного:', err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationsAPI.markAllAsRead();
+      
+      // Обновляем локальное состояние
+      setNotifications(prev => 
+        prev.map(notification => ({
+          ...notification, 
+          attributes: { ...notification.attributes, is_read: true }
+        }))
+      );
+    } catch (err) {
+      console.error('❌ Ошибка пометки всех уведомлений как прочитанных:', err);
+    }
+  };
+
+  // Преобразуем данные из Strapi формата
+  const transformNotification = (apiNotification) => {
+    const isStrapiFormat = apiNotification.attributes !== undefined;
+    const rawData = isStrapiFormat ? apiNotification.attributes : apiNotification;
+    
+    return {
+      id: apiNotification.id,
+      message: rawData.message,
+      title: rawData.title,
+      date: rawData.createdAt ? new Date(rawData.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      created_at: rawData.createdAt || new Date().toISOString(),
+      is_read: rawData.is_read || false,
+      order_id: rawData.order_id,
+      type: rawData.type || 'system'
+    };
+  };
+
+  const transformedNotifications = notifications.map(transformNotification);
+  const newNotifications = transformedNotifications.filter((n) => !n.is_read);
+  const readNotifications = transformedNotifications.filter((n) => n.is_read);
 
   if (isLoading) {
     return (
       <section className={styles.notificationsList} aria-labelledby="notifications-heading">
         <h3 id="notifications-heading" className={styles.title}>Уведомления</h3>
-        <p className={styles.loading} role="status" aria-live="polite">Загрузка...</p>
+        <p className={styles.loading} role="status" aria-live="polite">Загрузка уведомлений...</p>
       </section>
     );
   }
@@ -102,7 +122,7 @@ export const NotificationsList = observer(() => {
     return (
       <section className={styles.notificationsList} aria-labelledby="notifications-heading">
         <h3 id="notifications-heading" className={styles.title}>Уведомления</h3>
-        <p className={styles.error} role="alert" aria-live="assertive">Ошибка загрузки: {error}</p>
+        <p className={styles.error} role="alert" aria-live="assertive">Ошибка загрузки уведомлений: {error}</p>
       </section>
     );
   }
@@ -111,11 +131,14 @@ export const NotificationsList = observer(() => {
     <section className={styles.notificationsList} aria-labelledby="notifications-heading">
       <header className={styles.titleContainer}>
         <h3 id="notifications-heading" className={styles.title}>Уведомления</h3>
-        {newNotifications.length > 0 && (
-          <div className={styles.badge} aria-label={`Новых уведомлений: ${newNotifications.length}`}>
-            {newNotifications.length}
-          </div>
-        )}
+        <div className={styles.headerActions}>
+      
+          {newNotifications.length > 0 && (
+            <div className={styles.badge} aria-label={`Новых уведомлений: ${newNotifications.length}`}>
+              {newNotifications.length}
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Новые уведомления */}
@@ -128,6 +151,7 @@ export const NotificationsList = observer(() => {
                 key={notification.id}
                 notification={notification}
                 onViewOrder={handleViewOrder}
+                onMarkAsRead={() => handleMarkAsRead(notification.id)}
               />
             ))}
           </div>
@@ -150,10 +174,9 @@ export const NotificationsList = observer(() => {
         </section>
       )}
 
-      {notifications.length === 0 && (
+      {transformedNotifications.length === 0 && (
         <p className={styles.empty}>У вас пока нет уведомлений</p>
       )}
     </section>
   );
 });
-

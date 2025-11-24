@@ -1,3 +1,4 @@
+// src/components/personal_account/Personal_account.jsx
 import { useState, useContext, useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
@@ -7,8 +8,6 @@ import { authAPI } from "../../http/api";
 import { LOGIN_ROUTE } from "../../utils/consts";
 import styles from "./Personal_account.module.css";
 import api from "../../http/api"; 
-
-
 
 const EyeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -26,6 +25,8 @@ const EyeOffIcon = () => (
 export const Personal_account = observer(() => {
   const { user } = useContext(Context);
   const navigate = useNavigate();
+  
+  // Все хуки должны быть объявлены на верхнем уровне, без условий
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -51,6 +52,13 @@ export const Personal_account = observer(() => {
   const [lastNameError, setLastNameError] = useState("");
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  
+  // Состояния для работы с аватаром
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarError, setAvatarError] = useState("");
+  const [avatarSuccess, setAvatarSuccess] = useState("");
+  const fileInputRef = useRef(null);
 
   // Исходные значения для сравнения
   const [originalFirstName, setOriginalFirstName] = useState("");
@@ -59,44 +67,93 @@ export const Personal_account = observer(() => {
 
   // Функция для получения URL аватара
   const getAvatarUrl = () => {
-    if (user.user) {
-      // Формат 1: avatar как объект с data (Strapi v4)
-      if (user.user.avatar && user.user.avatar.data && user.user.avatar.data.attributes) {
+    if (!user.user) {
+      console.log('❌ getAvatarUrl - пользователь не загружен');
+      return "https://i.pravatar.cc/100";
+    }
+
+    console.log('🔄 getAvatarUrl - данные пользователя:', user.user);
+    
+    // Strapi v4 формат: avatar как объект с data
+    if (user.user.avatar) {
+      // Формат 1: avatar имеет data и attributes (самый распространенный)
+      if (user.user.avatar.data && user.user.avatar.data.attributes) {
         const url = `http://localhost:1337${user.user.avatar.data.attributes.url}`;
+        console.log('✅ Аватар найден (формат 1):', url);
         return url;
       }
       
-      // Формат 2: avatar как массив файлов (из upload)
-      if (user.user.avatar && Array.isArray(user.user.avatar) && user.user.avatar.length > 0) {
-        const url = `http://localhost:1337${user.user.avatar[0].url}`;
-        return url;
-      }
-      
-      // Формат 3: avatar как объект с url
-      if (user.user.avatar && user.user.avatar.url) {
+      // Формат 2: avatar имеет url напрямую
+      if (user.user.avatar.url) {
         const url = `http://localhost:1337${user.user.avatar.url}`;
+        console.log('✅ Аватар найден (формат 2):', url);
         return url;
       }
       
-      // Формат 4: avatar как ID файла
-      if (user.user.avatar && typeof user.user.avatar === 'number') {
+      // Формат 3: avatar - это ID файла
+      if (typeof user.user.avatar === 'number') {
         const url = `http://localhost:1337/api/upload/files/${user.user.avatar}`;
+        console.log('✅ Аватар найден (формат 3):', url);
         return url;
       }
-      
-      // Формат 5: avatar как строка (путь)
-      if (user.user.avatar && typeof user.user.avatar === 'string') {
-        const url = `http://localhost:1337${user.user.avatar}`;
-        return url;
+
+      // Формат 4: avatar как массив
+      if (Array.isArray(user.user.avatar) && user.user.avatar.length > 0) {
+        const avatarData = user.user.avatar[0];
+        if (avatarData.url) {
+          const url = `http://localhost:1337${avatarData.url}`;
+          console.log('✅ Аватар найден (формат 4 - массив):', url);
+          return url;
+        }
       }
     }
     
+    // Проверяем альтернативные поля
+    if (user.user.avatarUrl) {
+      console.log('✅ Аватар найден (avatarUrl):', user.user.avatarUrl);
+      return user.user.avatarUrl;
+    }
+    
+    console.log('❌ Аватар не найден, используем fallback');
     return "https://i.pravatar.cc/100"; // fallback аватар
   };
 
-  // Синхронизация данных из store
+  // Проверка авторизации при загрузке компонента
   useEffect(() => {
-    if (user.user) {
+    const checkAuthentication = async () => {
+      try {
+        console.log('🔐 Personal_account - проверка авторизации...');
+        
+        // Если пользователь не загружен, проверяем авторизацию
+        if (!user.user || Object.keys(user.user).length === 0) {
+          console.log('🔄 Personal_account - пользователь не загружен, проверяем auth...');
+          await user.checkAuth();
+        }
+        
+        // Если после проверки пользователь все еще не авторизован, редирект
+        if (!user.isAuth) {
+          console.log('❌ Personal_account - пользователь не авторизован, редирект...');
+          navigate(LOGIN_ROUTE);
+          return;
+        }
+        
+        console.log('✅ Personal_account - пользователь авторизован:', user.user);
+        
+      } catch (error) {
+        console.error('❌ Personal_account - ошибка проверки авторизации:', error);
+        navigate(LOGIN_ROUTE);
+      } finally {
+        setIsPageLoading(false);
+      }
+    };
+
+    checkAuthentication();
+  }, [user, navigate]);
+
+  // Синхронизация данных из store - ОДИН useEffect
+  useEffect(() => {
+    if (user.user && user.isAuth) {
+      console.log('🔄 Personal_account - синхронизация данных пользователя');
       const firstNameValue = user.user.firstName || user.user.first_name || "";
       const lastNameValue = user.user.lastName || user.user.last_name || "";
       const emailValue = user.user.email || "";
@@ -108,7 +165,7 @@ export const Personal_account = observer(() => {
       setOriginalLastName(lastNameValue);
       setOriginalEmail(emailValue);
     }
-  }, [user.user]);
+  }, [user.user, user.isAuth]);
 
   // Проверка изменений личных данных
   useEffect(() => {
@@ -129,6 +186,24 @@ export const Personal_account = observer(() => {
       setEmailSuccess("");
     }
   }, [email, originalEmail]);
+
+  // Очистка ошибок при изменении полей
+  useEffect(() => {
+    if (firstName) setFirstNameError("");
+  }, [firstName]);
+
+  useEffect(() => {
+    if (lastName) setLastNameError("");
+  }, [lastName]);
+
+  useEffect(() => {
+    if (email) setEmailError("");
+  }, [email]);
+
+  useEffect(() => {
+    if (newPassword) setNewPasswordError("");
+    if (confirmPassword) setConfirmPasswordError("");
+  }, [newPassword, confirmPassword]);
 
   // Валидация имени
   const validateFirstName = (value) => {
@@ -175,106 +250,152 @@ export const Personal_account = observer(() => {
     return "";
   };
 
-  // В handleSavePersonalData и handleSaveEmail - убираем автоматический выход при ошибке
+  // Обработчик клика по аватару
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
 
-const handleSavePersonalData = async (e) => {
-  e.preventDefault();
-  console.log('🔵 handleSavePersonalData - начало', { firstName, lastName });
-  setPersonalDataError("");
-  setPersonalDataSuccess("");
+  // Обработчик выбора файла
+  const handleFileSelect = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  // Валидация
-  const firstNameValidation = validateFirstName(firstName);
-  const lastNameValidation = validateLastName(lastName);
+    // Проверка типа файла
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      setAvatarError("Разрешены только файлы JPG, JPEG и PNG");
+      setTimeout(() => setAvatarError(""), 5000);
+      return;
+    }
 
-  if (firstNameValidation) {
-    setFirstNameError(firstNameValidation);
-    return;
-  }
-  setFirstNameError("");
+    // Проверка размера файла (максимум 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarError("Размер файла не должен превышать 5MB");
+      setTimeout(() => setAvatarError(""), 5000);
+      return;
+    }
 
-  if (lastNameValidation) {
-    setLastNameError(lastNameValidation);
-    return;
-  }
-  setLastNameError("");
+    setIsUploadingAvatar(true);
+    setAvatarError("");
+    setAvatarSuccess("");
 
-  setIsSavingPersonalData(true);
+    try {
+      const result = await user.uploadAvatar(file);
+      if (result.success) {
+        setAvatarSuccess(result.message || "Аватар успешно обновлен");
+        setTimeout(() => setAvatarSuccess(""), 5000);
+      } else {
+        setAvatarError(result.error || "Ошибка загрузки аватара");
+        setTimeout(() => setAvatarError(""), 5000);
+      }
+    } catch (error) {
+      setAvatarError("Ошибка загрузки аватара");
+      setTimeout(() => setAvatarError(""), 5000);
+    } finally {
+      setIsUploadingAvatar(false);
+      // Очищаем input для возможности выбора того же файла снова
+      event.target.value = "";
+    }
+  };
 
-  try {
-    console.log('🔵 handleSavePersonalData - вызов user.updateProfile с данными:', { firstName, lastName });
-    
-    const result = await user.updateProfile({ 
-      firstName: firstName.trim(),
-      lastName: lastName.trim()
-    });
-    console.log('🟢 handleSavePersonalData - результат:', result);
-    
-    if (result.success) {
-      setPersonalDataSuccess("Личные данные успешно обновлены");
-      setIsPersonalDataChanged(false);
-      setOriginalFirstName(firstName);
-      setOriginalLastName(lastName);
-      // Обновляем данные пользователя
-      await user.checkAuth();
-      setTimeout(() => setPersonalDataSuccess(""), 5000);
-    } else {
-      console.error('❌ handleSavePersonalData - ошибка:', result.error);
-      setPersonalDataError(result.error || "Ошибка обновления данных");
+  const handleSavePersonalData = async (e) => {
+    e.preventDefault();
+    console.log('🔵 handleSavePersonalData - начало', { firstName, lastName });
+    setPersonalDataError("");
+    setPersonalDataSuccess("");
+
+    // Валидация
+    const firstNameValidation = validateFirstName(firstName);
+    const lastNameValidation = validateLastName(lastName);
+
+    if (firstNameValidation) {
+      setFirstNameError(firstNameValidation);
+      return;
+    }
+    setFirstNameError("");
+
+    if (lastNameValidation) {
+      setLastNameError(lastNameValidation);
+      return;
+    }
+    setLastNameError("");
+
+    setIsSavingPersonalData(true);
+
+    try {
+      console.log('🔵 handleSavePersonalData - вызов user.updateProfile с данными:', { firstName, lastName });
+      
+      const result = await user.updateProfile({ 
+        firstName: firstName.trim(),
+        lastName: lastName.trim()
+      });
+      console.log('🟢 handleSavePersonalData - результат:', result);
+      
+      if (result.success) {
+        setPersonalDataSuccess("Личные данные успешно обновлены");
+        setIsPersonalDataChanged(false);
+        setOriginalFirstName(firstName);
+        setOriginalLastName(lastName);
+        // Обновляем данные пользователя
+        await user.checkAuth();
+        setTimeout(() => setPersonalDataSuccess(""), 5000);
+      } else {
+        console.error('❌ handleSavePersonalData - ошибка:', result.error);
+        setPersonalDataError(result.error || "Ошибка обновления данных");
+        setTimeout(() => setPersonalDataError(""), 5000);
+      }
+    } catch (error) {
+      console.error('🔴 handleSavePersonalData - исключение:', error);
+      setPersonalDataError(error.message || "Ошибка обновления данных");
       setTimeout(() => setPersonalDataError(""), 5000);
+    } finally {
+      setIsSavingPersonalData(false);
     }
-  } catch (error) {
-    console.error('🔴 handleSavePersonalData - исключение:', error);
-    setPersonalDataError(error.message || "Ошибка обновления данных");
-    setTimeout(() => setPersonalDataError(""), 5000);
-  } finally {
-    setIsSavingPersonalData(false);
-  }
-};
+  };
 
-const handleSaveEmail = async (e) => {
-  e.preventDefault();
-  console.log('🔵 handleSaveEmail - начало', { email });
-  setEmailError("");
-  setEmailSuccess("");
+  const handleSaveEmail = async (e) => {
+    e.preventDefault();
+    console.log('🔵 handleSaveEmail - начало', { email });
+    setEmailError("");
+    setEmailSuccess("");
 
-  // Валидация
-  const emailValidation = validateEmail(email);
-  if (emailValidation) {
-    setEmailError(emailValidation);
-    return;
-  }
+    // Валидация
+    const emailValidation = validateEmail(email);
+    if (emailValidation) {
+      setEmailError(emailValidation);
+      return;
+    }
 
-  setIsSavingEmail(true);
+    setIsSavingEmail(true);
 
-  try {
-    console.log('🔵 handleSaveEmail - вызов user.updateProfile с данными:', { email });
-    
-    const result = await user.updateProfile({ 
-      email: email.trim() 
-    });
-    console.log('🟢 handleSaveEmail - результат:', result);
-    
-    if (result.success) {
-      setEmailSuccess("Email успешно обновлен");
-      setIsEmailChanged(false);
-      setOriginalEmail(email);
-      // Обновляем данные пользователя
-      await user.checkAuth();
-      setTimeout(() => setEmailSuccess(""), 5000);
-    } else {
-      console.error('❌ handleSaveEmail - ошибка:', result.error);
-      setEmailError(result.error || "Ошибка обновления email");
+    try {
+      console.log('🔵 handleSaveEmail - вызов user.updateProfile с данными:', { email });
+      
+      const result = await user.updateProfile({ 
+        email: email.trim() 
+      });
+      console.log('🟢 handleSaveEmail - результат:', result);
+      
+      if (result.success) {
+        setEmailSuccess("Email успешно обновлен");
+        setIsEmailChanged(false);
+        setOriginalEmail(email);
+        // Обновляем данные пользователя
+        await user.checkAuth();
+        setTimeout(() => setEmailSuccess(""), 5000);
+      } else {
+        console.error('❌ handleSaveEmail - ошибка:', result.error);
+        setEmailError(result.error || "Ошибка обновления email");
+        setTimeout(() => setEmailError(""), 5000);
+      }
+    } catch (error) {
+      console.error('🔴 handleSaveEmail - исключение:', error);
+      setEmailError(error.message || "Ошибка обновления email");
       setTimeout(() => setEmailError(""), 5000);
+    } finally {
+      setIsSavingEmail(false);
     }
-  } catch (error) {
-    console.error('🔴 handleSaveEmail - исключение:', error);
-    setEmailError(error.message || "Ошибка обновления email");
-    setTimeout(() => setEmailError(""), 5000);
-  } finally {
-    setIsSavingEmail(false);
-  }
-};
+  };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -323,24 +444,6 @@ const handleSaveEmail = async (e) => {
     }
   };
 
-  // Очистка ошибок при изменении полей
-  useEffect(() => {
-    if (firstName) setFirstNameError("");
-  }, [firstName]);
-
-  useEffect(() => {
-    if (lastName) setLastNameError("");
-  }, [lastName]);
-
-  useEffect(() => {
-    if (email) setEmailError("");
-  }, [email]);
-
-  useEffect(() => {
-    if (newPassword) setNewPasswordError("");
-    if (confirmPassword) setConfirmPasswordError("");
-  }, [newPassword, confirmPassword]);
-
   const handleLogout = async () => {
     try {
       await user.logout();
@@ -350,6 +453,23 @@ const handleSaveEmail = async (e) => {
     }
   };
 
+  // Показываем загрузку пока страница не готова
+  if (isPageLoading || user.isLoading) {
+    return (
+      <section className={styles.account_container}>
+        <div className={styles.loading}>
+          <p>Загрузка...</p>
+        </div>
+      </section>
+    );
+  }
+
+  // Если пользователь не авторизован, не показываем содержимое
+  if (!user.isAuth) {
+    return null; // или редирект уже произошел
+  }
+
+  // Основной рендер компонента
   return (
     <section className={styles.account_container} aria-labelledby="account-heading">
       <h3 id="account-heading" className={styles.title}>Личный кабинет</h3>
@@ -371,7 +491,11 @@ const handleSaveEmail = async (e) => {
           </div>
 
           <div className={styles.photo_section}>
-            <Avatar.Root className={styles.avatar}>
+            <Avatar.Root 
+              className={styles.avatar}
+              onClick={handleAvatarClick}
+              style={{ cursor: 'pointer' }}
+            >
               <Avatar.Image
                 className={styles.avatarImage}
                 src={getAvatarUrl()}
@@ -385,9 +509,34 @@ const handleSaveEmail = async (e) => {
               </Avatar.Fallback>
             </Avatar.Root>
             <div className={styles.photo_actions}>
-              <p className={styles.photoHint}>Функционал загрузки фото временно недоступен</p>
+              <p className={styles.photoHint}>
+                {isUploadingAvatar 
+                  ? "Загрузка..." 
+                  : "Нажмите на фото для загрузки нового аватара"
+                }
+              </p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                accept=".jpg,.jpeg,.png"
+                style={{ display: 'none' }}
+                aria-label="Выберите файл для загрузки аватара"
+              />
             </div>
           </div>
+
+          {/* Сообщения для аватара */}
+          {avatarError && (
+            <div className={styles.message} role="alert" aria-live="assertive">
+              <p className={styles.errorMessage}>{avatarError}</p>
+            </div>
+          )}
+          {avatarSuccess && (
+            <div className={styles.message} role="status" aria-live="polite">
+              <p className={styles.successMessage}>{avatarSuccess}</p>
+            </div>
+          )}
           
           {/* Сообщения для сохранения личных данных */}
           {personalDataError && (

@@ -5,8 +5,9 @@ import styles from "./Tkanpage.module.css";
 import { Breadcrumbs } from "../../components/breadcrumbs/Breadcrumbs";
 import { Context } from "../../main";
 import { cartAPI } from "../../http/api";
-import { BASKET_ROUTE, DEFAULT_PRODUCT_VALUES, DISCOUNT_TIERS, CONTACT_PHONE, TELEGRAM_LINK } from "../../utils/consts";
+import { BASKET_ROUTE, DEFAULT_PRODUCT_VALUES, DISCOUNT_TIERS, CONTACT_PHONE, TELEGRAM_LINK, SHOP_ROUTE } from "../../utils/consts";
 import { showToast } from "../../components/ui/Toast";
+import { ProductSection } from "../../components/productsection2/ProductSection";
 
 export const Tkanpage = observer(() => {
   const { id } = useParams();
@@ -23,6 +24,10 @@ export const Tkanpage = observer(() => {
   useEffect(() => {
     if (id) {
       tkans.fetchTkanById(id);
+    }
+    // Также загружаем все товары для секций
+    if (!tkans.tkans || tkans.tkans.length === 0) {
+      tkans.fetchTkans();
     }
   }, [id, tkans]);
 
@@ -198,6 +203,47 @@ export const Tkanpage = observer(() => {
   // Проверяем есть ли скидка (корректная проверка)
   const hasDiscount = product.discount > 0;
 
+  // Подготавливаем данные для секций продуктов (аналогично Shop компоненту)
+  const prepareProductsData = () => {
+    const allProducts = tkans.tkans || [];
+    const currentProductId = product.id;
+
+    // Исключаем текущий товар из рекомендаций
+    const otherProducts = allProducts.filter(p => p.id !== currentProductId);
+    
+    // 1. Новинки - сортируем по новизне (по ID в обратном порядке)
+    const newArrivals = [...otherProducts]
+      .sort((a, b) => b.id - a.id)
+      .slice(0, 4);
+    
+    // 2. Акции и скидки - только товары со скидкой больше 0%
+    const discountedProducts = otherProducts
+      .filter(p => p.discount > 0)
+      .slice(0, 4);
+    
+    // 3. Похожие товары - по тому же типу или бренду
+    const similarProducts = otherProducts
+      .filter(p => p.typeId === product.typeId || p.brandId === product.brandId)
+      .slice(0, 4);
+    
+    // Если похожих товаров мало, добавляем случайные
+    if (similarProducts.length < 4) {
+      const randomProducts = otherProducts
+        .filter(p => !similarProducts.some(sp => sp.id === p.id))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 4 - similarProducts.length);
+      similarProducts.push(...randomProducts);
+    }
+
+    return {
+      newArrivals,
+      discountedProducts, 
+      similarProducts
+    };
+  };
+
+  const productsData = prepareProductsData();
+
   return (
     <div className={styles.container}>
       <Breadcrumbs />
@@ -342,49 +388,74 @@ export const Tkanpage = observer(() => {
               </div>
             </div>
           </div>
+          
         </div>
       </div>
 
+      {/* Секции с товарами под карточкой товара */}
+      {tkans.isLoading ? (
+        <div className="flex justify-center items-center py-[40px]">
+          <div className="text-[#888888] text-[16px]">Загрузка товаров...</div>
+        </div>
+      ) : tkans.error ? (
+        <div className="flex justify-center items-center py-[40px]">
+          <div className="text-[#9b1e1c] text-[16px]">Ошибка загрузки: {tkans.error}</div>
+        </div>
+      ) : (
+        <>
+          {/* Похожие товары */}
+          {productsData.similarProducts.length > 0 && (
+            <ProductSection 
+              title="Похожие товары" 
+              products={productsData.similarProducts} 
+              linkTo={SHOP_ROUTE}
+              keyPrefix="similar"
+            />
+          )}
+          
+        </>
+      )}
+
       {/* Модальное окно для просмотра изображений */}
       {isModalOpen && (
-  <div className={styles.modalOverlay} onClick={closeModal}>
-    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-      <div className={styles.modalImageContainer}>
-        <img 
-          src={validImages[modalImageIndex]} 
-          alt={`${product.name} ${modalImageIndex + 1}`}
-          className={styles.modalImage}
-        />
-      </div>
-      <div className={styles.modalFooter}>
-        <button className={styles.closeButton} onClick={closeModal}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M0.530273 12.5303L6.53027 6.53027M12.5303 0.530273L6.53027 6.53027M6.53027 6.53027L0.530273 0.530273L12.5303 12.5303" stroke="#888888" strokeWidth="1.5"/>
-          </svg>
-        </button>
-        <button className={styles.modalCloseText} onClick={closeModal}>
-          Закрыть
-        </button>
-      </div>
-      
-      {/* Стрелки навигации */}
-      {modalImageIndex > 0 && (
-        <button className={`${styles.navButton} ${styles.prevButton}`} onClick={prevImage}>
-          <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7 1L1 7L7 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+        <div className={styles.modalOverlay} onClick={closeModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalImageContainer}>
+              <img 
+                src={validImages[modalImageIndex]} 
+                alt={`${product.name} ${modalImageIndex + 1}`}
+                className={styles.modalImage}
+              />
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.closeButton} onClick={closeModal}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M0.530273 12.5303L6.53027 6.53027M12.5303 0.530273L6.53027 6.53027M6.53027 6.53027L0.530273 0.530273L12.5303 12.5303" stroke="#888888" strokeWidth="1.5"/>
+                </svg>
+              </button>
+              <button className={styles.modalCloseText} onClick={closeModal}>
+                Закрыть
+              </button>
+            </div>
+            
+            {/* Стрелки навигации */}
+            {modalImageIndex > 0 && (
+              <button className={`${styles.navButton} ${styles.prevButton}`} onClick={prevImage}>
+                <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 1L1 7L7 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+            {modalImageIndex < validImages.length - 1 && (
+              <button className={`${styles.navButton} ${styles.nextButton}`} onClick={nextImage}>
+                <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1L7 7L1 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
       )}
-      {modalImageIndex < validImages.length - 1 && (
-        <button className={`${styles.navButton} ${styles.nextButton}`} onClick={nextImage}>
-          <svg width="8" height="14" viewBox="0 0 8 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 1L7 7L1 13" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      )}
-    </div>
-  </div>
-)}
     </div>
   );
 });

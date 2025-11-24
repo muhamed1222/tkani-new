@@ -16,6 +16,8 @@ export const DISCOUNTS_ROUTE = '/discounts'
 export const OUR_WORKS_ROUTE = '/our_works'
 export const PRIVACY_POLICY_ROUTE = '/privacy-policy'
 export const TERMS_OF_SERVICE_ROUTE = '/terms-of-service'
+export const WORK_ROUTE = '/work';
+export const WORK_DETAIL_ROUTE = '/work/:id';
 
 // Константы для товаров
 export const DEFAULT_PRODUCT_VALUES = {

@@ -5,6 +5,9 @@ import { worksAPI } from "../http/api";
 export default class WorksStore {
   constructor() {
     this._works = [];
+    this._selectedWork = null; // Добавляем для хранения текущей работы
+    this._isLoadingWork = false; // Отдельный флаг загрузки для одной работы
+    this._errorWork = null; // Отдельная ошибка для одной работы
     this._currentPage = 1;
     this._totalPages = 1;
     this._totalItems = 0;
@@ -15,70 +18,136 @@ export default class WorksStore {
     makeAutoObservable(this);
   }
 
-  // Загрузка работ с сервера
-  async fetchWorks(page = 1, limit = 12) {
+ // WorksStore.jsx - обновите метод fetchWorkById
+async fetchWorkById(id) {
+  runInAction(() => {
+    this._isLoadingWork = true;
+    this._errorWork = null;
+    this._selectedWork = null;
+  });
+
+  try {
+    console.log('🔄 Fetching work by ID from API:', id);
+    
+    // Всегда пытаемся загрузить с API
+    const response = await worksAPI.getById(id);
+    console.log('📦 Work by ID response:', response);
+
+    let workData = null;
+    
+    if (response.data) {
+      workData = this._transformWorkData(response.data);
+    } else if (response.work) {
+      workData = this._transformWorkData(response.work);
+    } else {
+      workData = this._transformWorkData(response);
+    }
+
+    if (!workData) {
+      throw new Error('Данные работы не получены');
+    }
+
     runInAction(() => {
-      this._isLoading = true;
-      this._error = null;
+      this._selectedWork = workData;
+      console.log('✅ Work loaded from API:', workData);
     });
 
-    try {
-      console.log('🔄 Fetching works from API...');
-      const response = await worksAPI.getAll(page, limit);
-      console.log('📦 Works API response:', response);
+    return workData;
+  } catch (error) {
+    console.error('❌ Ошибка загрузки работы с API:', error);
+    
+    runInAction(() => {
+      this._errorWork = `Работа с ID ${id} не найдена в базе данных`;
+      this._selectedWork = null;
+    });
+    return null;
+  } finally {
+    runInAction(() => {
+      this._isLoadingWork = false;
+    });
+  }
+}
 
-      runInAction(() => {
-        // Обработка формата Strapi v4
-        if (response.data && Array.isArray(response.data)) {
-          this._works = response.data.map(item => this._transformWorkData(item));
-          this._totalItems = response.meta?.pagination?.total || response.data.length;
-          this._totalPages = response.meta?.pagination?.pageCount || Math.ceil(this._totalItems / limit);
-          this._currentPage = response.meta?.pagination?.page || page;
-        } 
-        // Обработка старого формата
-        else if (response.works && Array.isArray(response.works)) {
-          this._works = response.works.map(item => this._transformWorkData(item));
-          this._totalItems = response.total || response.works.length;
-          this._totalPages = response.totalPages || Math.ceil(this._totalItems / limit);
-          this._currentPage = response.page || page;
-        } 
-        // Если API возвращает просто массив
-        else if (Array.isArray(response)) {
-          this._works = response.map(item => this._transformWorkData(item));
-          this._totalItems = response.length;
-          this._totalPages = Math.ceil(response.length / limit);
-          this._currentPage = page;
-        } 
-        else {
-          console.warn('Неизвестный формат ответа, используем моковые данные');
-          const mockData = this._getMockData(page, limit);
-          this._works = mockData.works;
-          this._totalItems = mockData.total;
-          this._totalPages = mockData.totalPages;
-          this._currentPage = page;
-        }
-        
-        console.log(`✅ Loaded ${this._works.length} works`);
-      });
-    } catch (error) {
-      console.error('❌ Ошибка загрузки работ:', error);
-      runInAction(() => {
-        this._error = error.message;
-        // В случае ошибки используем моковые данные
-        const mockData = this._getMockData(page, limit);
-        this._works = mockData.works;
-        this._totalItems = mockData.total;
-        this._totalPages = mockData.totalPages;
-        this._currentPage = page;
-      });
-    } finally {
-      runInAction(() => {
-        this._isLoading = false;
-      });
-    }
+  // Добавляем методы для работы с selectedWork
+  setSelectedWork(work) {
+    this._selectedWork = work;
   }
 
-_transformWorkData(workData) {
+  setIsLoadingWork(loading) {
+    this._isLoadingWork = loading;
+  }
+
+  setErrorWork(error) {
+    this._errorWork = error;
+  }
+
+  // Добавляем геттеры для selectedWork
+  get selectedWork() {
+    return this._selectedWork;
+  }
+
+  get isLoadingWork() {
+    return this._isLoadingWork;
+  }
+
+  get errorWork() {
+    return this._errorWork;
+  }
+// WorksStore.jsx - обновите метод fetchWorks
+async fetchWorks(page = 1, limit = 12) {
+  runInAction(() => {
+    this._isLoading = true;
+    this._error = null;
+  });
+
+  try {
+    console.log('🔄 Fetching works from API...');
+    const response = await worksAPI.getAll(page, limit);
+    console.log('📦 Works API response:', response);
+
+    runInAction(() => {
+      // Обработка формата Strapi v4
+      if (response.data && Array.isArray(response.data)) {
+        this._works = response.data.map(item => this._transformWorkData(item));
+        this._totalItems = response.meta?.pagination?.total || response.data.length;
+        this._totalPages = response.meta?.pagination?.pageCount || Math.ceil(this._totalItems / limit);
+        this._currentPage = response.meta?.pagination?.page || page;
+      } 
+      // Обработка старого формата
+      else if (response.works && Array.isArray(response.works)) {
+        this._works = response.works.map(item => this._transformWorkData(item));
+        this._totalItems = response.total || response.works.length;
+        this._totalPages = response.totalPages || Math.ceil(this._totalItems / limit);
+        this._currentPage = response.page || page;
+      } 
+      // Если API возвращает просто массив
+      else if (Array.isArray(response)) {
+        this._works = response.map(item => this._transformWorkData(item));
+        this._totalItems = response.length;
+        this._totalPages = Math.ceil(response.length / limit);
+        this._currentPage = page;
+      } 
+      else {
+        throw new Error('Неизвестный формат ответа от API');
+      }
+      
+      console.log(`✅ Loaded ${this._works.length} works from API`);
+    });
+  } catch (error) {
+    console.error('❌ Ошибка загрузки работ:', error);
+    runInAction(() => {
+      this._error = error.message;
+      this._works = []; // Очищаем работы при ошибке
+    });
+  } finally {
+    runInAction(() => {
+      this._isLoading = false;
+    });
+  }
+}
+  
+
+  _transformWorkData(workData) {
   if (!workData) return null;
 
   console.log('🔄 Transforming work data:', workData);
@@ -116,7 +185,7 @@ _transformWorkData(workData) {
   const transformedWork = {
     id: id,
     title: attributes.title,
-    description: attributes.description, // оставляем на всякий случай
+    description: attributes.description,
     image: imageUrl,
     link: attributes.link || '#'
   };
@@ -128,34 +197,6 @@ _transformWorkData(workData) {
   // Моковые данные (для разработки, когда API недоступен)
   _getMockData(page, limit) {
     const allWorks = [
-      { 
-        id: 1, 
-        title: 'Платье из вискозного шифона "Флаурэль"', 
-        description: 'Элегантное платье из легкого вискозного шифона с цветочным принтом. Идеально для летних мероприятий и особых случаев.',
-        image: "/placeholder-work.jpg", 
-        link: "#" 
-      },
-      { 
-        id: 2, 
-        title: 'Костюм из льняной ткани "Элеганс"', 
-        description: 'Стильный летний костюм из натурального льна. Состоит из жакета и брюк, подходит для офиса и casual-выходов.',
-        image: "/placeholder-work.jpg", 
-        link: "#" 
-      },
-      { 
-        id: 3, 
-        title: 'Вечернее платье "Ноктюрн"', 
-        description: 'Роскошное вечернее платье из атласа с ручной вышивкой. Создано для особых мероприятий и торжественных случаев.',
-        image: "/placeholder-work.jpg", 
-        link: "#" 
-      },
-      { 
-        id: 4, 
-        title: 'Детский комплект "Радуга"', 
-        description: 'Яркий и comfortable детский комплект из хлопка. Включает платье и легкую куртку, идеален для повседневной носки.',
-        image: "/placeholder-work.jpg", 
-        link: "#" 
-      },
     ];
 
     const startIndex = (page - 1) * limit;
@@ -168,42 +209,6 @@ _transformWorkData(workData) {
       page: page,
       totalPages: Math.ceil(allWorks.length / limit),
     };
-  }
-
-  // Загрузка работы по ID
-  async fetchWorkById(id) {
-    runInAction(() => {
-      this._isLoading = true;
-      this._error = null;
-    });
-
-    try {
-      const response = await worksAPI.getById(id);
-      console.log('📦 Work by ID response:', response);
-
-      let workData = null;
-      
-      // Обработка разных форматов ответа
-      if (response.data) {
-        workData = this._transformWorkData(response.data);
-      } else if (response.work) {
-        workData = this._transformWorkData(response.work);
-      } else {
-        workData = this._transformWorkData(response);
-      }
-
-      return workData;
-    } catch (error) {
-      console.error('❌ Ошибка загрузки работы:', error);
-      runInAction(() => {
-        this._error = error.message;
-      });
-      return null;
-    } finally {
-      runInAction(() => {
-        this._isLoading = false;
-      });
-    }
   }
 
   // Установить текущую страницу

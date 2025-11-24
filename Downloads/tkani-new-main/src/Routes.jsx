@@ -15,7 +15,8 @@ import {
   DISCOUNTS_ROUTE,
   OUR_WORKS_ROUTE,
   PRIVACY_POLICY_ROUTE,
-  TERMS_OF_SERVICE_ROUTE
+  TERMS_OF_SERVICE_ROUTE,
+  WORK_DETAIL_ROUTE 
 } from "./utils/consts";
 
 import { Basket } from "./pages/basket/Basket";
@@ -36,6 +37,7 @@ import { OurWorks } from "./pages/ourWorks/OurWorks";
 import { PrivacyPolicy } from "./pages/privacyPolicy/PrivacyPolicy";
 import { TermsOfService } from "./pages/termsOfService/TermsOfService";
 import { Page404 } from "./pages/page404/Page404"; 
+import { WorkPage } from "./pages/WorkPage/WorkPage"; // Импортируйте компонент WorkPage
 
 export const authRoutes = [
   {
@@ -100,6 +102,10 @@ export const publicRoutes = [
   {
     path: TKAN_ROUTE + "/:id",
     element: <Tkanpage/>,
+  },
+  {
+    path: WORK_DETAIL_ROUTE, // Добавьте этот маршрут
+    element: <WorkPage/>,
   },
   {
     path: UIKIT_ROUTE,

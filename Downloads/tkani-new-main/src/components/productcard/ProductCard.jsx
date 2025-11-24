@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { TKAN_ROUTE } from "../../utils/consts";
+import { cartAPI } from "../../http/api";
+import { showToast } from "../../components/ui/Toast";
+import { Context } from "../../main";
 
 export const ProductCard = ({ product, showHover = false }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [quantity, setQuantity] = useState(1.0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   const location = useLocation();
+  const { user } = useContext(Context);
   
   // Сохраняем информацию о каталоге при переходе на товар
   const handleProductClick = () => {
@@ -38,6 +43,46 @@ export const ProductCard = ({ product, showHover = false }) => {
     e.stopPropagation();
     const newValue = quantity + 0.1;
     setQuantity(Math.round(newValue * 10) / 10);
+  };
+
+  const handleAddToCart = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Проверяем авторизацию
+    if (!user.isAuth) {
+      showToast('Для добавления в корзину необходимо авторизоваться', 'error');
+      return;
+    }
+
+    setIsAddingToCart(true);
+    
+    try {
+      console.log('🛒 Добавление товара в корзину:', {
+        productId: product.id,
+        productName: product.name,
+        quantity: quantity
+      });
+
+      const response = await cartAPI.addToCart(product.id, quantity);
+      
+      showToast('Товар добавлен в корзину', 'success');
+      console.log('✅ Товар успешно добавлен в корзину:', response);
+      
+    } catch (error) {
+      console.error('❌ Ошибка добавления в корзину:', error);
+      
+      if (error.status === 401) {
+        showToast('Сессия истекла. Пожалуйста, войдите снова', 'error');
+        localStorage.removeItem('authToken');
+      } else if (error.status === 404) {
+        showToast('Товар не найден', 'error');
+      } else {
+        showToast('Не удалось добавить товар в корзину', 'error');
+      }
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
   
   return (
@@ -204,14 +249,19 @@ export const ProductCard = ({ product, showHover = false }) => {
                   </p>
                 </div>
                 <button 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // Логика добавления в корзину
-                  }}
-                  className="bg-[#9B1E1C] flex gap-[10px] items-center justify-center px-[14px] py-[8px] rounded-[8px] w-full hover:bg-[#860202] transition-colors cursor-pointer"
+                  onClick={handleAddToCart}
+                  disabled={isAddingToCart}
+                  className={`flex gap-[10px] items-center justify-center px-[14px] py-[8px] rounded-[8px] w-full transition-colors cursor-pointer ${
+                    isAddingToCart 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-[#9B1E1C] hover:bg-[#860202]'
+                  }`}
                 >
-                  <p className="text-white text-[16.8px] font-medium leading-[24px]">В корзину</p>
+                  {isAddingToCart ? (
+                    <p className="text-white text-[16.8px] font-medium leading-[24px]">Добавление...</p>
+                  ) : (
+                    <p className="text-white text-[16.8px] font-medium leading-[24px]">В корзину</p>
+                  )}
                 </button>
               </div>
             </div>

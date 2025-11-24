@@ -7,10 +7,7 @@ import { ACCOUNT_ROUTE, LOGIN_ROUTE, SHOP_ROUTE, ABOUTUS_ROUTE, UIKIT_ROUTE, BAS
 import { Typebar } from "../typebar/Typebar";
 import { SearchInput } from "../search/SearchInput";
 
-
-
 export const NavBar = observer(() => {
-
     const {user, tkans} = useContext(Context)
     const location = useLocation();
     
@@ -29,6 +26,59 @@ export const NavBar = observer(() => {
     const handleMouseLeave = () => {
       if (window.innerWidth < 1024) return;
       timeoutRef.current = setTimeout(() => setIsOpen(false), 300);
+    };
+
+    // Функция для получения URL аватара
+    const getAvatarUrl = () => {
+      if (!user.user) {
+        console.log('❌ NavBar getAvatarUrl - пользователь не загружен');
+        return "https://i.pravatar.cc/100";
+      }
+
+      console.log('🔄 NavBar getAvatarUrl - данные пользователя:', user.user);
+      
+      // Strapi v4 формат: avatar как объект с data
+      if (user.user.avatar) {
+        // Формат 1: avatar имеет data и attributes (самый распространенный)
+        if (user.user.avatar.data && user.user.avatar.data.attributes) {
+          const url = `http://localhost:1337${user.user.avatar.data.attributes.url}`;
+          console.log('✅ NavBar Аватар найден (формат 1):', url);
+          return url;
+        }
+        
+        // Формат 2: avatar имеет url напрямую
+        if (user.user.avatar.url) {
+          const url = `http://localhost:1337${user.user.avatar.url}`;
+          console.log('✅ NavBar Аватар найден (формат 2):', url);
+          return url;
+        }
+        
+        // Формат 3: avatar - это ID файла
+        if (typeof user.user.avatar === 'number') {
+          const url = `http://localhost:1337/api/upload/files/${user.user.avatar}`;
+          console.log('✅ NavBar Аватар найден (формат 3):', url);
+          return url;
+        }
+
+        // Формат 4: avatar как массив
+        if (Array.isArray(user.user.avatar) && user.user.avatar.length > 0) {
+          const avatarData = user.user.avatar[0];
+          if (avatarData.url) {
+            const url = `http://localhost:1337${avatarData.url}`;
+            console.log('✅ NavBar Аватар найден (формат 4 - массив):', url);
+            return url;
+          }
+        }
+      }
+      
+      // Проверяем альтернативные поля
+      if (user.user.avatarUrl) {
+        console.log('✅ NavBar Аватар найден (avatarUrl):', user.user.avatarUrl);
+        return user.user.avatarUrl;
+      }
+      
+      console.log('❌ NavBar Аватар не найден, используем fallback');
+      return "https://i.pravatar.cc/100"; // fallback аватар
     };
 
     // Обработка клика на якорные ссылки AboutUs
@@ -203,8 +253,11 @@ export const NavBar = observer(() => {
                 <Avatar.Root className="inline-flex h-6 w-6 select-none items-center justify-center overflow-hidden rounded-full bg-gray-200 align-middle cursor-pointer hover:ring-2 hover:ring-accent transition-all">
                   <Avatar.Image
                     className="h-full w-full object-cover"
-                    src={user.user?.avatar || "https://i.pravatar.cc/100"}
+                    src={getAvatarUrl()}
                     alt="User avatar"
+                    onError={(e) => {
+                      e.target.src = "https://i.pravatar.cc/100";
+                    }}
                   />
                   <Avatar.Fallback
                     className="text-gray-700 text-sm font-medium"

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import styles from "./Basket.module.css";
 import { Breadcrumbs } from "../../components/breadcrumbs/Breadcrumbs";
-import { cartAPI } from "../../http/api";
+import { cartAPI, authAPI } from "../../http/api";
 import { SHOP_ROUTE, DISCOUNT_TIERS, CONTACT_PHONE, TELEGRAM_LINK } from "../../utils/consts";
 import { showToast } from "../../components/ui/Toast";
 
@@ -15,92 +15,136 @@ export const Basket = observer(() => {
   const [error, setError] = useState(null);
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [removingItems, setRemovingItems] = useState(new Set());
+  const [updatingItems, setUpdatingItems] = useState(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('Basket useEffect triggered, calling loadCart()');
-    loadCart();
+    console.log('Basket useEffect triggered, checking auth first...');
+    checkAuthAndLoadCart();
   }, []);
 
-  useEffect(() => {
-    // Обновляем состояние "Выбрать все" при изменении выбранных товаров
-    if (cartItems.length > 0) {
-      setSelectAll(selectedItems.size === cartItems.length && cartItems.length > 0);
+  const checkAuthAndLoadCart = async () => {
+    setIsCheckingAuth(true);
+    setError(null);
+    
+    try {
+      console.log('🔐 Проверяем авторизацию...');
+      const token = localStorage.getItem('authToken');
+      console.log('📱 Токен в localStorage:', token ? 'есть' : 'нет');
+      
+      if (!token) {
+        setError('Необходима авторизация для просмотра корзины');
+        setIsCheckingAuth(false);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        await authAPI.checkAuth();
+        console.log('✅ Авторизация подтверждена, загружаем корзину...');
+        await loadCart();
+      } catch (authError) {
+        console.error('❌ Ошибка авторизации:', authError);
+        localStorage.removeItem('authToken');
+        setError('Сессия истекла. Пожалуйста, войдите снова.');
+      }
+    } catch (error) {
+      console.error('❌ Ошибка проверки авторизации:', error);
+      setError('Ошибка проверки авторизации');
+    } finally {
+      setIsCheckingAuth(false);
     }
-  }, [selectedItems, cartItems]);
+  };
 
   const loadCart = async () => {
     setIsLoading(true);
     setError(null);
     
     console.log('=== Начало загрузки корзины ===');
-    console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1');
     
     try {
       console.log('Вызов cartAPI.getCart()...');
       const response = await cartAPI.getCart();
       
-      // Логируем ответ для отладки
-      console.log('=== Ответ от API ===');
+      console.log('=== Ответ от API корзины ===');
       console.log('Cart API Response:', response);
-      console.log('Тип ответа:', typeof response);
-      console.log('Является массивом:', Array.isArray(response));
       
-      // Обрабатываем разные форматы ответа
       let items = [];
       
-      // Новый формат: { items: [...] }
-      if (response && response.items && Array.isArray(response.items)) {
-        items = response.items;
-      }
-      // Формат: { data: { items: [...] } }
-      else if (response && response.data && response.data.items && Array.isArray(response.data.items)) {
+      if (response && response.data && response.data.items && Array.isArray(response.data.items)) {
         items = response.data.items;
+        console.log('✅ Используем формат: response.data.items');
+        
+        console.log('🔍 Детальная диагностика структуры товаров:');
+        items.forEach((item, index) => {
+          console.log(`📦 Товар ${index + 1}:`, {
+            cart_item_id: item.id,
+            product_id: item.product?.id,
+            product_name: item.product?.name,
+            quantity: item.quantity
+          });
+        });
       }
-      // Формат: { cart: [...] }
-      else if (response && response.cart && Array.isArray(response.cart)) {
-        items = response.cart;
-      }
-      // Формат: массив напрямую
-      else if (Array.isArray(response)) {
-        items = response;
-      }
-      // Формат: { data: [...] }
       else if (response && response.data && Array.isArray(response.data)) {
         items = response.data;
+        console.log('✅ Используем формат: response.data (массив)');
       }
-      // Если ответ пустой или null
+      else if (response && response.items && Array.isArray(response.items)) {
+        items = response.items;
+        console.log('✅ Используем формат: response.items');
+      }
+      else if (Array.isArray(response)) {
+        items = response;
+        console.log('✅ Используем формат: Array response');
+      }
       else if (!response) {
+        console.log('ℹ️ Пустой ответ от API корзины');
         items = [];
       }
-      // Неожиданный формат
       else {
-        console.warn('Неожиданный формат ответа корзины:', response);
+        console.warn('⚠️ Неожиданный формат ответа корзины:', response);
         items = [];
       }
       
-      if (import.meta.env.DEV) {
-        console.log('Parsed cart items:', items);
-      }
+      const validItems = items.filter(item => {
+        const hasProduct = !!item.product;
+        if (!hasProduct) {
+          console.warn('❌ Найден товар без продукта:', item);
+        }
+        return hasProduct;
+      });
       
-      setCartItems(items);
-      // Автоматически выбираем все товары при загрузке
-      if (items.length > 0) {
-        setSelectedItems(new Set(items.map(item => (item.product?.id || item.id))));
+      console.log('📦 Валидные товары в корзине:', validItems.length, 'из', items.length);
+      
+      setCartItems(validItems);
+      
+      if (validItems.length > 0) {
+        const itemIds = validItems.map(item => {
+          const product = item.product;
+          return product?.id;
+        }).filter(id => id != null);
+        
+        setSelectedItems(new Set(itemIds));
+        setSelectAll(true);
+        console.log('✅ Выбраны все товары:', itemIds);
       } else {
         setSelectedItems(new Set());
+        setSelectAll(false);
+        console.log('ℹ️ Корзина пуста, нет товаров для выбора');
       }
     } catch (error) {
-      console.error('Ошибка загрузки корзины:', error);
+      console.error('❌ Ошибка загрузки корзины:', error);
       console.error('Error details:', {
         message: error.message,
         status: error.status,
         statusText: error.statusText
       });
       
-      // Показываем более детальную ошибку
       if (error.status === 401) {
         setError('Необходима авторизация для просмотра корзины');
+        localStorage.removeItem('authToken');
       } else if (error.status === 404) {
         setError('Корзина не найдена');
       } else if (error.status >= 500) {
@@ -111,6 +155,7 @@ export const Basket = observer(() => {
       
       setCartItems([]);
       setSelectedItems(new Set());
+      setSelectAll(false);
     } finally {
       setIsLoading(false);
     }
@@ -119,56 +164,179 @@ export const Basket = observer(() => {
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedItems(new Set());
+      console.log('✅ Снят выбор со всех товаров');
     } else {
-      setSelectedItems(new Set(cartItems.map(item => (item.product?.id || item.id))));
+      const allItemIds = cartItems.map(item => item.product?.id).filter(id => id != null);
+      setSelectedItems(new Set(allItemIds));
+      console.log('✅ Выбраны все товары:', allItemIds);
     }
     setSelectAll(!selectAll);
   };
 
-  const handleSelectItem = (itemId) => {
+  const handleSelectItem = (productId) => {
     const newSelected = new Set(selectedItems);
-    if (newSelected.has(itemId)) {
-      newSelected.delete(itemId);
+    if (newSelected.has(productId)) {
+      newSelected.delete(productId);
+      console.log(`✅ Снят выбор с товара: ${productId}`);
     } else {
-      newSelected.add(itemId);
+      newSelected.add(productId);
+      console.log(`✅ Выбран товар: ${productId}`);
     }
     setSelectedItems(newSelected);
   };
 
+  const handleAddToCart = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  
+  // Проверяем авторизацию
+  if (!user.isAuth) {
+    showToast('Для добавления в корзину необходимо авторизоваться', 'error');
+    return;
+  }
+
+  setIsAddingToCart(true);
+  
+  try {
+    console.log('🛒 Добавление товара в корзину:', {
+      productId: product.id,
+      productName: product.name,
+      quantity: quantity
+    });
+
+    const response = await cartAPI.addToCart(product.id, quantity);
+    
+    showToast('Товар добавлен в корзину', 'success');
+    console.log('✅ Товар успешно добавлен в корзину:', response);
+    
+  } catch (error) {
+    console.error('❌ Ошибка добавления в корзину:', error);
+    
+    if (error.status === 401) {
+      showToast('Сессия истекла. Пожалуйста, войдите снова', 'error');
+      localStorage.removeItem('authToken');
+    } else if (error.status === 404) {
+      showToast('Товар не найден', 'error');
+    } else {
+      showToast('Не удалось добавить товар в корзину', 'error');
+    }
+  } finally {
+    setIsAddingToCart(false);
+  }
+}; 
+
+
   const handleRemoveItem = async (productId) => {
+    console.log(`🗑️ Удаление товара: ${productId}`);
+    
+    setRemovingItems(prev => new Set(prev).add(productId));
+    
     try {
       await cartAPI.removeFromCart(productId);
       showToast('Товар удален из корзины', 'success');
-      loadCart();
+      
+      const updatedItems = cartItems.filter(item => item.product?.id !== productId);
+      setCartItems(updatedItems);
+      
+      const newSelected = new Set(selectedItems);
+      newSelected.delete(productId);
+      setSelectedItems(newSelected);
+      
+      if (newSelected.size === 0) {
+        setSelectAll(false);
+      }
+      
+      console.log('✅ Товар удален из локального состояния');
+      
     } catch (error) {
-      console.error('Ошибка удаления товара:', error);
+      console.error('❌ Ошибка удаления товара:', error);
       showToast('Не удалось удалить товар', 'error');
+    } finally {
+      setRemovingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
+      
+      await loadCart();
     }
   };
 
   const handleUpdateQuantity = async (productId, newQuantity) => {
-    if (newQuantity <= 0) {
-      handleRemoveItem(productId);
+    console.log(`🔄 Обновление количества товара:`, {
+      productId,
+      newQuantity,
+      cartItems: cartItems.map(item => ({
+        productId: item.product?.id,
+        productName: item.product?.name,
+        quantity: item.quantity
+      }))
+    });
+    
+    // Проверка минимального количества
+    if (newQuantity < 0.5) {
+      showToast('Минимальное количество: 0.5 метра', 'error');
       return;
     }
+    
     if (newQuantity > 1000) {
       showToast('Максимальное количество: 1000 метров', 'error');
       return;
     }
+    
+    // Блокируем кнопку обновления
+    setUpdatingItems(prev => new Set(prev).add(productId));
+    
     try {
+      console.log('🎯 Отправка запроса обновления:', {
+        productId,
+        newQuantity
+      });
+      
       await cartAPI.updateCart(productId, newQuantity);
-      loadCart();
+      showToast('Количество обновлено', 'success');
+      await loadCart();
+      
     } catch (error) {
-      console.error('Ошибка обновления количества:', error);
-      showToast('Не удалось обновить количество', 'error');
+      console.error('❌ Ошибка обновления количества:', error);
+      
+      if (error.status === 400) {
+        showToast(error.message || 'Не удалось обновить количество', 'error');
+      } else {
+        showToast('Не удалось обновить количество', 'error');
+      }
+    } finally {
+      // Разблокируем кнопку обновления
+      setUpdatingItems(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(productId);
+        return newSet;
+      });
     }
   };
+
+  const handleLoginRedirect = () => {
+    navigate('/login');
+  };
+
+  console.log('🔍 Диагностика корзины на фронтенде:');
+  console.log('cartItems:', cartItems);
+  console.log('cartItems length:', cartItems.length);
+
+  if (isCheckingAuth) {
+    return (
+      <div className={styles.container}>
+        <Breadcrumbs />
+        <div className={styles.loading}>Проверка авторизации...</div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
       <div className={styles.container}>
         <Breadcrumbs />
-        <div className={styles.loading}>Загрузка...</div>
+        <div className={styles.loading}>Загрузка корзины...</div>
       </div>
     );
   }
@@ -177,13 +345,23 @@ export const Basket = observer(() => {
     return (
       <div className={styles.container}>
         <Breadcrumbs />
-        <div className={styles.error}>{error}</div>
+        <div className={styles.error}>
+          <p>{error}</p>
+          {error.includes('авторизация') && (
+            <button 
+              onClick={handleLoginRedirect}
+              className={styles.loginButton}
+            >
+              Войти в аккаунт
+            </button>
+          )}
+        </div>
       </div>
     );
   }
 
-  // Пустая корзина
   if (!cartItems || cartItems.length === 0) {
+    console.log('🛒 Корзина пуста, показываем empty state');
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -207,23 +385,19 @@ export const Basket = observer(() => {
     );
   }
 
-  // Расчет итогов
-  const selectedItemsList = cartItems.filter(item => {
-    const itemId = item.product?.id || item.id;
-    return selectedItems.has(itemId);
-  });
+  const selectedItemsList = cartItems.filter(item => 
+    selectedItems.has(item.product?.id)
+  );
 
   const subtotal = selectedItemsList.reduce((sum, item) => {
-    const product = item.product || item;
-    const price = product.price || item.price || 0;
+    const price = item.product?.price || 0;
     const quantity = item.quantity || 1;
     return sum + (price * quantity);
   }, 0);
 
   const discount = selectedItemsList.reduce((sum, item) => {
-    const product = item.product || item;
-    const originalPrice = product.price || item.price || 0;
-    const discountPrice = product.discountPrice || (originalPrice * (1 - (product.discount || 0) / 100));
+    const originalPrice = item.product?.price || 0;
+    const discountPrice = item.product?.discountPrice || (originalPrice * (1 - (item.product?.discount || 0) / 100));
     const quantity = item.quantity || 1;
     return sum + ((originalPrice - discountPrice) * quantity);
   }, 0);
@@ -259,50 +433,77 @@ export const Basket = observer(() => {
               </label>
             </div>
             <div className={styles.itemsList}>
-              {cartItems.map((item, index) => {
-                // Обрабатываем разные форматы данных из API
-                let product, itemId, quantity, originalPrice, discountPrice;
+              {cartItems.map((item) => {
+                const product = item.product;
+                const productId = product?.id;
+                const quantity = item.quantity || 1;
+                const originalPrice = product?.price || 0;
+                const discountPrice = product?.discountPrice || product?.discount_price || (originalPrice * (1 - (product?.discount || 0) / 100));
                 
-                // Формат 1: { product: {...}, quantity: ... }
-                if (item.product) {
-                  product = item.product;
-                  itemId = product.id || item.id;
-                  quantity = item.quantity || 1;
-                  originalPrice = product.price || 0;
-                  discountPrice = product.discountPrice || product.discount_price || (originalPrice * (1 - (product.discount || 0) / 100));
+                if (!productId) {
+                  console.warn('❌ Товар без ID:', item);
+                  return null;
                 }
-                // Формат 2: товар напрямую в item
-                else {
-                  product = item;
-                  itemId = item.id || item.product_id;
-                  quantity = item.quantity || 1;
-                  originalPrice = item.price || 0;
-                  discountPrice = item.discountPrice || item.discount_price || (originalPrice * (1 - (item.discount || 0) / 100));
-                }
-                
-                // Логируем для отладки
-                if (import.meta.env.DEV && index === 0) {
-                  console.log('Sample cart item structure:', {
-                    rawItem: item,
-                    parsedProduct: product,
-                    itemId,
-                    quantity,
-                    originalPrice,
-                    discountPrice
-                  });
-                }
-                
-                const isSelected = selectedItems.has(itemId);
+
+                const isSelected = selectedItems.has(productId);
                 const hasDiscount = discountPrice < originalPrice;
+                const isUpdating = updatingItems.has(productId);
+
+                const getProductName = () => {
+                  if (product.name) return product.name;
+                  if (product.title) return product.title;
+                  if (product.product_name) return product.product_name;
+                  return 'Товар без названия';
+                };
+
+                const getImageUrl = () => {
+                  if (product.images && product.images.length > 0) {
+                    const image = product.images[0];
+                    
+                    if (image.attributes && image.attributes.url) {
+                      return `http://localhost:1337${image.attributes.url}`;
+                    }
+                    if (image.url) {
+                      return image.url.startsWith('http') ? image.url : `http://localhost:1337${image.url}`;
+                    }
+                    if (image.formats) {
+                      const sizes = ['thumbnail', 'small', 'medium', 'large'];
+                      for (const size of sizes) {
+                        if (image.formats[size] && image.formats[size].url) {
+                          const url = image.formats[size].url;
+                          return url.startsWith('http') ? url : `http://localhost:1337${url}`;
+                        }
+                      }
+                      if (image.url) {
+                        return image.url.startsWith('http') ? image.url : `http://localhost:1337${image.url}`;
+                      }
+                    }
+                    if (typeof image === 'string') {
+                      return image.startsWith('http') ? image : `http://localhost:1337${image}`;
+                    }
+                  }
+                  
+                  if (product.image) {
+                    return product.image.startsWith('http') ? product.image : `http://localhost:1337${product.image}`;
+                  }
+                  if (product.img) {
+                    return product.img.startsWith('http') ? product.img : `http://localhost:1337${product.img}`;
+                  }
+                  
+                  return '/placeholder-product.jpg';
+                };
+
+                const productName = getProductName();
+                const imageUrl = getImageUrl();
 
                 return (
-                  <div key={itemId} className={styles.cartItem}>
+                  <div key={item.id} className={styles.cartItem}>
                     <div className={styles.itemLeft}>
                       <label className={styles.checkboxLabel}>
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => handleSelectItem(itemId)}
+                          onChange={() => handleSelectItem(productId)}
                           className={styles.checkboxInput}
                         />
                         <div className={`${styles.checkboxCustom} ${isSelected ? styles.checkboxChecked : ''}`}>
@@ -316,38 +517,41 @@ export const Basket = observer(() => {
                       <div className={styles.itemContent}>
                         <div className={styles.itemImage}>
                           <img 
-                            src={product.image || product.img || product.images?.[0] || '/placeholder-product.jpg'} 
-                            alt={product.name || product.title || 'Товар'}
+                            src={imageUrl}
+                            alt={productName}
                             onError={(e) => {
                               e.target.src = '/placeholder-product.jpg';
                             }}
                           />
                         </div>
                         <div className={styles.itemInfo}>
-                          <h3 className={styles.itemName}>{product.name || product.title || 'Без названия'}</h3>
+                          <h3 className={styles.itemName}>{productName}</h3>
                           <div className={styles.quantityControl}>
                             <button
                               className={styles.quantityButton}
-                              onClick={() => handleUpdateQuantity(itemId, quantity - 0.1)}
-                              disabled={quantity <= 0.1}
+                              onClick={() => handleUpdateQuantity(productId, quantity - 0.1)}
+                              disabled={quantity <= 0.5 || isUpdating}
                             >
                               <span>-</span>
                             </button>
                             <input
                               type="number"
                               step="0.1"
+                              min="0.5"
                               value={quantity}
                               onChange={(e) => {
                                 const value = parseFloat(e.target.value);
-                                if (!isNaN(value) && value >= 0.1) {
-                                  handleUpdateQuantity(itemId, value);
+                                if (!isNaN(value) && value >= 0.5) {
+                                  handleUpdateQuantity(productId, value);
                                 }
                               }}
                               className={styles.quantityInput}
+                              disabled={isUpdating}
                             />
                             <button
                               className={styles.quantityButton}
-                              onClick={() => handleUpdateQuantity(itemId, quantity + 0.1)}
+                              onClick={() => handleUpdateQuantity(productId, quantity + 0.1)}
+                              disabled={isUpdating}
                             >
                               <span>+</span>
                             </button>
@@ -368,12 +572,19 @@ export const Basket = observer(() => {
                       </div>
                       <button
                         className={styles.removeButton}
-                        onClick={() => handleRemoveItem(itemId)}
+                        onClick={() => handleRemoveItem(productId)}
+                        disabled={removingItems.has(productId) || isUpdating}
                         aria-label="Удалить товар"
                       >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18 6L6 18M6 6L18 18" stroke="#888888" strokeWidth="1.5" strokeLinecap="round"/>
-                        </svg>
+                        {removingItems.has(productId) ? (
+                          <div className={styles.removeSpinner}>
+                            <span>...</span>
+                          </div>
+                        ) : (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="#888888" strokeWidth="1.5" strokeLinecap="round"/>
+                          </svg>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -421,25 +632,13 @@ export const Basket = observer(() => {
             </p>
           </div>
           <div className={styles.socialLinks}>
-            <a 
-              href={TELEGRAM_LINK} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className={styles.socialLink}
-              aria-label="Telegram"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <a href={TELEGRAM_LINK} target="_blank" rel="noopener noreferrer" className={styles.socialLink}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM16.64 8.8C16.49 10.38 15.84 14.22 15.51 15.99C15.37 16.74 15.09 16.99 14.83 17.02C14.25 17.07 13.81 16.64 13.25 16.27C12.37 15.69 11.87 15.33 11.02 14.77C10.03 14.12 10.67 13.76 11.24 13.18C11.39 13.03 14.95 9.7 15.02 9.37C15.03 9.3 15.03 9.13 14.93 9.05C14.84 8.97 14.7 9 14.59 9.02C14.43 9.05 12.34 10.24 8.31 12.58C7.71 12.94 7.17 13.11 6.69 13.1C6.15 13.08 5.1 12.84 4.29 12.63C3.33 12.38 2.57 12.25 2.63 11.76C2.66 11.52 2.98 11.28 3.55 11.03C7.31 9.25 10.13 8.01 12.01 7.31C15.7 5.89 16.4 5.66 16.9 5.66C16.99 5.66 17.21 5.68 17.36 5.81C17.49 5.92 17.53 6.06 17.55 6.15C17.57 6.24 17.59 6.45 17.57 6.6L16.64 8.8Z" fill="#9B1E1C"/>
               </svg>
             </a>
-            <a 
-              href={`https://wa.me/${CONTACT_PHONE.replace('+', '')}`}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className={styles.socialLink}
-              aria-label="WhatsApp"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <a href={`https://wa.me/${CONTACT_PHONE.replace('+', '')}`} target="_blank" rel="noopener noreferrer" className={styles.socialLink}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" fill="#9B1E1C"/>
               </svg>
             </a>

@@ -38,23 +38,58 @@ export default class UserStore {
   constructor() {
     this._isAuth = false;
     this._user = {};
-    this._isLoading = false;
+    this._isLoading = true;
     this._error = null;
+    this._isInitialized = false;
     
     makeAutoObservable(this);
     
-    // Проверяем токен при инициализации
-    this.checkAuth();
+    // Синхронизируем токен с API service при инициализации
+    this.syncTokenWithAPI();
+    this.initialize();
+  }
+
+  // Синхронизация токена между localStorage и API service
+  syncTokenWithAPI() {
+    const token = localStorage.getItem('authToken') || cookieUtils.get('authToken');
+    console.log('🔄 Синхронизация токена с API:', token ? 'есть' : 'нет');
+    
+    if (token) {
+      api.setAuthToken(token);
+      this._isAuth = true;
+    } else {
+      api.setAuthToken(null);
+      this._isAuth = false;
+    }
+  }
+
+  // Асинхронная инициализация
+  async initialize() {
+    try {
+      await this.checkAuth();
+    } catch (error) {
+      console.error('❌ Ошибка инициализации UserStore:', error);
+    } finally {
+      runInAction(() => {
+        this._isInitialized = true;
+        this._isLoading = false;
+      });
+    }
   }
 
   async checkAuth() {
     try {
-      const token = cookieUtils.get('authToken');
+      // Сначала синхронизируем токен
+      this.syncTokenWithAPI();
+      
+      const token = localStorage.getItem('authToken') || cookieUtils.get('authToken');
       console.log('🔐 Проверка авторизации, токен:', token ? 'есть' : 'нет');
       
       if (!token) {
-        this.setIsAuth(false);
-        this.setUser({});
+        runInAction(() => {
+          this._isAuth = false;
+          this._user = {};
+        });
         return;
       }
 
@@ -62,7 +97,7 @@ export default class UserStore {
       api.setAuthToken(token);
 
       const userData = await authAPI.checkAuth();
-      console.log('✅ Данные пользователя:', userData);
+      console.log('✅ Данные пользователя из checkAuth:', userData);
       
       runInAction(() => {
         this._user = userData;
@@ -71,92 +106,195 @@ export default class UserStore {
 
     } catch (error) {
       console.error('❌ Ошибка проверки авторизации:', error);
-      this.clearAuth();
+      // При ошибке 401 просто сбрасываем авторизацию
+      if (error.status === 401) {
+        runInAction(() => {
+          this._isAuth = false;
+          this._user = {};
+        });
+        this.clearAuth();
+      }
     }
   }
 
- // В UserStore обновляем метод updateProfile:
-
-async updateProfile(userData) {
-  try {
-    console.log('🔄 updateProfile - исходные данные:', userData);
-    
-    // Проверяем авторизацию
-    console.log('🔐 updateProfile - Статус авторизации:', this._isAuth);
-    
-    // Получаем токен из куки и устанавливаем его
-    const token = cookieUtils.get('authToken');
-    console.log('🔐 updateProfile - Токен из куки:', token ? 'есть' : 'нет');
-    
-    if (token) {
-      api.setAuthToken(token);
-      console.log('🔐 Токен установлен в API');
-    } else {
-      console.error('❌ Токен не найден в куках');
-      return { 
-        success: false, 
-        error: 'Токен авторизации не найден. Пожалуйста, войдите заново.'
-      };
-    }
-    
-    const response = await authAPI.updateProfile(userData);
-    console.log('✅ updateProfile - успешный ответ:', response);
-    
-    // Обновляем данные пользователя в сторе из ответа сервера
-    runInAction(() => {
-      // Обновляем все поля из ответа
-      if (response.firstName !== undefined) {
-        this._user.firstName = response.firstName;
-      }
-      if (response.lastName !== undefined) {
-        this._user.lastName = response.lastName;
-      }
-      if (response.email !== undefined) {
-        this._user.email = response.email;
+  async updateProfile(userData) {
+    try {
+      console.log('🔄 updateProfile - исходные данные:', userData);
+      
+      // Проверяем авторизацию
+      console.log('🔐 updateProfile - Статус авторизации:', this._isAuth);
+      
+      // Получаем токен из куки и устанавливаем его
+      const token = cookieUtils.get('authToken');
+      console.log('🔐 updateProfile - Токен из куки:', token ? 'есть' : 'нет');
+      
+      if (token) {
+        api.setAuthToken(token);
+        console.log('🔐 Токен установлен в API');
+      } else {
+        console.error('❌ Токен не найден в куках');
+        return { 
+          success: false, 
+          error: 'Токен авторизации не найден. Пожалуйста, войдите заново.'
+        };
       }
       
-      // Также обновляем альтернативные имена полей для совместимости
-      if (response.firstName !== undefined) {
-        this._user.firstname = response.firstName;
+      const response = await authAPI.updateProfile(userData);
+      console.log('✅ updateProfile - успешный ответ:', response);
+      
+      // Обновляем данные пользователя в сторе из ответа сервера
+      runInAction(() => {
+        // Обновляем все поля из ответа
+        if (response.firstName !== undefined) {
+          this._user.firstName = response.firstName;
+        }
+        if (response.lastName !== undefined) {
+          this._user.lastName = response.lastName;
+        }
+        if (response.email !== undefined) {
+          this._user.email = response.email;
+        }
+        
+        // Также обновляем альтернативные имена полей для совместимости
+        if (response.firstName !== undefined) {
+          this._user.firstname = response.firstName;
+        }
+        if (response.lastName !== undefined) {
+          this._user.lastname = response.lastName;
+        }
+      });
+      
+      console.log('🔄 Данные пользователя после обновления в сторе:', this._user);
+      
+      return { success: true, data: response };
+    } catch (error) {
+      console.error('❌ updateProfile - ошибка:', error);
+      
+      // Если ошибка авторизации, НЕ очищаем данные автоматически
+      if (error.status === 401) {
+        return { 
+          success: false, 
+          error: 'Ошибка авторизации. Проверьте правильность данных.'
+        };
       }
-      if (response.lastName !== undefined) {
-        this._user.lastname = response.lastName;
-      }
-    });
-    
-    console.log('🔄 Данные пользователя после обновления в сторе:', this._user);
-    
-    return { success: true, data: response };
-  } catch (error) {
-    console.error('❌ updateProfile - ошибка:', error);
-    
-    // Если ошибка авторизации, НЕ очищаем данные автоматически
-    if (error.status === 401) {
+      
       return { 
         success: false, 
-        error: 'Ошибка авторизации. Проверьте правильность данных.'
+        error: error.message || 'Ошибка обновления профиля'
       };
     }
-    
-    return { 
-      success: false, 
-      error: error.message || 'Ошибка обновления профиля'
-    };
   }
-}
 
-  // Очистка авторизации
-  clearAuth() {
-    runInAction(() => {
-      this._isAuth = false;
-      this._user = {};
-      this._error = null;
-      this._isLoading = false;
-    });
-    
-    // Удаляем все данные авторизации
-    api.setAuthToken(null);
-    cookieUtils.remove('authToken');
+  // Загрузка аватара
+  async uploadAvatar(file) {
+    try {
+      console.log('🔄 UserStore.uploadAvatar - начало загрузки файла:', file.name);
+      
+      const token = cookieUtils.get('authToken');
+      if (!token) {
+        return { 
+          success: false, 
+          error: 'Токен авторизации не найден' 
+        };
+      }
+
+      // Создаем FormData для загрузки файла
+      const formData = new FormData();
+      formData.append('files', file);
+      
+      // Загружаем файл через Strapi Upload
+      console.log('📤 Загружаем файл на сервер...');
+      const uploadResponse = await api.post('/upload', formData, true, true);
+      console.log('✅ Файл загружен:', uploadResponse);
+
+      if (uploadResponse && uploadResponse.length > 0) {
+        const fileId = uploadResponse[0].id;
+        console.log('📝 ID загруженного файла:', fileId);
+        
+        // Обновляем пользователя, привязывая аватар
+        const updateData = {
+          avatar: fileId
+        };
+        
+        console.log('🔄 Обновляем профиль пользователя с аватаром...');
+        const updateResponse = await authAPI.updateProfile(updateData);
+        console.log('✅ Профиль обновлен:', updateResponse);
+        
+        // ОБНОВЛЯЕМ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ В STORE
+        runInAction(() => {
+          // Сохраняем аватар в формате Strapi v4
+          this._user.avatar = {
+            data: {
+              id: uploadResponse[0].id,
+              attributes: uploadResponse[0]
+            }
+          };
+        });
+        
+        // ПЕРЕЗАГРУЖАЕМ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ
+        await this.checkAuth();
+        
+        return { 
+          success: true, 
+          message: 'Аватар успешно обновлен',
+          avatar: uploadResponse[0]
+        };
+      } else {
+        return { 
+          success: false, 
+          error: 'Ошибка загрузки файла' 
+        };
+      }
+    } catch (error) {
+      console.error('❌ UserStore.uploadAvatar - ошибка:', error);
+      return { 
+        success: false, 
+        error: error.message || 'Ошибка загрузки аватара' 
+      };
+    }
+  }
+
+  // Удаление аватара
+  async removeAvatar() {
+    try {
+      console.log('🔄 UserStore.removeAvatar - удаление аватара');
+      
+      const token = cookieUtils.get('authToken');
+      if (!token) {
+        return { 
+          success: false, 
+          error: 'Токен авторизации не найден' 
+        };
+      }
+
+      // Обновляем пользователя, убирая аватар
+      const updateData = {
+        avatar: null
+      };
+      
+      console.log('🔄 Удаляем аватар из профиля...');
+      const updateResponse = await authAPI.updateProfile(updateData);
+      console.log('✅ Аватар удален:', updateResponse);
+      
+      // ОБНОВЛЯЕМ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ В STORE
+      runInAction(() => {
+        this._user.avatar = null;
+      });
+      
+      // ПЕРЕЗАГРУЖАЕМ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ
+      await this.checkAuth();
+      
+      return { 
+        success: true, 
+        message: 'Аватар успешно удален'
+      };
+    } catch (error) {
+      console.error('❌ UserStore.removeAvatar - ошибка:', error);
+      return { 
+        success: false, 
+        error: error.message || 'Ошибка удаления аватара' 
+      };
+    }
   }
 
   // Вход
@@ -169,14 +307,17 @@ async updateProfile(userData) {
     try {
       const response = await authAPI.login(email, password);
       
-      // Strapi возвращает jwt и user в ответе
       const token = response.jwt;
       
       if (token) {
+        // Сохраняем во всех местах
         api.setAuthToken(token);
-        // Сохраняем в куки
+        localStorage.setItem('authToken', token);
+        
         const days = rememberMe ? 30 : 7;
         cookieUtils.set('authToken', token, days);
+        
+        console.log('🔐 Токен сохранен во всех хранилищах');
       }
 
       runInAction(() => {
@@ -281,6 +422,29 @@ async updateProfile(userData) {
     console.log('🔵 Пользователь вышел из системы');
   }
 
+  // Очистка авторизации из всех мест
+  clearAuth() {
+    runInAction(() => {
+      this._isAuth = false;
+      this._user = {};
+      this._error = null;
+      this._isLoading = false;
+    });
+    
+    // Удаляем все данные авторизации
+    api.setAuthToken(null);
+    localStorage.removeItem('authToken');
+    cookieUtils.remove('authToken');
+    
+    console.log('🔐 Все данные авторизации очищены');
+  }
+
+  // Метод для принудительной синхронизации
+  forceTokenSync() {
+    this.syncTokenWithAPI();
+  }
+
+  // Сеттеры
   setIsAuth(bool) {
     this._isAuth = bool;
   }
@@ -289,6 +453,7 @@ async updateProfile(userData) {
     this._user = user;
   }
 
+  // Геттеры
   get isAuth() {
     return this._isAuth;
   }
@@ -303,5 +468,9 @@ async updateProfile(userData) {
 
   get error() {
     return this._error;
+  }
+
+  get token() {
+    return localStorage.getItem('authToken') || cookieUtils.get('authToken');
   }
 }
