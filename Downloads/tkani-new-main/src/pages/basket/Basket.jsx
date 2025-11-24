@@ -263,57 +263,53 @@ export const Basket = observer(() => {
   };
 
   const handleUpdateQuantity = async (productId, newQuantity) => {
-    console.log(`🔄 Обновление количества товара:`, {
+  console.log(`🔄 Обновление количества товара:`, {
+    productId,
+    newQuantity
+  });
+  
+  // Проверка минимального количества
+  if (newQuantity < 0.5) {
+    showToast('Минимальное количество: 0.5 метра', 'error');
+    return;
+  }
+  
+  if (newQuantity > 1000) {
+    showToast('Максимальное количество: 1000 метров', 'error');
+    return;
+  }
+  
+  // Блокируем кнопку обновления
+  setUpdatingItems(prev => new Set(prev).add(productId));
+  
+  try {
+    console.log('🎯 Отправка запроса обновления через addToCart:', {
       productId,
-      newQuantity,
-      cartItems: cartItems.map(item => ({
-        productId: item.product?.id,
-        productName: item.product?.name,
-        quantity: item.quantity
-      }))
+      newQuantity
     });
     
-    // Проверка минимального количества
-    if (newQuantity < 0.5) {
-      showToast('Минимальное количество: 0.5 метра', 'error');
-      return;
-    }
+    // Используем addToCart вместо updateCart - он правильно сохраняет связи
+    await cartAPI.addToCart(productId, newQuantity);
+    showToast('Количество обновлено', 'success');
+    await loadCart();
     
-    if (newQuantity > 1000) {
-      showToast('Максимальное количество: 1000 метров', 'error');
-      return;
-    }
+  } catch (error) {
+    console.error('❌ Ошибка обновления количества:', error);
     
-    // Блокируем кнопку обновления
-    setUpdatingItems(prev => new Set(prev).add(productId));
-    
-    try {
-      console.log('🎯 Отправка запроса обновления:', {
-        productId,
-        newQuantity
-      });
-      
-      await cartAPI.updateCart(productId, newQuantity);
-      showToast('Количество обновлено', 'success');
-      await loadCart();
-      
-    } catch (error) {
-      console.error('❌ Ошибка обновления количества:', error);
-      
-      if (error.status === 400) {
-        showToast(error.message || 'Не удалось обновить количество', 'error');
-      } else {
-        showToast('Не удалось обновить количество', 'error');
-      }
-    } finally {
-      // Разблокируем кнопку обновления
-      setUpdatingItems(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(productId);
-        return newSet;
-      });
+    if (error.status === 400) {
+      showToast(error.message || 'Не удалось обновить количество', 'error');
+    } else {
+      showToast('Не удалось обновить количество', 'error');
     }
-  };
+  } finally {
+    // Разблокируем кнопку обновления
+    setUpdatingItems(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(productId);
+      return newSet;
+    });
+  }
+};
 
   const handleLoginRedirect = () => {
     navigate('/login');
@@ -612,9 +608,12 @@ export const Basket = observer(() => {
                 <span className={styles.summaryTotalValue}>{Math.round(total)} ₽</span>
               </div>
             </div>
-            <button className={styles.checkoutButton}>
-              Оформить заказ
-            </button>
+            <button 
+  className={styles.checkoutButton}
+  onClick={() => navigate('/checkout')}
+>
+  Оформить заказ
+</button>
           </div>
           <div className={styles.discountInfo}>
             <p>

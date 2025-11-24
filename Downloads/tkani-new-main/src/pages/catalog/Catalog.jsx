@@ -129,7 +129,7 @@ export const Catalog = observer(() => {
 
   return (
     <div className="flex flex-col gap-[10px] items-center px-0 py-[20px] w-full min-h-screen bg-[#F1F0EE]">
-        <div className="flex flex-col gap-[16px] items-start w-full max-w-[1440px] px-[20px] sm:px-[50px]">
+        <div className={`flex flex-col gap-[16px] items-start w-full max-w-[1440px] px-[20px] sm:px-[50px] ${styles.containerPadding}`}>
           {/* Breadcrumbs */}
           <div className="flex gap-[8px] items-center py-0 w-full">
             <Breadcrumbs />
@@ -143,11 +143,11 @@ export const Catalog = observer(() => {
           </h1>
         </div>
 
-        <div className="flex flex-col gap-[16px] items-start w-full max-w-[1440px] px-[20px] sm:px-[50px]">
+        <div className={`flex flex-col gap-[16px] items-start w-full max-w-[1440px] px-[20px] sm:px-[50px] ${styles.containerPadding}`}>
           {/* Основной контент */}
-          <div className="flex flex-col lg:flex-row gap-[32px] items-start py-0 w-full">
+          <div className={`flex items-start py-0 w-full ${styles.catalogLayout}`}>
             {/* Боковая панель навигации */}
-            <div className="flex flex-col gap-[5px] items-start w-full lg:w-[300px] shrink-0">
+            <div className={`flex flex-col gap-[5px] items-start shrink-0 ${styles.sidebar}`}>
               {fabricTypes.map((type) => {
                 if (!shouldShowFilter(type)) return null;
                 
@@ -206,7 +206,7 @@ export const Catalog = observer(() => {
             </div>
 
             {/* Сетка товаров */}
-            <div className="flex flex-[1_0_0] flex-col items-start min-h-px min-w-px w-full">
+            <div className="flex flex-1 flex-col items-start min-w-0 w-full">
               <div className="flex flex-col gap-[24px] items-start w-full">
                 {/* Заголовок и количество товаров */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-[10px] w-full">
@@ -237,7 +237,7 @@ export const Catalog = observer(() => {
                 {/* Сетка товаров */}
                 {!tkans.isLoading && !tkans.error && (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[16px] w-full">
+                    <div className={`grid w-full ${styles.productsGrid}`}>
                       {currentProducts.map((product) => (
                         <ProductCard key={product.id} product={product} showHover={true} />
                       ))}

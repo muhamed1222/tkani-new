@@ -30,14 +30,14 @@ export const Discounts = observer(() => {
           </div>
         </div>
 
-        {/* Сетка товаров - 4 колонки */}
-        <div className="flex flex-col gap-[16px] items-start w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px] w-full">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} showHover={true} />
-            ))}
-          </div>
+        {/* Сетка товаров - адаптивная */}
+      <div className="flex flex-col gap-[16px] items-start w-full">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 w-full">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} showHover={true} />
+          ))}
         </div>
+      </div>
       </div>
     </div>
   );

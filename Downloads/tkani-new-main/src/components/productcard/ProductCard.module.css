@@ -1,0 +1,384 @@
+/* Базовые стили для карточки товара */
+.productCard {
+  height: 457px;
+}
+
+/* Контейнер изображения */
+.imageContainer {
+  height: 380px;
+  overflow: hidden;
+  position: relative;
+  border-radius: 10px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* Изображение товара */
+.productImage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+}
+
+/* Индикатор точек */
+.dotsIndicator {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  padding: 3px;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(5px);
+  z-index: 10;
+}
+
+.dotLarge {
+  width: 14px;
+  height: 4px;
+  border-radius: 17px;
+  background: white;
+}
+
+.dotSmall {
+  width: 4px;
+  height: 4px;
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.60);
+}
+
+/* Контент по умолчанию */
+.defaultContent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  padding-top: 14px;
+  padding-left: 10px;
+  padding-right: 10px;
+  width: 100%;
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.productName {
+  color: #101010;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: pre-wrap;
+}
+
+.priceContainer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.productPrice {
+  color: #9B1E1C;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Стили для hover карточки */
+.hoverCard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1.2px solid rgba(16, 16, 16, 0.1);
+  border-radius: 20px;
+  padding: 10px;
+  z-index: 20;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.hoverCardVisible {
+  opacity: 1;
+  height: 608px;
+}
+
+.hoverCardHidden {
+  opacity: 0;
+  height: 457px;
+  pointer-events: none;
+}
+
+.productLink {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+/* Контент при hover */
+.hoverContent {
+  position: relative;
+  z-index: 20;
+  transition: all 0.3s ease;
+}
+
+.hoverContentVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hoverContentHidden {
+  opacity: 0;
+  transform: translateY(-16px);
+}
+
+.hoverActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10px;
+  width: 100%;
+}
+
+.discountNote {
+  color: #888888;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.2;
+  white-space: pre-wrap;
+  width: 100%;
+}
+
+.actionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.quantityPriceRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.quantitySelector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.quantityControls {
+  background: #E4E2DF;
+  border: 1px solid #E4E2DF;
+  border-radius: 8px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.quantityButton {
+  display: flex;
+  gap: 10px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  width: 50px;
+  transition: opacity 0.2s ease;
+  border: none;
+}
+
+.quantityButtonActive {
+  background: white;
+  border-right: 1.2px solid rgba(16, 16, 16, 0.15);
+  cursor: pointer;
+}
+
+.quantityButtonActive:hover {
+  background: #f9f9f9;
+}
+
+.quantityButtonDisabled {
+  background: white;
+  border-right: 1.2px solid rgba(16, 16, 16, 0.15);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.quantityButtonText {
+  color: #888888;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.quantityInput {
+  background: #E4E2DE;
+  height: 46px;
+  padding: 8px 14px;
+  width: 64px;
+  color: #101010;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  border: none;
+  outline: none;
+  appearance: textfield;
+}
+
+.quantityInput::-webkit-outer-spin-button,
+.quantityInput::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.totalPrice {
+  color: #101010;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Строка кнопок */
+.buttonsRow {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.cartButton,
+.buyButton {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 8px;
+  width: 50%;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+  border: none;
+  font-size: 16.8px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+.cartButtonActive {
+  background: #9B1E1C;
+  color: white;
+}
+
+.cartButtonActive:hover {
+  background: #860202;
+}
+
+.cartButtonDisabled {
+  background: #9B1E1C;
+  color: white;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.buyButtonActive {
+  background: #101010;
+  color: white;
+}
+
+.buyButtonActive:hover {
+  background: #333333;
+}
+
+.buyButtonDisabled {
+  background: #101010;
+  color: white;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.buttonText {
+  color: inherit;
+  font-size: 16.8px;
+  font-weight: 500;
+  line-height: 24px;
+}
+
+/* Стили для мобильных устройств (до 743px) */
+@media (max-width: 743px) {
+  .productCard {
+    height: auto;
+    min-height: 457px;
+  }
+
+  .imageContainer {
+    height: 280px;
+  }
+
+  .productImage {
+    height: 280px;
+    width: 280px;
+    object-fit: cover;
+  }
+
+  .hoverCardVisible {
+    height: auto;
+    min-height: 520px;
+  }
+}
+
+/* Стили для планшетов (744px - 1023px) */
+@media (max-width: 1023px) and (min-width: 744px) {
+  .imageContainer {
+    height: 320px;
+  }
+
+  .productImage {
+    height: 320px;
+    width: 320px;
+    object-fit: cover;
+  }
+
+  .hoverCardVisible {
+    height: auto;
+    min-height: 560px;
+  }
+}
+
+/* Стили для десктопа (1024px и выше) */
+@media (min-width: 1024px) {
+  .productImage {
+    height: 433px;
+    width: 338px;
+  }
+
+  .buttonsRow {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cartButton,
+  .buyButton {
+    width: 100%;
+  }
+}

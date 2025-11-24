@@ -278,16 +278,16 @@ export const NavBar = observer(() => {
 
             {/* Бургер меню — мобильная версия */}
             <button
-              className="lg:hidden p-2 rounded-md hover:bg-gray-100"
+              className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
               onClick={() => setMobileNav(!mobileNav)}
             >
               {mobileNav ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18M6 6L18 18" stroke="#101010" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 12H21M3 6H21M3 18H21" stroke="#101010" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               )}
             </button>
@@ -316,76 +316,201 @@ export const NavBar = observer(() => {
         </div>
       </div>
 
-      {/* ====== Мобильное меню (выезжает справа) ====== */}
-      <div
-        className={`fixed top-0 right-0 h-full w-64 bg-[#F1F0EE] shadow-lg border-l border-dark/10 transform transition-transform duration-300 z-40 ${
-          mobileNav ? "translate-x-0" : "translate-x-full"
-        }`}
-      >
-        <div className="flex justify-between items-center px-4 py-3 border-b">
-          <h2 className="font-semibold text-lg">Меню</h2>
-          <button onClick={() => setMobileNav(false)}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+      {/* ====== Мобильное меню (полноэкранное) ====== */}
+<div
+  className={`fixed inset-0 bg-[#F1F0EE] z-40 transform transition-transform duration-300 ${
+    mobileNav ? "translate-x-0" : "translate-x-full"
+  }`}
+>
+  {/* Шапка мобильного меню */}
+  <div className="flex justify-between items-center px-6 py-4 border-b border-[#e4e2de]">
+    {/* Крестик слева - прижат к левому краю */}
+    <button 
+      onClick={() => setMobileNav(false)}
+      className="p-2 hover:bg-white rounded-lg transition-colors"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M18 6L6 18M6 6L18 18" stroke="#101010" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </button>
 
-        <nav className="flex flex-col gap-3 p-4">
-          <NavLink to={ABOUTUS_ROUTE} className="hover:text-accent">О нас</NavLink>
-          {/* <NavLink to={UIKIT_ROUTE} className="hover:text-accent">UI Kit</NavLink> */}
-          <Link 
-            to={`${ABOUTUS_ROUTE}#pay`} 
-            onClick={(e) => {
-              handleAboutUsLinkClick(e, '#pay');
-              setMobileNav(false);
-            }}
-            className="hover:text-accent"
-          >
-            Оплата и доставка
-          </Link>
-          <Link 
-            to={`${ABOUTUS_ROUTE}#questions`} 
-            onClick={(e) => {
-              handleAboutUsLinkClick(e, '#questions');
-              setMobileNav(false);
-            }}
-            className="hover:text-accent"
-          >
-            Часто задаваемые вопросы
-          </Link>
-          <Link 
-            to={`${ABOUTUS_ROUTE}#contacts`} 
-            onClick={(e) => {
-              handleAboutUsLinkClick(e, '#contacts');
-              setMobileNav(false);
-            }}
-            className="hover:text-accent"
-          >
-            Контакты
-          </Link>
-          <hr />
-          <Link to="/our_works" className="hover:text-accent">Работы из наших тканей</Link>
-          <Link to="/discounts" className="hover:text-accent">Скидки и акции</Link>
-        </nav>
+    {/* Логотип по центру */}
+    <NavLink 
+      to={SHOP_ROUTE} 
+      onClick={() => setMobileNav(false)}
+      className="flex items-center gap-2"
+    >
+      <div className="flex items-center justify-center w-8 h-8 bg-[#F1F0EE] rounded-lg">
+        <img src="/Logo Icon.svg" alt="Логотип" className="w-6 h-3" />
+      </div>
+      <img
+        src="/CENTER TKANI.svg"
+        alt="CENTER TKANI"
+        className="h-3 w-20"
+      />
+    </NavLink>
+
+    {/* Правая часть - поиск и корзина */}
+    <div className="flex items-center gap-3">
+      {/* Поиск */}
+      <button
+        onClick={() => {
+          setShowSearch(true);
+          setMobileNav(false);
+        }}
+        className="p-2 hover:bg-white rounded-lg transition-colors"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 21L16.65 16.65M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z" stroke="#101010" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+
+      {/* Корзина */}
+      <NavLink 
+        to={BASKET_ROUTE} 
+        onClick={() => setMobileNav(false)}
+        className="p-2 hover:bg-white rounded-lg transition-colors"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path fillRule="evenodd" clipRule="evenodd" d="M7.49951 6V6.75H5.51238C4.55284 6.75 3.74813 7.47444 3.64768 8.42872L2.38453 20.4287C2.26799 21.5358 3.13603 22.5 4.24922 22.5H19.75C20.8631 22.5 21.7312 21.5358 21.6147 20.4287L20.3515 8.42872C20.251 7.47444 19.4463 6.75 18.4868 6.75H16.4995V6C16.4995 3.51472 14.4848 1.5 11.9995 1.5C9.51423 1.5 7.49951 3.51472 7.49951 6ZM11.9995 3C10.3427 3 8.99951 4.34315 8.99951 6V6.75H14.9995V6C14.9995 4.34315 13.6564 3 11.9995 3ZM8.99951 11.25C8.99951 12.9069 10.3427 14.25 11.9995 14.25C13.6564 14.25 14.9995 12.9069 14.9995 11.25V10.5C14.9995 10.0858 15.3353 9.75 15.7495 9.75C16.1637 9.75 16.4995 10.0858 16.4995 10.5V11.25C16.4995 13.7353 14.4848 15.75 11.9995 15.75C9.51423 15.75 7.49951 13.7353 7.49951 11.25V10.5C7.49951 10.0858 7.8353 9.75 8.24951 9.75C8.66373 9.75 8.99951 10.0858 8.99951 10.5V11.25Z" fill="#101010"/>
+        </svg>
+      </NavLink>
+    </div>
+  </div>
+
+  {/* Основное содержимое меню */}
+  <div className="px-6 py-6 h-[calc(100vh-80px)] flex flex-col">
+    {/* Навигационные ссылки */}
+    <nav className="space-y-6 mb-8">
+      <NavLink 
+        to={ABOUTUS_ROUTE} 
+        onClick={() => setMobileNav(false)}
+        className="block text-[18px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+      >
+        О нас
+      </NavLink>
+      
+      <Link 
+        to={`${ABOUTUS_ROUTE}#pay`} 
+        onClick={(e) => {
+          handleAboutUsLinkClick(e, '#pay');
+          setMobileNav(false);
+        }}
+        className="block text-[18px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+      >
+        Оплата и доставка
+      </Link>
+      
+      <Link 
+        to={`${ABOUTUS_ROUTE}#questions`} 
+        onClick={(e) => {
+          handleAboutUsLinkClick(e, '#questions');
+          setMobileNav(false);
+        }}
+        className="block text-[18px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+      >
+        Часто задаваемые вопросы
+      </Link>
+
+      <Link 
+        to={`${ABOUTUS_ROUTE}#contacts`} 
+        onClick={(e) => {
+          handleAboutUsLinkClick(e, '#contacts');
+          setMobileNav(false);
+        }}
+        className="block text-[18px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+      >
+        Контакты
+      </Link>
+    </nav>
+
+    {/* Дополнительные ссылки */}
+    <div className="space-y-4 mb-8">
+      <Link 
+        to="/our_works" 
+        onClick={() => setMobileNav(false)}
+        className="block text-[16px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+      >
+        Работы из наших тканей
+      </Link>
+      
+      <Link 
+        to="/discounts" 
+        onClick={() => setMobileNav(false)}
+        className="block text-[16px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+      >
+        Скидки и акции
+      </Link>
+    </div>
+
+    {/* Маркетплейсы и аватарка */}
+    <div className="mt-auto space-y-6">
+      {/* Маркетплейсы - прижаты к правому краю */}
+      <div className="border-t border-[#e4e2de] pt-6">
+        <div className="flex justify-end">
+          <div className="text-right space-y-3">
+            <a 
+              href="#" 
+              className="block text-[16px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+            >
+              Мы на WB
+            </a>
+            
+            <a 
+              href="#" 
+              className="block text-[16px] font-medium text-[#101010] hover:text-[#9B1E1C] transition-colors"
+            >
+              Мы на OZON
+            </a>
+          </div>
+        </div>
       </div>
 
-      {/* Анимация slide-down */}
-      <style>{`
-        @keyframes slideDown {
-          0% {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slideDown {
-          animation: slideDown 0.3s ease-out;
-        }
-      `}</style>
+      {/* Аватарка - прижата к правому краю */}
+      <div className="border-t border-[#e4e2de] pt-4">
+        <div className="flex justify-end">
+          {user.isAuth ? (
+            <NavLink 
+              to={ACCOUNT_ROUTE} 
+              onClick={() => setMobileNav(false)}
+              className="p-2 hover:bg-white rounded-lg transition-colors"
+            >
+              <Avatar.Root className="inline-flex h-10 w-10 select-none items-center justify-center overflow-hidden rounded-full bg-gray-200 align-middle">
+                <Avatar.Image
+                  className="h-full w-full object-cover"
+                  src={getAvatarUrl()}
+                  alt="User avatar"
+                  onError={(e) => {
+                    e.target.src = "https://i.pravatar.cc/100";
+                  }}
+                />
+                <Avatar.Fallback
+                  className="text-gray-700 text-sm font-medium"
+                  delayMs={600}
+                >
+                  {user.user?.firstName?.[0] || user.user?.email?.[0] || "U"}
+                </Avatar.Fallback>
+              </Avatar.Root>
+            </NavLink>
+          ) : (
+            <Link 
+              to={LOGIN_ROUTE} 
+              onClick={() => setMobileNav(false)}
+              className="p-2 hover:bg-white rounded-lg transition-colors"
+            >
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" clipRule="evenodd" d="M7.49984 6C7.49984 3.51472 9.51456 1.5 11.9998 1.5C14.4851 1.5 16.4998 3.51472 16.4998 6C16.4998 8.48528 14.4851 10.5 11.9998 10.5C9.51456 10.5 7.49984 8.48528 7.49984 6Z" fill="#101010"/>
+                  <path fillRule="evenodd" clipRule="evenodd" d="M3.75109 20.1053C3.82843 15.6156 7.49183 12 11.9998 12C16.508 12 20.1714 15.6157 20.2486 20.1056C20.2537 20.4034 20.0822 20.676 19.8115 20.8002C17.4326 21.8918 14.7864 22.5 12.0002 22.5C9.2137 22.5 6.56728 21.8917 4.18816 20.7999C3.91749 20.6757 3.74596 20.4031 3.75109 20.1053Z" fill="#101010"/>
+                </svg>
+              </div>
+            </Link>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
     </header>
   );
 });

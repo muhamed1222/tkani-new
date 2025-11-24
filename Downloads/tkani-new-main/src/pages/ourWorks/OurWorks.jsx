@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { Breadcrumbs } from "../../components/breadcrumbs/Breadcrumbs";
 import { WorkCard } from "../../components/workcard/WorkCard";
 import { Context } from "../../main";
+import styles from "./OurWorks.module.css";
 
 export const OurWorks = observer(() => {
   const { works } = useContext(Context);
@@ -58,10 +59,10 @@ export const OurWorks = observer(() => {
             </div>
           )}
 
-          {/* Сетка работ - 4 колонки */}
+          {/* Сетка работ - адаптивная */}
           {!works.isLoading && (
             <div className="flex flex-col gap-[16px] items-start w-full">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[16px] w-full">
+              <div className={styles.worksGrid}>
                 {works.works.map((work) => (
                   <WorkCard key={work.id} work={work} />
                 ))}
@@ -135,4 +136,3 @@ export const OurWorks = observer(() => {
     </div>
   );
 });
-

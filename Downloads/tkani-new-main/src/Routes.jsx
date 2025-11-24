@@ -38,6 +38,7 @@ import { PrivacyPolicy } from "./pages/privacyPolicy/PrivacyPolicy";
 import { TermsOfService } from "./pages/termsOfService/TermsOfService";
 import { Page404 } from "./pages/page404/Page404"; 
 import { WorkPage } from "./pages/WorkPage/WorkPage"; // Импортируйте компонент WorkPage
+import { Checkout } from "./pages/checkout/Checkout";
 
 export const authRoutes = [
   {
@@ -127,6 +128,10 @@ export const publicRoutes = [
     path: TERMS_OF_SERVICE_ROUTE,
     element: <TermsOfService/>,
   },
+  {
+  path: '/checkout',
+  element: <Checkout />
+},
   {
     path: "*",
     element: <Page404 />,

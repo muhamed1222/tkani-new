@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ProductCard } from "../productcard/ProductCard";
 import { SHOP_ROUTE } from "../../utils/consts";
+import styles from "./ProductSection.module.css";
 
 export const ProductSection = ({ title, products, linkTo = SHOP_ROUTE, keyPrefix = "" }) => {
   return (
@@ -24,7 +25,7 @@ export const ProductSection = ({ title, products, linkTo = SHOP_ROUTE, keyPrefix
         </div>
         
         {/* Сетка товаров */}
-        <div className="flex flex-col sm:flex-row gap-[16px] items-start w-full">
+        <div className={styles.productGrid}>
           {products.map((product, index) => (
             <ProductCard 
               key={keyPrefix ? `${keyPrefix}-${product.id}` : product.id} 
@@ -37,4 +38,3 @@ export const ProductSection = ({ title, products, linkTo = SHOP_ROUTE, keyPrefix
     </div>
   );
 };
-

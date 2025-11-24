@@ -65,23 +65,23 @@ export let Shop = observer(() => {
     
     return(
         <>
-        {/* Слайдеры */}
-        <div className="max-w-[1440px] w-full mx-auto px-[20px] py-[40px]">
-            <div className="flex flex-col md:flex-row gap-[16px]">
-                <Slider 
-                    slides={leftSlides}
-                    title={["ТКАНИ ДЛЯ", "ОДЕЖДЫ"]}
-                    textPosition="left"
-                    totalSlides={4}
-                />
-                <Slider 
-                    slides={rightSlides}
-                    title={["ТКАНИ ДЛЯ", "ДОМА"]}
-                    textPosition="right"
-                    totalSlides={4}
-                />
-            </div>
-        </div>
+       {/* Слайдеры */}
+<div className={styles.sliderContainer}>
+    <div className="flex flex-col md:flex-row gap-[16px]">
+        <Slider 
+            slides={leftSlides}
+            title={["ТКАНИ ДЛЯ", "ОДЕЖДЫ"]}
+            textPosition="left"
+            totalSlides={4}
+        />
+        <Slider 
+            slides={rightSlides}
+            title={["ТКАНИ ДЛЯ", "ДОМА"]}
+            textPosition="right"
+            totalSlides={4}
+        />
+    </div>
+</div>
         
         {/* Блоки товаров */}
         {tkans.isLoading ? (
@@ -100,6 +100,7 @@ export let Shop = observer(() => {
                     products={productsData.newArrivals} 
                     linkTo={SHOP_ROUTE}
                     keyPrefix="new"
+                    gridClassName={styles.productGrid}
                 />
                 
                 {/* Акции и скидки - только товары со скидкой */}
@@ -108,6 +109,7 @@ export let Shop = observer(() => {
                     products={productsData.discountedProducts} 
                     linkTo={SHOP_ROUTE}
                     keyPrefix="discounts"
+                    gridClassName={styles.productGrid}
                 />
                 
                 {/* Комбинации - случайные товары */}
@@ -116,35 +118,36 @@ export let Shop = observer(() => {
                     products={productsData.combinations} 
                     linkTo={SHOP_ROUTE}
                     keyPrefix="combinations"
+                    gridClassName={styles.productGrid}
                 />
             </>
         )}
         
         {/* Блок "О нас" */}
-        <div className="flex gap-[32px] items-start justify-center px-0 py-[32px] w-full">
-            <div className="bg-white flex flex-col items-center justify-center p-[64px] rounded-[16px] w-full max-w-[1340px] mx-auto">
+<div className={styles.aboutSection}>
+    <div className="bg-white flex flex-col items-center justify-center p-[64px] rounded-[16px] w-full max-w-[1340px] mx-auto">
                 <div className="flex flex-col gap-[4px] items-start w-full">
                     {/* Заголовок */}
                     <div className="flex flex-col items-center w-full">
-                        <p className="font-inter font-medium leading-[1.2] text-[#888888] text-[16px] text-center whitespace-nowrap">
+                        <p className={`font-inter font-medium leading-[1.2] text-[#888888] text-[16px] text-center whitespace-nowrap ${styles.aboutTitle}`}>
                             Дорогие покупатели!
                         </p>
                     </div>
                     <div className="flex flex-col items-start w-full">
-                        <h2 className="font-inter font-semibold leading-[1.2] text-[#101010] text-[38px] text-center tracking-[-0.8px] w-full whitespace-pre-wrap">
+                        <h2 className={`font-inter font-semibold leading-[1.2] text-[#101010] text-[38px] text-center tracking-[-0.8px] w-full whitespace-pre-wrap ${styles.aboutSubtitle}`}>
                             Магазин натуральных тканей
                         </h2>
                     </div>
                     
                     {/* Две карточки с текстом */}
-                    <div className="flex flex-col sm:flex-row gap-[16px] items-start w-full pt-[20px]">
-                        <div className="bg-[#f1f0ee] flex flex-[1_0_0] flex-col h-[250px] items-center justify-center min-h-px min-w-px p-[64px] rounded-[16px]">
+                    <div className={`flex flex-col sm:flex-row gap-[16px] items-start w-full pt-[20px] ${styles.aboutCards}`}>
+                        <div className={`bg-[#f1f0ee] flex flex-[1_0_0] flex-col items-center justify-center min-h-px min-w-px p-[64px] rounded-[16px] ${styles.aboutCard}`}>
                             <p className="font-inter font-medium leading-[24px] text-[#101010] text-[17px] text-center tracking-[-0.48px] w-full">
                                 <span className="font-inter font-bold text-[#101010]">«Центр ткани»</span>
                                 <span>{` — это магазин натуральных тканей и трикотажа высокого качества. У нас вы найдёте широкий выбор материалов для одежды и текстиля: хлопок, лен, футер и многое другое.`}</span>
                             </p>
                         </div>
-                        <div className="bg-[#f1f0ee] flex flex-[1_0_0] flex-col h-[250px] items-center justify-center min-h-px min-w-px p-[64px] rounded-[16px]">
+                        <div className={`bg-[#f1f0ee] flex flex-[1_0_0] flex-col items-center justify-center min-h-px min-w-px p-[64px] rounded-[16px] ${styles.aboutCard}`}>
                             <p className="font-inter font-medium leading-[24px] text-[#101010] text-[17px] text-center tracking-[-0.48px] w-full">
                                 <span>{`Мы работаем с 2020 года и сотрудничаем напрямую с ведущими фабриками `}</span>
                                 <span className="font-inter font-bold text-[#101010]">Турции, Беларуси и Китая</span>

@@ -918,3 +918,345 @@
         width: 100%;
     }
 }
+
+/* Стили для мобильных устройств (до 743px) */
+@media (max-width: 743px) {
+    .wrapper {
+        padding: 20px 16px;
+        gap: 16px;
+    }
+
+    .breadcrumbs_container {
+        width: 100%;
+        padding: 0;
+    }
+
+    .section_about,
+    .section_delivery,
+    .section_pay,
+    .section_questions,
+    .section_contacts {
+        width: 100%;
+        padding: 40px 0;
+    }
+
+    .title_text {
+        padding-top: 20px;
+        padding-bottom: 16px;
+    }
+
+    .title_text p {
+        font-size: 14px;
+    }
+
+    .title_text h3 {
+        font-size: 26px;
+        letter-spacing: -0.4px;
+    }
+
+    .tiles {
+        padding: 0 16px;
+        gap: 12px;
+    }
+
+    .tiles_container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .tiles_text {
+        height: auto;
+        min-height: 200px;
+        padding: 24px;
+    }
+
+    .tiles_text p {
+        font-size: 16px;
+        line-height: 1.4;
+    }
+
+    .tiles_container:nth-child(2) .tiles_text p {
+        font-size: 15px;
+    }
+
+    .tiles_img {
+        height: 200px;
+    }
+
+    .icon_container p {
+        font-size: 14px;
+        padding: 0 16px;
+    }
+
+    .icons {
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .icons img {
+        height: 40px;
+        max-width: 100px;
+    }
+
+    /* Доставка */
+    .section_delivery_text h3,
+    .section_pay_text h3,
+    .section_questions_title,
+    .section_contacts_title {
+        font-size: 26px;
+        letter-spacing: -0.4px;
+    }
+
+    .section_delivery_text p,
+    .section_pay_text p {
+        font-size: 14px;
+    }
+
+    .section_delivery_cards {
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .delivery_card {
+        width: 100%;
+        max-width: 280px;
+        height: 100px;
+        padding: 10px;
+    }
+
+    .delivery_card_title h5 {
+        font-size: 16px;
+    }
+
+    .delivery_badge {
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+    }
+
+    .delivery_card p {
+        font-size: 14px;
+    }
+
+    /* Оплата */
+    .section_pay_cards {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .pay_card {
+        width: 100%;
+        height: 140px;
+        padding: 12px;
+    }
+
+    .pay_card p {
+        font-size: 16px;
+        padding: 0 10px;
+    }
+
+    .pay_card_img01,
+    .pay_card_img02,
+    .pay_card_img03 {
+        height: 50px;
+        width: 50px;
+    }
+
+    /* Вопросы */
+    .section_questions {
+        padding: 40px 16px;
+    }
+
+    .questions_content {
+        gap: 24px;
+    }
+
+    .question_delivery h3,
+    .question_order h3 {
+        font-size: 18px;
+    }
+
+    .overlays {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .modal_link_name {
+        min-height: 56px;
+    }
+
+    .question_header {
+        padding: 12px 16px;
+    }
+
+    .modal_link_name span {
+        font-size: 16px;
+    }
+
+    .answer {
+        padding: 12px 16px;
+    }
+
+    .answer p {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    /* Контакты */
+    .section_contacts {
+        padding: 40px 16px;
+    }
+
+    .contacts_wrapper {
+        gap: 24px;
+    }
+
+    .contacts_container {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .contacts_info {
+        width: 100%;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .info_text {
+        font-size: 16px;
+    }
+
+    .info_name p {
+        font-size: 14px;
+    }
+
+    .info_icon {
+        width: 16px;
+        height: 16px;
+    }
+
+    .contacts_form {
+        width: 100%;
+        min-height: auto;
+        padding: 16px;
+    }
+
+    .contacts_form h3 {
+        font-size: 20px;
+        letter-spacing: -0.4px;
+    }
+
+    .form_fields {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .form_inputs {
+        width: 100%;
+        gap: 12px;
+    }
+
+    .input input {
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .input textarea {
+        width: 100%;
+        height: 100px;
+        font-size: 14px;
+    }
+
+    .input p {
+        font-size: 13px;
+    }
+
+    .checkbox_label {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    .checkbox_label span {
+        margin-top: 0;
+    }
+
+    .checkbox_custom {
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        min-height: 18px;
+        margin-top: 2px;
+    }
+
+    .subm_btn {
+        height: 44px;
+        font-size: 15px;
+    }
+
+    /* Карта - квадратная для мобильных */
+    .contacts_map {
+        width: 100%;
+        height: 300px;
+        /* Квадратная высота */
+        border-radius: 16px;
+        margin-top: 0;
+    }
+
+    .contacts_map iframe {
+        border-radius: 16px;
+    }
+
+    .error_message,
+    .error_message_block,
+    .success_message {
+        font-size: 13px;
+        padding: 10px;
+    }
+}
+
+/* Дополнительные стили для очень маленьких экранов */
+@media (max-width: 360px) {
+    .wrapper {
+        padding: 16px 12px;
+    }
+
+    .tiles {
+        padding: 0 12px;
+    }
+
+    .tiles_text {
+        padding: 20px;
+        min-height: 180px;
+    }
+
+    .tiles_text p {
+        font-size: 15px;
+    }
+
+    .tiles_img {
+        height: 180px;
+    }
+
+    .delivery_card {
+        max-width: 100%;
+    }
+
+    .pay_card {
+        max-width: 100%;
+    }
+
+    .contacts_map {
+        height: 280px;
+        /* Немного меньше для очень маленьких экранов */
+    }
+
+    .section_questions {
+        padding: 32px 12px;
+    }
+
+    .section_contacts {
+        padding: 32px 12px;
+    }
+}
