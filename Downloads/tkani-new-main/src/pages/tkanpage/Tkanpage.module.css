@@ -782,3 +782,81 @@
     width: 50px;
   }
 }
+
+.discountInfo {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.discountInfoLabel {
+  color: #101010;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 100%;
+}
+
+.discountInfoPrice {
+  color: #888;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 100%;
+}
+
+.discountTierActive {
+  color: #4D4D4D;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 100%;
+}
+
+.discountInfoContact {
+  color: #888;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 100%;
+}
+
+.discountInfoPhone {
+  color: #9B1E1C;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 100%;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.discountInfoPhone:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.discountInfoLink {
+  color: #9B1E1C;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 100%;
+  text-decoration: underline;
+  text-underline-position: from-font;
+  cursor: pointer;
+  display: inline-block;
+  transition: opacity 0.2s ease;
+  text-decoration-skip-ink: auto;
+}
+
+.discountInfoLink:hover {
+  text-decoration: none;
+  opacity: 0.8;
+}

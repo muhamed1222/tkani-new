@@ -47,6 +47,7 @@ const getAuthToken = () => {
 };
 
 // Утилита для получения заголовков с авторизацией
+// src/http/api.js - обновите getHeaders
 const getHeaders = (includeAuth = true, isFormData = false) => {
   const headers = {};
 
@@ -59,7 +60,11 @@ const getHeaders = (includeAuth = true, isFormData = false) => {
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-      console.log('📤 Заголовок Authorization установлен');
+      console.log('📤 Заголовок Authorization установлен:', {
+        tokenLength: token.length,
+        tokenStart: token.substring(0, 20) + '...',
+        fullHeader: `Bearer ${token}`
+      });
     } else {
       console.warn('⚠️ getHeaders - Токен не найден, запрос без авторизации');
     }
@@ -256,18 +261,97 @@ class ApiService {
     }
   }
 
-  // Универсальный метод для DELETE запросов
-  async delete(endpoint, includeAuth = true) {
+  // src/http/api.js - ОБНОВИТЕ метод delete
+  async delete(endpoint, data = {}, includeAuth = true) {
     try {
+      console.log('🗑️ API DELETE Request:', {
+        url: `${this.baseURL}${endpoint}`,
+        endpoint,
+        includeAuth,
+        data,
+        headers: getHeaders(includeAuth)
+      });
+
       const response = await fetch(`${this.baseURL}${endpoint}`, {
         method: 'DELETE',
         headers: getHeaders(includeAuth),
+        body: data && Object.keys(data).length > 0 ? JSON.stringify(data) : undefined,
+      });
+
+      console.log('🗑️ API DELETE Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
       });
 
       return await this._handleResponse(response);
     } catch (error) {
-      console.error('API DELETE Error:', error);
+      console.error('❌ API DELETE Error:', error);
       throw error;
+    }
+  }
+
+  // src/store/UserStore.jsx - ОБНОВЛЕННЫЙ метод deleteAccount
+  async deleteAccount() {
+    runInAction(() => {
+      this._isLoading = true;
+      this._error = null;
+    });
+
+    try {
+      console.log('🗑️ UserStore.deleteAccount - начало удаления аккаунта');
+
+      // ПРОВЕРЯЕМ ТОКЕН ИЗ РАЗНЫХ ИСТОЧНИКОВ
+      const tokenFromLocalStorage = localStorage.getItem('authToken');
+      const tokenFromCookie = cookieUtils.get('authToken');
+      const tokenFromAPI = api.getAuthToken();
+
+      console.log('🔐 Токены из разных источников:', {
+        localStorage: tokenFromLocalStorage ? 'есть' : 'нет',
+        cookie: tokenFromCookie ? 'есть' : 'нет',
+        api: tokenFromAPI ? 'есть' : 'нет'
+      });
+
+      // Используем токен из localStorage (основной источник)
+      const token = tokenFromLocalStorage || tokenFromCookie;
+      if (!token) {
+        throw new Error('Токен авторизации не найден');
+      }
+
+      // Устанавливаем токен в API
+      api.setAuthToken(token);
+      console.log('🔐 Токен установлен в API:', token.substring(0, 20) + '...');
+
+      // ДЕЛАЕМ ЗАПРОС С ПРОВЕРКОЙ АВТОРИЗАЦИИ
+      console.log('👤 Удаление текущего аккаунта через кастомный endpoint');
+
+      // Используем authAPI.deleteAccount вместо прямого вызова api.delete
+      const response = await authAPI.deleteAccount();
+      console.log('✅ Аккаунт успешно удален:', response);
+
+      // Очищаем данные авторизации
+      this.clearAuth();
+
+      return {
+        success: true,
+        message: 'Аккаунт успешно удален'
+      };
+
+    } catch (error) {
+      console.error('❌ UserStore.deleteAccount - ошибка:', error);
+
+      runInAction(() => {
+        this._error = error.message || 'Ошибка удаления аккаунта';
+      });
+
+      return {
+        success: false,
+        error: this._error
+      };
+    } finally {
+      runInAction(() => {
+        this._isLoading = false;
+      });
     }
   }
 
@@ -405,6 +489,18 @@ export const authAPI = {
     return api.get('/users/me?populate=avatar', {}, true);
   },
 
+
+  deleteAccount: async () => {
+    try {
+      console.log('🗑️ authAPI.deleteAccount - отправка запроса через /auth/account');
+      return await api.delete('/auth/account', {}, true);
+    } catch (error) {
+      console.error('❌ authAPI.deleteAccount - ошибка:', error);
+      throw error;
+    }
+  },
+
+
   // Обновление профиля
   updateProfile: async (userData) => {
     const updateData = {};
@@ -413,18 +509,19 @@ export const authAPI = {
     if (userData.firstName !== undefined) updateData.firstName = userData.firstName;
     if (userData.lastName !== undefined) updateData.lastName = userData.lastName;
     if (userData.email !== undefined) updateData.email = userData.email;
+    if (userData.phone !== undefined) updateData.phone = userData.phone; // ВАЖНО: добавляем phone
     if (userData.avatar !== undefined) updateData.avatar = userData.avatar;
 
     console.log('🔵 Отправляем данные обновления профиля:', updateData);
 
-    // Получаем ID текущего пользователя с populate avatar
-    const currentUser = await api.get('/users/me?populate=avatar', {}, true);
+    // Получаем ID текущего пользователя
+    const currentUser = await api.get('/users/me', {}, true);
     const userId = currentUser.id;
 
     console.log('👤 ID пользователя для обновления:', userId);
 
-    // Обновляем пользователя и запрашиваем полные данные с populate avatar
-    const response = await api.put(`/users/${userId}?populate=avatar`, updateData, true);
+    // Обновляем пользователя
+    const response = await api.put(`/users/${userId}`, updateData, true);
 
     console.log('✅ Профиль обновлен, ответ:', response);
 

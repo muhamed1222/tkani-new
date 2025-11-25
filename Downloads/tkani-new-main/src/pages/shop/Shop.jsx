@@ -16,21 +16,20 @@ export let Shop = observer(() => {
         }
         tkans.fetchTypes();
         tkans.fetchBrands();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     
     const leftSlides = [
-        "/Hero Image Left.jpg",
-        "/Hero Image Left.jpg",
-        "/Hero Image Left.jpg",
-        "/Hero Image Left.jpg",
+        "/LeftSlider/IMG1.JPG",
+        "/LeftSlider/IMG2.JPEG",
+        "/LeftSlider/IMG3.PNG",
+        "/LeftSlider/IMG4.PNG",
     ];
     
     const rightSlides = [
-        "/Hero Image Right.jpg",
-        "/Hero Image Right.jpg",
-        "/Hero Image Right.jpg",
-        "/Hero Image Right.jpg",
+        "/RightSlider/IMG1.PNG",
+        "/RightSlider/IMG2.JPG",
+        "/RightSlider/IMG3.JPEG",
+        "/RightSlider/IMG4.PNG",
     ];
     
     // Мемоизируем вычисления для оптимизации

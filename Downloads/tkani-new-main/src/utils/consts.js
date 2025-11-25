@@ -32,5 +32,5 @@ export const DISCOUNT_TIERS = [
   { minQuantity: 10, price: 420 }
 ];
 
-export const CONTACT_PHONE = '+79287166626';
+export const CONTACT_PHONE = '8 (928) 716-66-26';
 export const TELEGRAM_LINK = 'https://t.me/centertkani';

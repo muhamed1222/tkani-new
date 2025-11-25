@@ -293,6 +293,7 @@ export const Tkanpage = observer(() => {
               </div>
             )}
           </div>
+          
           <div className={styles.productActions}>
             <div className={styles.quantitySection}>
               <div className={styles.quantityControl}>
@@ -346,6 +347,33 @@ export const Tkanpage = observer(() => {
               {isAddingToCart ? 'Добавление...' : 'Купить в один клик'}
             </button>
           </div>
+
+   {/* Блок персональных скидок */}
+{quantity >= 5 && (
+  <div className={styles.discountInfo}>
+    <p className={styles.discountInfoLabel}>Персональные скидки от количества:</p>
+    <p className={quantity >= 5 && quantity < 10 ? styles.discountTierActive : styles.discountInfoPrice}>
+      От 5м одного отреза - 640 ₽
+    </p>
+    <p className={quantity >= 10 ? styles.discountTierActive : styles.discountInfoPrice}>
+      От 10м одного отреза - 420 ₽
+    </p>
+    <p className={styles.discountInfoContact}>
+      Запросить цену от 30 метров:{" "}
+      <a href={`tel:${CONTACT_PHONE}`} className={styles.discountInfoPhone}>
+        {CONTACT_PHONE}
+      </a>
+    </p>
+    <a 
+      href={TELEGRAM_LINK} 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      className={styles.discountInfoLink}
+    >
+      Телеграм
+    </a>
+  </div>
+)}
           {product.stock !== undefined && product.stock <= 0 && (
             <p className={styles.outOfStock}>Товар закончился</p>
           )}

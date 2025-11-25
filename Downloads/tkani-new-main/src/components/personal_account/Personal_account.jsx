@@ -3,6 +3,7 @@ import { useState, useContext, useEffect, useRef } from "react";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "react-router-dom";
 import * as Avatar from "@radix-ui/react-avatar";
+import * as AlertDialog from "@radix-ui/react-alert-dialog";
 import { Context } from "../../main";
 import { authAPI } from "../../http/api";
 import { LOGIN_ROUTE } from "../../utils/consts";
@@ -22,6 +23,40 @@ const EyeOffIcon = () => (
   </svg>
 );
 
+// Диалог подтверждения удаления аккаунта
+const DeleteAccountDialog = ({ open, onOpenChange, onConfirm, isDeleting }) => (
+  <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
+    <AlertDialog.Portal>
+      <AlertDialog.Overlay className={styles.dialogOverlay} />
+      <AlertDialog.Content className={styles.dialogContent}>
+        <AlertDialog.Title className={styles.dialogTitle}>
+          Удаление аккаунта
+        </AlertDialog.Title>
+        <AlertDialog.Description className={styles.dialogDescription}>
+          Вы уверены, что хотите удалить свой аккаунт? Это действие нельзя отменить. 
+          Все ваши данные, включая заказы и историю, будут безвозвратно удалены.
+        </AlertDialog.Description>
+        <div className={styles.dialogActions}>
+          <AlertDialog.Cancel asChild>
+            <button className={styles.dialogCancelButton}>
+              Отмена
+            </button>
+          </AlertDialog.Cancel>
+          <AlertDialog.Action asChild>
+            <button 
+              className={styles.dialogConfirmButton}
+              onClick={onConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Удаление..." : "Удалить аккаунт"}
+            </button>
+          </AlertDialog.Action>
+        </div>
+      </AlertDialog.Content>
+    </AlertDialog.Portal>
+  </AlertDialog.Root>
+);
+
 export const Personal_account = observer(() => {
   const { user } = useContext(Context);
   const navigate = useNavigate();
@@ -30,6 +65,7 @@ export const Personal_account = observer(() => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -37,19 +73,24 @@ export const Personal_account = observer(() => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isPersonalDataChanged, setIsPersonalDataChanged] = useState(false);
+  const [isContactDataChanged, setIsContactDataChanged] = useState(false);
   const [isEmailChanged, setIsEmailChanged] = useState(false);
   const [isPasswordChanged, setIsPasswordChanged] = useState(false);
   const [isSavingPersonalData, setIsSavingPersonalData] = useState(false);
+  const [isSavingContactData, setIsSavingContactData] = useState(false);
   const [isSavingEmail, setIsSavingEmail] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [personalDataError, setPersonalDataError] = useState("");
   const [personalDataSuccess, setPersonalDataSuccess] = useState("");
+  const [contactDataError, setContactDataError] = useState("");
+  const [contactDataSuccess, setContactDataSuccess] = useState("");
   const [emailError, setEmailError] = useState("");
   const [emailSuccess, setEmailSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [firstNameError, setFirstNameError] = useState("");
   const [lastNameError, setLastNameError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -60,10 +101,16 @@ export const Personal_account = observer(() => {
   const [avatarSuccess, setAvatarSuccess] = useState("");
   const fileInputRef = useRef(null);
 
+  // Состояния для удаления аккаунта
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState("");
+
   // Исходные значения для сравнения
   const [originalFirstName, setOriginalFirstName] = useState("");
   const [originalLastName, setOriginalLastName] = useState("");
   const [originalEmail, setOriginalEmail] = useState("");
+  const [originalPhone, setOriginalPhone] = useState("");
 
   // Функция для получения URL аватара
   const getAvatarUrl = () => {
@@ -157,13 +204,16 @@ export const Personal_account = observer(() => {
       const firstNameValue = user.user.firstName || user.user.first_name || "";
       const lastNameValue = user.user.lastName || user.user.last_name || "";
       const emailValue = user.user.email || "";
+      const phoneValue = user.user.phone || user.user.phoneNumber || "";
       
       setFirstName(firstNameValue);
       setLastName(lastNameValue);
       setEmail(emailValue);
+      setPhone(phoneValue);
       setOriginalFirstName(firstNameValue);
       setOriginalLastName(lastNameValue);
       setOriginalEmail(emailValue);
+      setOriginalPhone(phoneValue);
     }
   }, [user.user, user.isAuth]);
 
@@ -177,15 +227,17 @@ export const Personal_account = observer(() => {
     }
   }, [firstName, lastName, originalFirstName, originalLastName]);
 
-  // Проверка изменений email
+  // Проверка изменений контактных данных
   useEffect(() => {
-    const hasChanged = email !== originalEmail;
-    setIsEmailChanged(hasChanged);
+    const hasChanged = email !== originalEmail || phone !== originalPhone;
+    setIsContactDataChanged(hasChanged);
     if (hasChanged) {
+      setContactDataError("");
+      setContactDataSuccess("");
       setEmailError("");
       setEmailSuccess("");
     }
-  }, [email, originalEmail]);
+  }, [email, phone, originalEmail, originalPhone]);
 
   // Очистка ошибок при изменении полей
   useEffect(() => {
@@ -199,6 +251,10 @@ export const Personal_account = observer(() => {
   useEffect(() => {
     if (email) setEmailError("");
   }, [email]);
+
+  useEffect(() => {
+    if (phone) setPhoneError("");
+  }, [phone]);
 
   useEffect(() => {
     if (newPassword) setNewPasswordError("");
@@ -235,6 +291,18 @@ export const Personal_account = observer(() => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(value)) {
       return "Введите корректный email адрес";
+    }
+    return "";
+  };
+
+  // Валидация телефона
+  const validatePhone = (value) => {
+    if (!value.trim()) {
+      return ""; // Телефон не обязателен
+    }
+    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,15}$/;
+    if (!phoneRegex.test(value.replace(/\s/g, ''))) {
+      return "Введите корректный номер телефона";
     }
     return "";
   };
@@ -353,47 +421,60 @@ export const Personal_account = observer(() => {
     }
   };
 
-  const handleSaveEmail = async (e) => {
+  const handleSaveContactData = async (e) => {
     e.preventDefault();
-    console.log('🔵 handleSaveEmail - начало', { email });
+    console.log('🔵 handleSaveContactData - начало', { email, phone });
+    setContactDataError("");
+    setContactDataSuccess("");
     setEmailError("");
     setEmailSuccess("");
 
     // Валидация
     const emailValidation = validateEmail(email);
+    const phoneValidation = validatePhone(phone);
+
     if (emailValidation) {
       setEmailError(emailValidation);
       return;
     }
+    setEmailError("");
 
-    setIsSavingEmail(true);
+    if (phoneValidation) {
+      setPhoneError(phoneValidation);
+      return;
+    }
+    setPhoneError("");
+
+    setIsSavingContactData(true);
 
     try {
-      console.log('🔵 handleSaveEmail - вызов user.updateProfile с данными:', { email });
+      console.log('🔵 handleSaveContactData - вызов user.updateProfile с данными:', { email, phone });
       
       const result = await user.updateProfile({ 
-        email: email.trim() 
+        email: email.trim(),
+        phone: phone.trim()
       });
-      console.log('🟢 handleSaveEmail - результат:', result);
+      console.log('🟢 handleSaveContactData - результат:', result);
       
       if (result.success) {
-        setEmailSuccess("Email успешно обновлен");
-        setIsEmailChanged(false);
+        setContactDataSuccess("Контактные данные успешно обновлены");
+        setIsContactDataChanged(false);
         setOriginalEmail(email);
+        setOriginalPhone(phone);
         // Обновляем данные пользователя
         await user.checkAuth();
-        setTimeout(() => setEmailSuccess(""), 5000);
+        setTimeout(() => setContactDataSuccess(""), 5000);
       } else {
-        console.error('❌ handleSaveEmail - ошибка:', result.error);
-        setEmailError(result.error || "Ошибка обновления email");
-        setTimeout(() => setEmailError(""), 5000);
+        console.error('❌ handleSaveContactData - ошибка:', result.error);
+        setContactDataError(result.error || "Ошибка обновления контактных данных");
+        setTimeout(() => setContactDataError(""), 5000);
       }
     } catch (error) {
-      console.error('🔴 handleSaveEmail - исключение:', error);
-      setEmailError(error.message || "Ошибка обновления email");
-      setTimeout(() => setEmailError(""), 5000);
+      console.error('🔴 handleSaveContactData - исключение:', error);
+      setContactDataError(error.message || "Ошибка обновления контактных данных");
+      setTimeout(() => setContactDataError(""), 5000);
     } finally {
-      setIsSavingEmail(false);
+      setIsSavingContactData(false);
     }
   };
 
@@ -442,6 +523,38 @@ export const Personal_account = observer(() => {
     } finally {
       setIsChangingPassword(false);
     }
+  };
+
+const handleDeleteAccount = async () => {
+  setIsDeletingAccount(true);
+  setDeleteAccountError("");
+
+  try {
+    console.log('🗑️ Начало удаления аккаунта - используем прямой метод');
+    
+    const result = await user.deleteAccountDirect();
+    
+    console.log('🗑️ Результат удаления:', result);
+    
+    if (result.success) {
+      console.log('✅ Аккаунт успешно удален');
+      setIsDeleteDialogOpen(false);
+      navigate(LOGIN_ROUTE);
+    } else {
+      throw new Error(result.error || 'Ошибка удаления аккаунта');
+    }
+  } catch (error) {
+    console.error('❌ Ошибка удаления аккаунта:', error);
+    setDeleteAccountError(error.message || 'Произошла ошибка при удалении аккаунта');
+  } finally {
+    setIsDeletingAccount(false);
+  }
+};
+
+  // Открытие диалога удаления
+  const openDeleteDialog = () => {
+    setDeleteAccountError("");
+    setIsDeleteDialogOpen(true);
   };
 
   const handleLogout = async () => {
@@ -509,11 +622,16 @@ export const Personal_account = observer(() => {
               </Avatar.Fallback>
             </Avatar.Root>
             <div className={styles.photo_actions}>
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                className={styles.uploadPhotoButton}
+                disabled={isUploadingAvatar}
+              >
+                {isUploadingAvatar ? "Загрузка..." : "Загрузить фотографию"}
+              </button>
               <p className={styles.photoHint}>
-                {isUploadingAvatar 
-                  ? "Загрузка..." 
-                  : "Нажмите на фото для загрузки нового аватара"
-                }
+                Рекомендованный размер 160×160px в формате PNG или JPG
               </p>
               <input
                 type="file"
@@ -595,53 +713,77 @@ export const Personal_account = observer(() => {
           </div>
         </section>
 
-        {/* Почта */}
-        <section className={styles.section} aria-labelledby="email-heading">
+        {/* Контактные данные с почтой и телефоном на одной строке */}
+        <section className={styles.section} aria-labelledby="contact-data-heading">
           <div className={styles.header}>
-            <h5 id="email-heading">Почта</h5>
+            <h5 id="contact-data-heading">Контактные данные</h5>
             <button 
               type="button" 
-              onClick={handleSaveEmail}
-              disabled={!isEmailChanged || isSavingEmail}
-              className={`${styles.saveButton} ${isEmailChanged ? styles.saveButtonActive : ""}`}
-              aria-label="Сохранить email"
+              onClick={handleSaveContactData}
+              disabled={!isContactDataChanged || isSavingContactData}
+              className={`${styles.saveButton} ${isContactDataChanged ? styles.saveButtonActive : ""}`}
+              aria-label="Сохранить контактные данные"
             >
-              {isSavingEmail ? "Сохранение..." : "Сохранить"}
+              {isSavingContactData ? "Сохранение..." : "Сохранить"}
             </button>
           </div>
 
           {/* Сообщения об ошибках и успехе */}
-          {emailError && (
+          {contactDataError && (
             <div className={styles.message} role="alert" aria-live="assertive">
-              <p className={styles.errorMessage}>{emailError}</p>
+              <p className={styles.errorMessage}>{contactDataError}</p>
             </div>
           )}
-          {emailSuccess && (
+          {contactDataSuccess && (
             <div className={styles.message} role="status" aria-live="polite">
-              <p className={styles.successMessage}>{emailSuccess}</p>
+              <p className={styles.successMessage}>{contactDataSuccess}</p>
             </div>
           )}
 
-          <div className={styles.email_field}>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              className={`${styles.input} ${emailError ? styles.inputError : ""}`}
-              aria-invalid={!!emailError}
-              aria-describedby={emailError ? "email-error" : undefined}
-              disabled={isSavingEmail}
-            />
-            {emailError && (
-              <p id="email-error" className={styles.fieldError} role="alert">
-                {emailError}
-              </p>
-            )}
+          <div className={styles.contact_fields}>
+            <div className={styles.field}>
+              <label htmlFor="email">Email</label>
+              <input
+                type="email"
+                name="email"
+                id="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+                className={`${styles.input} ${emailError ? styles.inputError : ""}`}
+                aria-invalid={!!emailError}
+                aria-describedby={emailError ? "email-error" : undefined}
+                disabled={isSavingContactData}
+              />
+              {emailError && (
+                <p id="email-error" className={styles.fieldError} role="alert">
+                  {emailError}
+                </p>
+              )}
+            </div>
+            <div className={styles.field}>
+              <label htmlFor="phone">Телефон</label>
+              <input
+                type="tel"
+                name="phone"
+                id="phone"
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                }}
+                placeholder="+7 (999) 999-99-99"
+                className={`${styles.input} ${phoneError ? styles.inputError : ""}`}
+                aria-invalid={!!phoneError}
+                aria-describedby={phoneError ? "phone-error" : undefined}
+                disabled={isSavingContactData}
+              />
+              {phoneError && (
+                <p id="phone-error" className={styles.fieldError} role="alert">
+                  {phoneError}
+                </p>
+              )}
+            </div>
           </div>
         </section>
 
@@ -770,18 +912,44 @@ export const Personal_account = observer(() => {
           </div>
         </section>
 
-        {/* Выход из аккаунта */}
+        {/* Выход из аккаунта и удаление */}
         <section className={styles.section}>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className={styles.logoutButton}
-            aria-label="Выйти из аккаунта"
-          >
-            Выйти
-          </button>
+          <div className={styles.logout_section}>
+            <button
+              type="button"
+              onClick={openDeleteDialog}
+              className={styles.deleteButton}
+              aria-label="Удалить аккаунт"
+              disabled={isDeletingAccount}
+            >
+              {isDeletingAccount ? "Удаление..." : "Удалить аккаунт"}
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={styles.logoutButton}
+              aria-label="Выйти из аккаунта"
+            >
+              Выйти
+            </button>
+          </div>
+          
+          {/* Сообщение об ошибке удаления */}
+          {deleteAccountError && (
+            <div className={styles.message} role="alert" aria-live="assertive">
+              <p className={styles.errorMessage}>{deleteAccountError}</p>
+            </div>
+          )}
         </section>
       </div>
+
+      {/* Диалог подтверждения удаления аккаунта */}
+      <DeleteAccountDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={handleDeleteAccount}
+        isDeleting={isDeletingAccount}
+      />
     </section>
   );
 });

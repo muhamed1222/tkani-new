@@ -117,6 +117,116 @@ export default class UserStore {
     }
   }
 
+// В UserStore.jsx - ОБНОВИТЕ метод deleteAccount
+async deleteAccount() {
+  runInAction(() => {
+    this._isLoading = true;
+    this._error = null;
+  });
+
+  try {
+    console.log('🗑️ UserStore.deleteAccount - начало удаления аккаунта');
+    
+    // ПРОВЕРЯЕМ ТОКЕН ИЗ РАЗНЫХ ИСТОЧНИКОВ
+    const tokenFromLocalStorage = localStorage.getItem('authToken');
+    const tokenFromCookie = cookieUtils.get('authToken');
+    const tokenFromAPI = api.getAuthToken();
+    
+    console.log('🔐 Токены из разных источников:', {
+      localStorage: tokenFromLocalStorage ? 'есть' : 'нет',
+      cookie: tokenFromCookie ? 'есть' : 'нет', 
+      api: tokenFromAPI ? 'есть' : 'нет'
+    });
+    
+    // Используем токен из куки (как в других методах)
+    const token = tokenFromCookie;
+    if (!token) {
+      throw new Error('Токен авторизации не найден');
+    }
+
+    // Устанавливаем токен в API
+    api.setAuthToken(token);
+    console.log('🔐 Токен установлен в API');
+    
+    console.log('👤 Удаление текущего аккаунта через кастомный endpoint');
+    
+    // ДЕЛАЕМ ЗАПРОС С ПРОВЕРКОЙ АВТОРИЗАЦИИ
+    const response = await api.delete('/profile', {}, true);
+    console.log('✅ Аккаунт успешно удален:', response);
+    
+    // Очищаем данные авторизации
+    this.clearAuth();
+    
+    return { 
+      success: true, 
+      message: 'Аккаунт успешно удален' 
+    };
+    
+  } catch (error) {
+    console.error('❌ UserStore.deleteAccount - ошибка:', error);
+    
+    runInAction(() => {
+      this._error = error.message || 'Ошибка удаления аккаунта';
+    });
+    
+    return { 
+      success: false, 
+      error: this._error 
+    };
+  } finally {
+    runInAction(() => {
+      this._isLoading = false;
+    });
+  }
+}
+
+// В UserStore.jsx - добавьте этот метод
+async deleteAccountDirect() {
+  runInAction(() => {
+    this._isLoading = true;
+    this._error = null;
+  });
+
+  try {
+    console.log('🔄 Используем прямой метод удаления через users endpoint');
+    
+    // Сначала получаем ID текущего пользователя
+    const currentUser = await api.get('/users/me', {}, true);
+    const userId = currentUser.id;
+    
+    console.log('🗑️ Удаляем пользователя по ID:', userId);
+    
+    // Используем стандартный Strapi endpoint для удаления пользователя
+    const response = await api.delete(`/users/${userId}`, {}, true);
+    
+    console.log('✅ Аккаунт удален через прямой метод:', response);
+    
+    // Очищаем данные авторизации
+    this.clearAuth();
+    
+    return { 
+      success: true, 
+      message: 'Аккаунт успешно удален' 
+    };
+    
+  } catch (error) {
+    console.error('❌ Прямой метод удаления не сработал:', error);
+    
+    runInAction(() => {
+      this._error = error.message || 'Ошибка удаления аккаунта';
+    });
+    
+    return { 
+      success: false, 
+      error: this._error 
+    };
+  } finally {
+    runInAction(() => {
+      this._isLoading = false;
+    });
+  }
+}
+
   async updateProfile(userData) {
     try {
       console.log('🔄 updateProfile - исходные данные:', userData);
@@ -154,6 +264,9 @@ export default class UserStore {
         if (response.email !== undefined) {
           this._user.email = response.email;
         }
+        if (response.phone !== undefined) { // ДОБАВЛЕНО: обновление телефона
+          this._user.phone = response.phone;
+        }
         
         // Также обновляем альтернативные имена полей для совместимости
         if (response.firstName !== undefined) {
@@ -161,6 +274,9 @@ export default class UserStore {
         }
         if (response.lastName !== undefined) {
           this._user.lastname = response.lastName;
+        }
+        if (response.phone !== undefined) { // ДОБАВЛЕНО: альтернативное поле
+          this._user.phoneNumber = response.phone;
         }
       });
       

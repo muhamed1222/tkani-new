@@ -7,7 +7,26 @@
   border-radius: 20px;
 }
 
+/* Стили для контактных полей */
+.contact_fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
 
+@media (min-width: 640px) {
+  .contact_fields {
+    flex-direction: row;
+  }
+}
+
+.contact_fields .field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
 
 @media (min-width: 640px) {
   .account_container {
@@ -109,8 +128,8 @@
 
 .avatar {
   display: inline-flex;
-  height: 62px;
-  width: 62px;
+  height: 74px;
+  width: 74px;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
@@ -127,7 +146,7 @@
 
 .avatarFallback {
   font-family: 'Inter', sans-serif;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 500;
   color: #101010;
 }
@@ -136,8 +155,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  min-height: 62px;
-  justify-content: space-between;
+  min-height: 74px;
+  justify-content: flex-start;
   flex: 1;
   min-width: 200px;
 }
@@ -149,51 +168,33 @@
   }
 }
 
-.uploadButtons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.uploadButton {
+.uploadPhotoButton {
   font-family: 'Inter', sans-serif;
   font-size: 16px;
   font-weight: 400;
-  line-height: 1.2;
-  padding: 8px 14px;
-  border: 1px solid #C2C2C2;
-  border-radius: 6px;
-  background: #fff;
+  line-height: 120%;
   color: #101010;
+  display: flex;
+  padding: 8px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 6px;
+  border: 1px solid #C2C2C2;
+  background: #fff;
   cursor: pointer;
-  align-self: flex-start;
   transition: background-color 0.2s;
   white-space: nowrap;
+  align-self: flex-start;
 }
 
-.uploadButton:hover:not(:disabled) {
+.uploadPhotoButton:hover:not(:disabled) {
   background: #F1F0EE;
 }
 
-.cancelButton {
-  font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.2;
-  padding: 8px 14px;
-  border: 1px solid #C2C2C2;
-  border-radius: 6px;
-  background: #fff;
-  color: #888888;
-  cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
-  white-space: nowrap;
-}
-
-.cancelButton:hover {
-  background: #F1F0EE;
-  color: #101010;
+.uploadPhotoButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .photoHint {
@@ -208,7 +209,7 @@
 
 @media (min-width: 640px) {
   .photoHint {
-    text-align: center;
+    text-align: left;
   }
 }
 
@@ -420,6 +421,43 @@
   background: #fff;
 }
 
+/* Стили для раздела выхода и удаления */
+.logout_section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: none;
+  /* Убираем ограничение по ширине */
+}
+
+.deleteButton {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 12px 24px;
+  background: transparent;
+  border: 1px solid #9B1E1C;
+  border-radius: 8px;
+  color: #9B1E1C;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  margin-right: auto;
+  /* Прижимаем к левому краю */
+}
+
+.deleteButton:hover {
+  background: #860202;
+  color: #fff;
+}
+
+.deleteButton:active {
+  background: #860202;
+  border-color: #860202;
+}
+
 .logoutButton {
   font-family: 'Inter', sans-serif;
   font-size: 16px;
@@ -432,9 +470,9 @@
   color: #fff;
   cursor: pointer;
   transition: background-color 0.2s;
-  width: 100%;
-  max-width: 200px;
-  align-self: flex-start;
+  white-space: nowrap;
+  margin-left: auto;
+  /* Прижимаем к правому краю */
 }
 
 .logoutButton:hover {
@@ -443,4 +481,131 @@
 
 .logoutButton:active {
   background: #6b0101;
+}
+
+/* Стили для диалога удаления аккаунта */
+.dialogOverlay {
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+}
+
+.dialogContent {
+  background: white;
+  border-radius: 12px;
+  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 500px;
+  max-height: 85vh;
+  padding: 24px;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1001;
+}
+
+.dialogTitle {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #101010;
+  margin-bottom: 12px;
+}
+
+.dialogDescription {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4d4d4d;
+  margin-bottom: 24px;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.dialogCancelButton {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: 1px solid #C2C2C2;
+  background: white;
+  border-radius: 6px;
+  color: #101010;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dialogCancelButton:hover {
+  background: #F1F0EE;
+}
+
+.dialogConfirmButton {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border: none;
+  background: #9B1E1C;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dialogConfirmButton:hover:not(:disabled) {
+  background: #860202;
+}
+
+.dialogConfirmButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 640px) {
+  .dialogContent {
+    width: 95vw;
+    padding: 20px;
+  }
+
+  .dialogActions {
+    flex-direction: column;
+  }
+
+  .dialogCancelButton,
+  .dialogConfirmButton {
+    width: 100%;
+  }
 }

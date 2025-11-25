@@ -169,34 +169,6 @@
   display: none;
 }
 
-.deliveryRadioInput:checked+.deliveryRadioCustom {
-  background-color: #9B1E1C;
-  border-color: #9B1E1C;
-}
-
-.deliveryRadioInput:checked+.deliveryRadioCustom::after {
-  content: '';
-  display: block;
-  width: 8px;
-  height: 8px;
-  background: white;
-  border-radius: 50%;
-  margin: 3px;
-}
-
-.deliveryRadioCustom {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 20px;
-  height: 20px;
-  border: 2px solid #C2C2C2;
-  border-radius: 50%;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-  background: white;
-}
-
 .deliveryRadioContent {
   width: 100%;
   display: flex;
@@ -277,16 +249,11 @@
 .paymentRadioLabel {
   display: flex;
   align-items: center;
-  padding: 16px;
-  background: white;
+  padding: 0px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  gap: 16px;
-}
-
-.paymentRadioLabel:hover {
-  background: #fefafa;
+  gap: 9px;
 }
 
 .paymentRadioInput {
@@ -308,14 +275,72 @@
   margin: 3px;
 }
 
+/* Обновленные стили для radio button доставки */
+.deliveryRadioInput:checked+.deliveryRadioCustom {
+  background-color: #9B1E1C;
+  border-color: #9B1E1C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deliveryRadioInput:checked+.deliveryRadioCustom::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+/* Обновленные стили для radio button оплаты */
+.paymentRadioInput:checked+.paymentRadioCustom {
+  background-color: #9B1E1C;
+  border-color: #9B1E1C;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paymentRadioInput:checked+.paymentRadioCustom::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+/* Убедимся, что кастомные radio кнопки правильно выровнены */
+.deliveryRadioCustom {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  background: #E4E2DF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .paymentRadioCustom {
   width: 20px;
   height: 20px;
-  border: 2px solid #C2C2C2;
   border-radius: 50%;
   flex-shrink: 0;
   transition: all 0.3s ease;
   background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.paymentRadioCustom:hover {
+  background: #E4E2DF;
 }
 
 .paymentRadioTitle {
@@ -383,7 +408,7 @@
 /* Кнопка отправки */
 .submitButton {
   width: 100%;
-  padding: 16px 24px;
+  height: 40px;
   background-color: #9B1E1C;
   color: white;
   border: none;
