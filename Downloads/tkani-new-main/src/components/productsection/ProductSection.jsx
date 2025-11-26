@@ -4,6 +4,24 @@ import { SHOP_ROUTE } from "../../utils/consts";
 import styles from "./ProductSection.module.css";
 
 export const ProductSection = ({ title, products, linkTo = SHOP_ROUTE, keyPrefix = "" }) => {
+  // Определяем количество товаров для отображения в зависимости от устройства
+  const getVisibleProducts = () => {
+    // Для десктопа - 4 товара
+    if (window.innerWidth >= 1440) {
+      return products.slice(0, 4);
+    }
+    // Для планшета - 3 товара
+    else if (window.innerWidth >= 744) {
+      return products.slice(0, 3);
+    }
+    // Для телефона - 2 товара
+    else {
+      return products.slice(0, 2);
+    }
+  };
+
+  const visibleProducts = getVisibleProducts();
+
   return (
     <div className="max-w-[1440px] w-full mx-auto px-[20px] sm:px-[50px] py-[40px]">
       <div className="flex flex-col gap-[16px]">
@@ -26,7 +44,7 @@ export const ProductSection = ({ title, products, linkTo = SHOP_ROUTE, keyPrefix
         
         {/* Сетка товаров */}
         <div className={styles.productGrid}>
-          {products.map((product, index) => (
+          {visibleProducts.map((product, index) => (
             <ProductCard 
               key={keyPrefix ? `${keyPrefix}-${product.id}` : product.id} 
               product={product} 

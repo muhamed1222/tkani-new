@@ -5,11 +5,18 @@ export const Page404 = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#F1F0EE] p-4">
       <div className="flex flex-col items-center gap-[40px]">
-        {/* Картинка 404 */}
+        {/* Картинка 404 - десктопная версия */}
         <img 
           src="/404.png" 
           alt="404" 
-          className="w-[673px] h-[253px]"
+          className="hidden md:block w-[673px] h-[253px]"
+        />
+        
+        {/* Картинка 404 - мобильная версия (уменьшена в 1.2 раза) */}
+        <img 
+          src="/404mobile.png" 
+          alt="404" 
+          className="block md:hidden w-full max-w-[200px] h-auto"
         />
         
         {/* Текст "Страница не найдена" */}

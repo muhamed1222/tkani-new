@@ -61,7 +61,7 @@ export const Slider = ({
             <img
               src={src}
               alt={`Слайд ${index + 1}`}
-              className="w-full h-full object-fill"
+              className="w-full h-full object-cover"
             />
           </div>
         ))}

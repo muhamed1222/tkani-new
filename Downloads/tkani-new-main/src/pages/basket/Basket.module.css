@@ -628,51 +628,6 @@
   }
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 24px 16px 64px 16px;
-  }
-
-  .cartHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .itemContent {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .itemImage {
-    width: 100%;
-    max-width: 120px;
-  }
-
-  .itemInfo {
-    width: 100%;
-    height: auto;
-    gap: 12px;
-  }
-
-  .itemRight {
-    height: auto;
-    gap: 12px;
-    align-items: flex-start;
-    width: auto;
-  }
-
-  .cartItem {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-
-  .itemLeft {
-    width: 100%;
-  }
-}
 
 @media (max-width: 480px) {
   .container {
@@ -690,19 +645,78 @@
   .checkoutButton {
     padding: 0 16px;
   }
+
+  .cartItem {
+    gap: 12px;
+    padding: 16px 0;
+  }
+
+  .itemContent {
+    gap: 6px;
+  }
+
+  .itemImage {
+    width: 70px;
+    height: 90px;
+  }
+
+  .quantityControl {
+    width: 120px;
+  }
+
+  .quantityButton {
+    width: 35px;
+    height: 35px;
+  }
+
+  .quantityInput {
+    width: 40px;
+    height: 35px;
+    font-size: 16px;
+  }
+
+  .itemRight {
+    gap: 6px;
+  }
 }
 
-.removeSpinner {
-  width: 24px;
-  height: 24px;
+/* Скрываем мобильную цену по умолчанию */
+.mobilePrice {
+  display: none;
+}
+
+/* Показываем десктопную цену по умолчанию */
+.desktopPrice {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #888888;
-  font-size: 14px;
+  flex-direction: column;
+  gap: 0;
+  align-items: flex-end;
 }
 
-.removeButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* На мобильных показываем мобильную цену и скрываем десктопную */
+@media (max-width: 768px) {
+  .mobilePrice {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .cartItem {
+    position: relative;
+    padding-bottom: 50px;
+    /* Добавляем место для кнопки внизу */
+  }
+
+  .removeButton {
+    position: absolute;
+    right: 0;
+    bottom: 16px;
+    /* Размещаем внизу карточки */
+  }
+
+  .desktopPrice {
+    display: none;
+  }
 }

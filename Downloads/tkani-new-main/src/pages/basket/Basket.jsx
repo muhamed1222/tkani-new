@@ -494,113 +494,126 @@ export const Basket = observer(() => {
 
                 return (
                   <div key={item.id} className={styles.cartItem}>
-                    <div className={styles.itemLeft}>
-                      <label className={styles.checkboxLabel}>
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleSelectItem(productId)}
-                          className={styles.checkboxInput}
-                        />
-                        <div className={`${styles.checkboxCustom} ${isSelected ? styles.checkboxChecked : ''}`}>
-                          {isSelected && (
-                            <svg width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M1 3.5L3.5 6L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          )}
-                        </div>
-                      </label>
-                      <div className={styles.itemContent}>
-                        <div className={styles.itemImage}>
-                          <img 
-                            src={imageUrl}
-                            alt={productName}
-                            onError={(e) => {
-                              e.target.src = '/placeholder-product.jpg';
-                            }}
-                          />
-                        </div>
-                        <div className={styles.itemInfo}>
-                          <h3 className={styles.itemName}>{productName}</h3>
-                          <div className={styles.quantityControl}>
-                            <button
-                              className={styles.quantityButton}
-                              onClick={() => handleUpdateQuantity(productId, quantity - 0.1)}
-                              disabled={quantity <= 0.5 || isUpdating}
-                            >
-                              <span>-</span>
-                            </button>
-                            <input
-                              type="number"
-                              step="0.1"
-                              min="0.5"
-                              value={quantity}
-                              onChange={(e) => {
-                                const value = parseFloat(e.target.value);
-                                if (!isNaN(value) && value >= 0.5) {
-                                  handleUpdateQuantity(productId, value);
-                                }
-                              }}
-                              className={styles.quantityInput}
-                              disabled={isUpdating}
-                            />
-                            <button
-                              className={styles.quantityButton}
-                              onClick={() => handleUpdateQuantity(productId, quantity + 0.1)}
-                              disabled={isUpdating}
-                            >
-                              <span>+</span>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className={styles.itemRight}>
-                      <div className={styles.itemPrice}>
-                        {hasDiscount ? (
-                          <>
-                            <span className={styles.currentPrice}>{Math.round(discountPrice)} ₽</span>
-                            <span className={styles.oldPrice}>{originalPrice} ₽</span>
-                          </>
-                        ) : (
-                          <span className={styles.currentPrice}>{originalPrice} ₽</span>
-                        )}
-                      </div>
-                      <button
-  className={styles.removeButton}
-  onClick={() => handleRemoveItem(productId)}
-  disabled={removingItems.has(productId) || isUpdating}
-  aria-label="Удалить товар"
->
-  {removingItems.has(productId) ? (
-    <div className={styles.removeSpinner}>
-      <span>...</span>
+  <div className={styles.itemLeft}>
+    <label className={styles.checkboxLabel}>
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={() => handleSelectItem(productId)}
+        className={styles.checkboxInput}
+      />
+      <div className={`${styles.checkboxCustom} ${isSelected ? styles.checkboxChecked : ''}`}>
+        {isSelected && (
+          <svg width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 3.5L3.5 6L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )}
+      </div>
+    </label>
+    <div className={styles.itemContent}>
+      <div className={styles.itemImage}>
+        <img 
+          src={imageUrl}
+          alt={productName}
+          onError={(e) => {
+            e.target.src = '/placeholder-product.jpg';
+          }}
+        />
+      </div>
+      <div className={styles.itemInfo}>
+        <h3 className={styles.itemName}>{productName}</h3>
+        
+        {/* Цена для мобильной версии - под названием и над счетчиком */}
+        <div className={styles.mobilePrice}>
+          {hasDiscount ? (
+            <>
+              <span className={styles.currentPrice}>{Math.round(discountPrice)} ₽</span>
+              <span className={styles.oldPrice}>{originalPrice} ₽</span>
+            </>
+          ) : (
+            <span className={styles.currentPrice}>{originalPrice} ₽</span>
+          )}
+        </div>
+        
+        <div className={styles.quantityControl}>
+          <button
+            className={styles.quantityButton}
+            onClick={() => handleUpdateQuantity(productId, quantity - 0.1)}
+            disabled={quantity <= 0.5 || isUpdating}
+          >
+            <span>-</span>
+          </button>
+          <input
+            type="number"
+            step="0.1"
+            min="0.5"
+            value={quantity}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              if (!isNaN(value) && value >= 0.5) {
+                handleUpdateQuantity(productId, value);
+              }
+            }}
+            className={styles.quantityInput}
+            disabled={isUpdating}
+          />
+          <button
+            className={styles.quantityButton}
+            onClick={() => handleUpdateQuantity(productId, quantity + 0.1)}
+            disabled={isUpdating}
+          >
+            <span>+</span>
+          </button>
+        </div>
+      </div>
     </div>
-  ) : (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24" 
-      height="24" 
-      viewBox="0 0 24 24" 
-      fill="none"
-      className={styles.trashIcon}
+  </div>
+  <div className={styles.itemRight}>
+    {/* Цена для десктопной версии - скрывается на мобильных */}
+    <div className={styles.desktopPrice}>
+      {hasDiscount ? (
+        <>
+          <span className={styles.currentPrice}>{Math.round(discountPrice)} ₽</span>
+          <span className={styles.oldPrice}>{originalPrice} ₽</span>
+        </>
+      ) : (
+        <span className={styles.currentPrice}>{originalPrice} ₽</span>
+      )}
+    </div>
+    <button
+      className={styles.removeButton}
+      onClick={() => handleRemoveItem(productId)}
+      disabled={removingItems.has(productId) || isUpdating}
+      aria-label="Удалить товар"
     >
-      <path 
-        fillRule="evenodd" 
-        clipRule="evenodd" 
-        d="M8.58085 1.85559C8.73843 1.48791 9.09997 1.24951 9.5 1.24951H14.5C14.9 1.24951 15.2616 1.48791 15.4191 1.85559L16.6594 4.74951H22V6.74951H2V4.74951H7.3406L8.58085 1.85559ZM9.51654 4.74951H14.4835L13.8406 3.24951H10.1594L9.51654 4.74951Z" 
-        fill="#101010"
-      />
-      <path 
-        d="M19.2471 22.0449C19.2231 22.4407 18.8954 22.7498 18.499 22.75H5.49902C5.10243 22.75 4.77399 22.4408 4.75 22.0449L3.75 5.54492H20.2471L19.2471 22.0449ZM8.49902 11V17H10.499V11H8.49902ZM13.499 11V17H15.499V11H13.499Z" 
-        fill="#101010"
-      />
-    </svg>
-  )}
-</button>
-                      
-                    </div>
-                  </div>
+      {removingItems.has(productId) ? (
+        <div className={styles.removeSpinner}>
+          <span>...</span>
+        </div>
+      ) : (
+        <svg 
+          xmlns="http://www.w3.org/2000/svg" 
+          width="24" 
+          height="24" 
+          viewBox="0 0 24 24" 
+          fill="none"
+          className={styles.trashIcon}
+        >
+          <path 
+            fillRule="evenodd" 
+            clipRule="evenodd" 
+            d="M8.58085 1.85559C8.73843 1.48791 9.09997 1.24951 9.5 1.24951H14.5C14.9 1.24951 15.2616 1.48791 15.4191 1.85559L16.6594 4.74951H22V6.74951H2V4.74951H7.3406L8.58085 1.85559ZM9.51654 4.74951H14.4835L13.8406 3.24951H10.1594L9.51654 4.74951Z" 
+            fill="#101010"
+          />
+          <path 
+            d="M19.2471 22.0449C19.2231 22.4407 18.8954 22.7498 18.499 22.75H5.49902C5.10243 22.75 4.77399 22.4408 4.75 22.0449L3.75 5.54492H20.2471L19.2471 22.0449ZM8.49902 11V17H10.499V11H8.49902ZM13.499 11V17H15.499V11H13.499Z" 
+            fill="#101010"
+          />
+        </svg>
+      )}
+    </button>
+  </div>
+</div>
                 );
               })}
             </div>

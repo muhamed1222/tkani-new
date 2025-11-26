@@ -5,13 +5,25 @@ export const SearchInput = ({ placeholder = "Поиск по сайту", onSear
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isSearchHovered, setIsSearchHovered] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
+
+  // Определяем мобильное устройство
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Популярные запросы
   const popularQueries = ["Нитки", "Ткань", "Иглы швейные", "Атласная ткань"];
   
-  // Недавние запросы (можно хранить в localStorage)
+  // Недавние запросы
   const [recentQueries, setRecentQueries] = useState(() => {
     const saved = localStorage.getItem("recentQueries");
     return saved ? JSON.parse(saved) : ["Ткань для штор", "Натуральные материалы"];
@@ -57,7 +69,6 @@ export const SearchInput = ({ placeholder = "Поиск по сайту", onSear
 
   const handleSearch = (query) => {
     if (onSearch) onSearch(query);
-    // Добавляем в недавние запросы
     if (query && !recentQueries.includes(query)) {
       const updated = [query, ...recentQueries.slice(0, 4)];
       setRecentQueries(updated);
@@ -82,12 +93,10 @@ export const SearchInput = ({ placeholder = "Поиск по сайту", onSear
     setShowDropdown(true);
   };
 
-
-
   return (
     <div className="relative" ref={searchRef}>
       <div 
-        className={`flex items-center justify-between pl-[14px] pr-[4px] py-[4px] rounded-[40px] w-[340px] transition-all ${
+        className={`flex items-center justify-between pl-[14px] pr-[4px] py-[4px] rounded-[40px] w-full md:w-[340px] transition-all ${
           isSearchHovered && !isSearchFocused && !searchValue 
             ? "bg-[#E4E2DF]" 
             : "bg-white"
@@ -96,9 +105,6 @@ export const SearchInput = ({ placeholder = "Поиск по сайту", onSear
         onMouseLeave={() => setIsSearchHovered(false)}
       >
         <div className="flex items-center flex-1 relative">
-          {/* {searchValue && (
-            <div className="absolute left-0 w-[2px] h-[22px] bg-[#9B1E1C] rounded-[10px]"></div>
-          )} */}
           <input
             type="text"
             placeholder={placeholder}
@@ -114,27 +120,31 @@ export const SearchInput = ({ placeholder = "Поиск по сайту", onSear
             }`}
           />
         </div>
-       <button 
-  onClick={searchValue ? handleClear : () => handleSearch(searchValue)}
-  className="flex items-center justify-center w-[36px] h-[36px] bg-[#9B1E1C] rounded-[30px] hover:bg-[#860202] transition-colors"
->
-  {searchValue ? (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M16.5 5.5L5.5 16.5M5.5 5.5L16.5 16.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  ) : (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M19.25 19.25L15.5 15.5M17.4167 10.0833C17.4167 14.1334 14.1334 17.4167 10.0833 17.4167C6.03325 17.4167 2.75 14.1334 2.75 10.0833C2.75 6.03325 6.03325 2.75 10.0833 2.75C14.1334 2.75 17.4167 6.03325 17.4167 10.0833Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-  )}
-</button>
+        <button 
+          onClick={searchValue ? handleClear : () => handleSearch(searchValue)}
+          className="flex items-center justify-center w-[36px] h-[36px] bg-[#9B1E1C] rounded-[30px] hover:bg-[#860202] transition-colors"
+        >
+          {searchValue ? (
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16.5 5.5L5.5 16.5M5.5 5.5L16.5 16.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ) : (
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.25 19.25L15.5 15.5M17.4167 10.0833C17.4167 14.1334 14.1334 17.4167 10.0833 17.4167C6.03325 17.4167 2.75 14.1334 2.75 10.0833C2.75 6.03325 6.03325 2.75 10.0833 2.75C14.1334 2.75 17.4167 6.03325 17.4167 10.0833Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Выпадающее меню */}
       {showDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute top-full right-0 mt-[10px] bg-white rounded-[20px] shadow-[0px_2px_10px_0px_rgba(165,165,165,0.2)] w-[520px] z-50"
+          className={`absolute top-full mt-[10px] bg-white rounded-[20px] shadow-[0px_2px_10px_0px_rgba(165,165,165,0.2)] z-[100] ${
+            isMobile 
+              ? "left-1/2 transform -translate-x-1/2 w-[calc(100vw-32px)]" 
+              : "right-0 w-[520px]"
+          }`}
         >
           {!searchValue ? (
             // Популярные и недавние запросы
@@ -159,7 +169,6 @@ export const SearchInput = ({ placeholder = "Поиск по сайту", onSear
                   ))}
                 </div>
               </div>
-
 
               {/* Недавние запросы */}
               {recentQueries.length > 0 && (
@@ -227,15 +236,16 @@ export const SearchInput = ({ placeholder = "Поиск по сайту", onSear
                   </div>
                 </div>
                 {/* Скроллбар */}
-
-                <div className="flex-shrink-0">
-                  <div className="w-[7px] h-[460px] bg-[#F1F0EE] rounded-[10px] relative">
-                    <div
-                      className="absolute top-[2px] left-[2px] w-[3px] bg-[#C2C2C2] rounded-[10px]"
-                      style={{ height: `${(460 / searchResults.length) * Math.min(searchResults.length, 4)}px` }}
-                    ></div>
+                {!isMobile && (
+                  <div className="flex-shrink-0">
+                    <div className="w-[7px] h-[460px] bg-[#F1F0EE] rounded-[10px] relative">
+                      <div
+                        className="absolute top-[2px] left-[2px] w-[3px] bg-[#C2C2C2] rounded-[10px]"
+                        style={{ height: `${(460 / searchResults.length) * Math.min(searchResults.length, 4)}px` }}
+                      ></div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           ) : (
