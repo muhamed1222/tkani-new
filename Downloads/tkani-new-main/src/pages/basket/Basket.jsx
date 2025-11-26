@@ -567,21 +567,38 @@ export const Basket = observer(() => {
                         )}
                       </div>
                       <button
-                        className={styles.removeButton}
-                        onClick={() => handleRemoveItem(productId)}
-                        disabled={removingItems.has(productId) || isUpdating}
-                        aria-label="Удалить товар"
-                      >
-                        {removingItems.has(productId) ? (
-                          <div className={styles.removeSpinner}>
-                            <span>...</span>
-                          </div>
-                        ) : (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M18 6L6 18M6 6L18 18" stroke="#888888" strokeWidth="1.5" strokeLinecap="round"/>
-                          </svg>
-                        )}
-                      </button>
+  className={styles.removeButton}
+  onClick={() => handleRemoveItem(productId)}
+  disabled={removingItems.has(productId) || isUpdating}
+  aria-label="Удалить товар"
+>
+  {removingItems.has(productId) ? (
+    <div className={styles.removeSpinner}>
+      <span>...</span>
+    </div>
+  ) : (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width="24" 
+      height="24" 
+      viewBox="0 0 24 24" 
+      fill="none"
+      className={styles.trashIcon}
+    >
+      <path 
+        fillRule="evenodd" 
+        clipRule="evenodd" 
+        d="M8.58085 1.85559C8.73843 1.48791 9.09997 1.24951 9.5 1.24951H14.5C14.9 1.24951 15.2616 1.48791 15.4191 1.85559L16.6594 4.74951H22V6.74951H2V4.74951H7.3406L8.58085 1.85559ZM9.51654 4.74951H14.4835L13.8406 3.24951H10.1594L9.51654 4.74951Z" 
+        fill="#101010"
+      />
+      <path 
+        d="M19.2471 22.0449C19.2231 22.4407 18.8954 22.7498 18.499 22.75H5.49902C5.10243 22.75 4.77399 22.4408 4.75 22.0449L3.75 5.54492H20.2471L19.2471 22.0449ZM8.49902 11V17H10.499V11H8.49902ZM13.499 11V17H15.499V11H13.499Z" 
+        fill="#101010"
+      />
+    </svg>
+  )}
+</button>
+                      
                     </div>
                   </div>
                 );

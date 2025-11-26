@@ -265,100 +265,100 @@ export const Checkout = observer(() => {
             </div>
 
             {/* Способ доставки */}
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>Способ доставки</h2>
-                <span className={styles.stepNumber}>Шаг 2</span>
-              </div>
-              <div className={styles.deliveryOptions}>
-                <label className={styles.deliveryRadioLabel}>
-                  <input
-                    type="radio"
-                    name="deliveryMethod"
-                    value="pickup"
-                    checked={formData.deliveryMethod === 'pickup'}
-                    onChange={handleInputChange}
-                    className={styles.deliveryRadioInput}
-                  />
-                  <div className={styles.deliveryRadioCustom}></div>
-                  <div className={styles.deliveryRadioContent}>
-                    <div>
-                      <span className={styles.deliveryRadioTitle}>Самовывоз</span>
-                    </div>
-                    <div>
-                      <span className={styles.deliveryRadioDescription}>ул. Кабардинская 158, Нальчик, КБР</span>
-                    </div>
-                    <span className={styles.deliveryRadioPrice}>Бесплатно</span>
-                  </div>
-                </label>
+<div className={styles.section}>
+  <div className={styles.sectionHeader}>
+    <h2 className={styles.sectionTitle}>Способ доставки</h2>
+    <span className={styles.stepNumber}>Шаг 2</span>
+  </div>
+  <div className={styles.deliveryOptions}>
+    <label className={`${styles.deliveryRadioLabel} ${formData.deliveryMethod === 'pickup' ? styles.selected : ''}`}>
+      <input
+        type="radio"
+        name="deliveryMethod"
+        value="pickup"
+        checked={formData.deliveryMethod === 'pickup'}
+        onChange={handleInputChange}
+        className={styles.deliveryRadioInput}
+      />
+      <div className={styles.deliveryRadioCustom}></div>
+      <div className={styles.deliveryRadioContent}>
+        <div>
+          <span className={styles.deliveryRadioTitle}>Самовывоз</span>
+        </div>
+        <div>
+          <span className={styles.deliveryRadioDescription}>ул. Кабардинская 158, Нальчик, КБР</span>
+        </div>
+        <span className={styles.deliveryRadioPrice}>Бесплатно</span>
+      </div>
+    </label>
 
-                <label className={styles.deliveryRadioLabel}>
-                  <input
-                    type="radio"
-                    name="deliveryMethod"
-                    value="russian_post"
-                    checked={formData.deliveryMethod === 'russian_post'}
-                    onChange={handleInputChange}
-                    className={styles.deliveryRadioInput}
-                  />
-                  <div className={styles.deliveryRadioCustom}></div>
-                  <div className={styles.deliveryRadioContent}>
-                    <div>
-                      <span className={styles.deliveryRadioTitle}>Почта России</span>
-                    </div>
-                    <div>
-                      <span className={styles.deliveryRadioDescription}>5-7 дней</span>
-                    </div>
-                    <span className={styles.deliveryRadioPrice}>~190 ₽</span>
-                  </div>
-                </label>
+    <label className={`${styles.deliveryRadioLabel} ${formData.deliveryMethod === 'russian_post' ? styles.selected : ''}`}>
+      <input
+        type="radio"
+        name="deliveryMethod"
+        value="russian_post"
+        checked={formData.deliveryMethod === 'russian_post'}
+        onChange={handleInputChange}
+        className={styles.deliveryRadioInput}
+      />
+      <div className={styles.deliveryRadioCustom}></div>
+      <div className={styles.deliveryRadioContent}>
+        <div>
+          <span className={styles.deliveryRadioTitle}>Почта России</span>
+        </div>
+        <div>
+          <span className={styles.deliveryRadioDescription}>5-7 дней</span>
+        </div>
+        <span className={styles.deliveryRadioPrice}>~190 ₽</span>
+      </div>
+    </label>
 
-                <label className={styles.deliveryRadioLabel}>
-                  <input
-                    type="radio"
-                    name="deliveryMethod"
-                    value="cdek"
-                    checked={formData.deliveryMethod === 'cdek'}
-                    onChange={handleInputChange}
-                    className={styles.deliveryRadioInput}
-                  />
-                  <div className={styles.deliveryRadioCustom}></div>
-                  <div className={styles.deliveryRadioContent}>
-                    <div>
-                      <span className={styles.deliveryRadioTitle}>СДЭК</span>
-                    </div>
-                    <div>
-                      <span className={styles.deliveryRadioDescription}>2-4 дня</span>
-                    </div>
-                    <span className={styles.deliveryRadioPrice}>~390 ₽</span>
-                  </div>
-                </label>
+    <label className={`${styles.deliveryRadioLabel} ${formData.deliveryMethod === 'cdek' ? styles.selected : ''}`}>
+      <input
+        type="radio"
+        name="deliveryMethod"
+        value="cdek"
+        checked={formData.deliveryMethod === 'cdek'}
+        onChange={handleInputChange}
+        className={styles.deliveryRadioInput}
+      />
+      <div className={styles.deliveryRadioCustom}></div>
+      <div className={styles.deliveryRadioContent}>
+        <div>
+          <span className={styles.deliveryRadioTitle}>СДЭК</span>
+        </div>
+        <div>
+          <span className={styles.deliveryRadioDescription}>2-4 дня</span>
+        </div>
+        <span className={styles.deliveryRadioPrice}>~390 ₽</span>
+      </div>
+    </label>
 
-                <label className={styles.deliveryRadioLabel}>
-                  <input
-                    type="radio"
-                    name="deliveryMethod"
-                    value="ozon"
-                    checked={formData.deliveryMethod === 'ozon'}
-                    onChange={handleInputChange}
-                    className={styles.deliveryRadioInput}
-                  />
-                  <div className={styles.deliveryRadioCustom}></div>
-                  <div className={styles.deliveryRadioContent}>
-                    <div>
-                      <span className={styles.deliveryRadioTitle}>Ozon</span>
-                    </div>
-                    <div>
-                      <span className={styles.deliveryRadioDescription}>1-2 дня</span>
-                    </div>
-                    <span className={styles.deliveryRadioPrice}>~490 ₽</span>
-                  </div>
-                </label>
-              </div>
-              <p className={styles.deliveryNote}>
-                *Для курьерской доставки по городу — свяжитесь с менеджером
-              </p>
-            </div>
+    <label className={`${styles.deliveryRadioLabel} ${formData.deliveryMethod === 'ozon' ? styles.selected : ''}`}>
+      <input
+        type="radio"
+        name="deliveryMethod"
+        value="ozon"
+        checked={formData.deliveryMethod === 'ozon'}
+        onChange={handleInputChange}
+        className={styles.deliveryRadioInput}
+      />
+      <div className={styles.deliveryRadioCustom}></div>
+      <div className={styles.deliveryRadioContent}>
+        <div>
+          <span className={styles.deliveryRadioTitle}>Ozon</span>
+        </div>
+        <div>
+          <span className={styles.deliveryRadioDescription}>1-2 дня</span>
+        </div>
+        <span className={styles.deliveryRadioPrice}>~490 ₽</span>
+      </div>
+    </label>
+  </div>
+  <p className={styles.deliveryNote}>
+    *Для курьерской доставки по городу — свяжитесь с менеджером
+  </p>
+</div>
 
             {/* Способ оплаты */}
             <div className={styles.section}>
@@ -499,8 +499,8 @@ export const Checkout = observer(() => {
         </div>
       )}
       <div className={styles.summaryTotal}>
-        <span>Итого</span>
-        <span>{Math.round(finalTotal)} ₽</span>
+        <span>{cartItems.length} товара</span>
+        <span className={styles.summaryItog}>{Math.round(finalTotal)} ₽</span>
       </div>
     </div>
   </div>
