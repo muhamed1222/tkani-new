@@ -1,0 +1,70 @@
+.orderHistoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.title {
+  font-family: 'Inter', sans-serif;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #101010;
+  letter-spacing: -0.8px;
+  margin: 0;
+}
+
+.ordersGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.ordersGrid > * {
+  flex: 1 0 0;
+  min-width: 486px;
+  max-width: calc(50% - 8px);
+}
+
+@media (min-width: 1025px) {
+  .ordersGrid > * {
+    flex: 1 0 0;
+    min-width: 486px;
+    max-width: calc(50% - 8px);
+  }
+}
+
+.loading,
+.error,
+.empty {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: #888888;
+  margin: 0;
+}
+
+.error {
+  color: #9b1e1c;
+}
+
+@media (max-width: 1024px) {
+  .ordersGrid > * {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .ordersGrid {
+    flex-direction: column;
+  }
+
+  .ordersGrid > * {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+

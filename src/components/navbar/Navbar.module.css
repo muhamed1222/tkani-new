@@ -1,0 +1,17 @@
+/* В ваш глобальный CSS файл */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Кастомные transition для плавности */
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+.transition-colors {
+  transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.transition-transform {
+  transition: transform 0.3s ease-in-out;
+}

@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Базовые стили для контейнеров */
+.sliderContainer {
+  max-width: 1440px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  overflow: hidden;
+  /* Добавляем чтобы содержимое не выходило за пределы */
+}
+
+.aboutSection {
+  max-width: 1440px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Базовые стили для продукт секций */
+.productGrid {
+  display: grid;
+  gap: 16px;
+}
+
+/* Десктопные стили (4 колонки) */
+@media (min-width: 1440px) {
+  .productGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Стили для планшета (744px - 1439px) */
+@media (max-width: 1439px) and (min-width: 744px) {
+  .sliderContainer {
+    height: 300px !important;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* Добавляем отступ сверху для первого блока товаров (Новинки) */
+  .firstProductSection {
+    margin-top: 150px !important;
+  }
+
+  .aboutTitle {
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: -0.48px;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutSubtitle {
+    font-family: Inter;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 120%;
+    letter-spacing: -0.8px;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutCards {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .aboutCard {
+    height: 250px;
+    padding: 32px;
+  }
+}
+
+/* Стили для мобильных устройств (до 743px) */
+@media (max-width: 743px) {
+  .sliderContainer {
+    height: 269px !important;
+    padding-left: 16px;
+    padding-right: 16px;
+    max-width: 100vw;
+    /* Ограничиваем максимальную ширину */
+    overflow: hidden;
+    /* Скрываем переполнение */
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .aboutTitle {
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 140%;
+    letter-spacing: -0.48px;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutSubtitle {
+    font-family: Inter;
+    font-size: 26px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 120%;
+    letter-spacing: -0.8px;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutCards {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .aboutCard {
+    height: auto;
+    min-height: 200px;
+    padding: 24px;
+  }
+
+  .aboutSection {
+    padding: 16px !important;
+  }
+}
+
+/* Дополнительные стили для гарантии что ничего не выпирает */
+@media (max-width: 743px) {
+  body {
+    overflow-x: hidden;
+    /* Скрываем горизонтальный скролл */
+  }
+
+  .sliderContainer>div {
+    max-width: 100%;
+    /* Ограничиваем ширину внутреннего контейнера */
+  }
+
+  .sliderContainer img {
+    max-width: 100%;
+    /* Ограничиваем ширину изображений */
+    height: auto;
+  }
+}
