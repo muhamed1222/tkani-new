@@ -1,0 +1,53 @@
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+}
+
+ol {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 8px;
+    align-items: center;
+}
+
+li {
+    display: flex;
+    align-items: center;
+}
+
+.chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+}
+
+.title {
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #101010;
+    font-family: 'Inter', sans-serif;
+}
+
+.title:hover {
+    color: #9B1E1C;
+}
+
+.title_path {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #101010;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+}
+
+.title_path:hover {
+    color: #9B1E1C;
+    cursor: pointer;
+}

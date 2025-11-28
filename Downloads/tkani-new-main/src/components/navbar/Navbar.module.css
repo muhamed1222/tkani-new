@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Кастомные transition для плавности */
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+.transition-colors {
+  transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+
+.transition-transform {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Стили для планшетной строки */
+.tabletLinks {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease-out;
+}
+
+.tabletLink {
+  border: 1px solid transparent;
+  transition: all 0.3s ease-in-out;
+}
+
+.tabletLink:hover {
+  border-color: #9B1E1C;
+  background-color: white;
+  color: #9B1E1C;
+}
+
+/* Анимация появления планшетной строки */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
