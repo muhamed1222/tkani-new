@@ -45,18 +45,18 @@ export const NavBar = observer(() => {
       // Strapi v4 формат: avatar как объект с data
       if (user.user.avatar) {
         if (user.user.avatar.data && user.user.avatar.data.attributes) {
-          return `http://localhost:1337${user.user.avatar.data.attributes.url}`;
+          return `http://localhost:1339${user.user.avatar.data.attributes.url}`;
         }
         if (user.user.avatar.url) {
-          return `http://localhost:1337${user.user.avatar.url}`;
+          return `http://localhost:1339${user.user.avatar.url}`;
         }
         if (typeof user.user.avatar === 'number') {
-          return `http://localhost:1337/api/upload/files/${user.user.avatar}`;
+          return `http://localhost:1339/api/upload/files/${user.user.avatar}`;
         }
         if (Array.isArray(user.user.avatar) && user.user.avatar.length > 0) {
           const avatarData = user.user.avatar[0];
           if (avatarData.url) {
-            return `http://localhost:1337${avatarData.url}`;
+            return `http://localhost:1339${avatarData.url}`;
           }
         }
       }

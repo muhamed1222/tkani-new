@@ -1,7 +1,7 @@
 // src/http/api.js
 // Базовый URL API (можно вынести в переменные окружения)
 // Поддерживаем оба варианта: /api/v1/ (новый) и /api/ (старый для обратной совместимости)
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1337/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1339/api';
 
 // Утилита для работы с куками
 const cookieUtils = {
@@ -908,13 +908,13 @@ export const getImageUrl = (imageData) => {
   if (imageData.data) {
     // Если это массив (multiple: true)
     if (Array.isArray(imageData.data) && imageData.data.length > 0) {
-      const url = `http://localhost:1337${imageData.data[0].attributes?.url}`;
+      const url = `http://localhost:1339${imageData.data[0].attributes?.url}`;
       console.log('✅ URL из массива данных:', url);
       return url;
     }
     // Если это одиночный файл
     if (imageData.data.attributes?.url) {
-      const url = `http://localhost:1337${imageData.data.attributes.url}`;
+      const url = `http://localhost:1339${imageData.data.attributes.url}`;
       console.log('✅ URL из одиночных данных:', url);
       return url;
     }
@@ -922,21 +922,21 @@ export const getImageUrl = (imageData) => {
 
   // Прямой доступ к attributes (альтернативный формат)
   if (imageData.attributes?.url) {
-    const url = `http://localhost:1337${imageData.attributes.url}`;
+    const url = `http://localhost:1339${imageData.attributes.url}`;
     console.log('✅ URL из прямых attributes:', url);
     return url;
   }
 
   // Прямой URL (для обратной совместимости)
   if (imageData.url) {
-    const url = imageData.startsWith('http') ? imageData : `http://localhost:1337${imageData}`;
+    const url = imageData.startsWith('http') ? imageData : `http://localhost:1339${imageData}`;
     console.log('✅ Прямой URL:', url);
     return url;
   }
 
   // Если это строка (старый формат)
   if (typeof imageData === 'string') {
-    const url = imageData.startsWith('http') ? imageData : `http://localhost:1337${imageData}`;
+    const url = imageData.startsWith('http') ? imageData : `http://localhost:1339${imageData}`;
     console.log('✅ URL из строки:', url);
     return url;
   }

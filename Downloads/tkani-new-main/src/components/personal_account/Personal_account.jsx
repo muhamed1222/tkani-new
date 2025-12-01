@@ -125,21 +125,21 @@ export const Personal_account = observer(() => {
     if (user.user.avatar) {
       // Формат 1: avatar имеет data и attributes (самый распространенный)
       if (user.user.avatar.data && user.user.avatar.data.attributes) {
-        const url = `http://localhost:1337${user.user.avatar.data.attributes.url}`;
+        const url = `http://localhost:1339${user.user.avatar.data.attributes.url}`;
         console.log('✅ Аватар найден (формат 1):', url);
         return url;
       }
       
       // Формат 2: avatar имеет url напрямую
       if (user.user.avatar.url) {
-        const url = `http://localhost:1337${user.user.avatar.url}`;
+        const url = `http://localhost:1339${user.user.avatar.url}`;
         console.log('✅ Аватар найден (формат 2):', url);
         return url;
       }
       
       // Формат 3: avatar - это ID файла
       if (typeof user.user.avatar === 'number') {
-        const url = `http://localhost:1337/api/upload/files/${user.user.avatar}`;
+        const url = `http://localhost:1339/api/upload/files/${user.user.avatar}`;
         console.log('✅ Аватар найден (формат 3):', url);
         return url;
       }
@@ -148,7 +148,7 @@ export const Personal_account = observer(() => {
       if (Array.isArray(user.user.avatar) && user.user.avatar.length > 0) {
         const avatarData = user.user.avatar[0];
         if (avatarData.url) {
-          const url = `http://localhost:1337${avatarData.url}`;
+          const url = `http://localhost:1339${avatarData.url}`;
           console.log('✅ Аватар найден (формат 4 - массив):', url);
           return url;
         }
