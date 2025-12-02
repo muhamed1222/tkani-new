@@ -1,0 +1,135 @@
+/* Стили для блока "О нас" */
+.aboutSection {
+  max-width: 1440px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Стили для планшета (744px - 1439px) */
+@media (max-width: 1439px) and (min-width: 744px) {
+  .aboutTitle {
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 120%;
+    color: #888;
+    text-align: center;
+  }
+
+  .aboutSubtitle {
+    font-family: Inter;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 120%;
+    letter-spacing: -0.8px;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutCardText {
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    line-height: 24px;
+    letter-spacing: -0.48px;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutCardTextBold {
+    font-weight: 700;
+  }
+
+  .aboutCardTextMedium {
+    font-weight: 500;
+  }
+
+  .aboutFooter {
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 120%;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutCards {
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .aboutCard {
+    height: auto;
+    min-height: 250px;
+    padding: 32px;
+  }
+}
+
+/* Стили для мобильных устройств (до 743px) */
+@media (max-width: 743px) {
+  .aboutTitle {
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 120%;
+    color: #888;
+    text-align: center;
+  }
+
+  .aboutSubtitle {
+    font-family: Inter;
+    font-size: 26px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 120%;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutCardText {
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    line-height: 140%;
+    letter-spacing: -0.48px;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutCardTextBold {
+    font-weight: 700;
+  }
+
+  .aboutCardTextMedium {
+    font-weight: 500;
+  }
+
+  .aboutFooter {
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 120%;
+    color: #101010;
+    text-align: center;
+  }
+
+  .aboutCards {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .aboutCard {
+    height: auto;
+    min-height: 200px;
+  }
+
+
+}

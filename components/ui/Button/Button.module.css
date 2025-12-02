@@ -1,0 +1,98 @@
+.button {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  line-height: 1.2;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+/* Варианты */
+.primary {
+  background: #9B1E1C;
+  color: #FFFFFF;
+}
+
+.primary:hover:not(:disabled) {
+  background: #860202;
+}
+
+.secondary {
+  background: transparent;
+  color: #4D4D4D;
+}
+
+.secondary:hover:not(:disabled) {
+  background: #E4E2DF;
+}
+
+.tertiary {
+  background: #E4E2DF;
+  color: #101010;
+}
+
+.tertiary:hover:not(:disabled) {
+  background: #C2C2C2;
+}
+
+.outline {
+  background: transparent;
+  color: #9B1E1C;
+  border: 2px solid #9B1E1C;
+}
+
+.outline:hover:not(:disabled) {
+  background: #9B1E1C;
+  color: #FFFFFF;
+}
+
+/* Размеры */
+.small {
+  height: 32px;
+  min-height: 32px;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+.medium {
+  height: 40px;
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 15.25px;
+}
+
+.large {
+  height: 48px;
+  min-height: 48px;
+  padding: 12px 20px;
+  font-size: 16px;
+}
+
+/* Состояния */
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.disabled:hover {
+  background: inherit !important;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+/* Фокус для доступности */
+.button:focus-visible {
+  outline: 2px solid #9B1E1C;
+  outline-offset: 2px;
+}
+
+
+

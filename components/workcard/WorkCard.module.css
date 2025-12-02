@@ -1,0 +1,212 @@
+/* Базовые стили для карточки работы */
+.workCard {
+  background: white;
+  border: 1.2px solid rgba(16, 16, 16, 0.1);
+  border-radius: 20px;
+  width: 100%;
+  overflow: hidden;
+  height: auto;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  height: 100%;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+}
+
+/* Контейнер изображения */
+.imageContainer {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  width: 100%;
+  background: #F1F0EE;
+  flex-shrink: 0;
+}
+
+/* Изображение работы */
+.workImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Индикатор точек */
+.dotsIndicator {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  padding: 3px;
+  justify-content: center;
+  align-items: center;
+  gap: 3px;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.20);
+  backdrop-filter: blur(5px);
+  z-index: 10;
+}
+
+.dotLarge {
+  width: 14px;
+  height: 4px;
+  border-radius: 17px;
+  background: white;
+}
+
+.dotSmall {
+  width: 4px;
+  height: 4px;
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.60);
+}
+
+/* Текстовый контент */
+.textContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 0 8px 8px 8px;
+  width: 100%;
+  flex-grow: 1;
+}
+
+.titleContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.workTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #101010;
+  width: 100%;
+  white-space: pre-wrap;
+  margin: 0;
+  /* Ограничение до двух строк */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Кнопка "Подробнее" */
+.detailsButton {
+  border: 1px solid rgba(16, 16, 16, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 17px;
+  border-radius: 8px;
+  width: 50%;
+  transition: background-color 0.2s ease;
+  text-decoration: none;
+  align-self: flex-start;
+}
+
+.detailsButton:hover {
+  background: #F1F0EE;
+}
+
+.buttonText {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #101010;
+  text-align: center;
+  white-space: nowrap;
+  margin: 0;
+}
+
+/* Десктоп (1024px и выше) */
+@media (min-width: 1024px) {
+  .workCard {
+    width: 323px;
+    height: 535px;
+  }
+
+  .imageContainer {
+    height: 380px;
+  }
+}
+
+/* Планшеты (744px - 1023px) */
+@media (max-width: 1023px) and (min-width: 744px) {
+  .workCard {
+    width: 229px;
+    height: 368px;
+  }
+
+  .imageContainer {
+    height: 250px;
+  }
+
+  .workTitle {
+    font-size: 15px;
+    -webkit-line-clamp: 2;
+  }
+
+  .detailsButton {
+    width: 55%;
+    height: 36px;
+    padding: 8px 14px;
+  }
+
+  .buttonText {
+    font-size: 14px;
+  }
+}
+
+/* Телефоны (до 743px) */
+@media (max-width: 743px) {
+  .workCard {
+    width: 181px;
+    height: 307px;
+  }
+
+  .imageContainer {
+    height: 200px;
+  }
+
+  .workTitle {
+    font-size: 14px;
+    -webkit-line-clamp: 2;
+  }
+
+  .detailsButton {
+    width: 60%;
+    height: 32px;
+    padding: 6px 12px;
+  }
+
+  .buttonText {
+    font-size: 13px;
+  }
+
+  .textContent {
+    gap: 12px;
+  }
+
+  .titleContainer {
+    gap: 12px;
+  }
+}
