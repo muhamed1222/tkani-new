@@ -49,21 +49,7 @@ export const OrdersList = observer(() => {
         return;
       }
 
-      // ДЕТАЛЬНАЯ ДИАГНОСТИКА КАЖДОГО ЗАКАЗА
-      console.log('🔍 Детальная диагностика заказов:');
-      apiOrders.forEach((order, index) => {
-        console.log(`--- Заказ ${index + 1} ---`);
-        console.log('ID:', order.id);
-        console.log('Атрибуты:', order.attributes);
-        if (order.attributes) {
-          console.log('Статус:', order.attributes.status);
-          console.log('Номер заказа:', order.attributes.order_number);
-          console.log('Дата создания:', order.attributes.createdAt);
-          console.log('Товары:', order.attributes.items);
-          console.log('Общая сумма:', order.attributes.total_price);
-        }
-        console.log('----------------');
-      });
+    
 
       // Преобразуем данные
       const transformedOrders = apiOrders.map(transformOrderData);
@@ -219,7 +205,6 @@ export const OrdersList = observer(() => {
       console.log('⚠️ Товары не найдены в данных API');
       // Создаем моковые товары на основе items_count
       const itemCount = rawData.items_count || 2;
-      console.log(`🛠️ Создаем ${itemCount} моковых товара`);
       
       items = Array.from({ length: itemCount }, (_, index) => {
         const mockImages = ['/textile-blue.jpg', '/textile-brown.jpg', '/textile-yellow.jpg', '/textile-green.jpg'];

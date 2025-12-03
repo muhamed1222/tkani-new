@@ -1,7 +1,7 @@
 // src/http/api.js
 // Базовый URL API (можно вынести в переменные окружения)
 // Поддерживаем оба варианта: /api/v1/ (новый) и /api/ (старый для обратной совместимости)
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1338/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1339/api';
 
 // Утилита для работы с куками
 const cookieUtils = {
@@ -77,10 +77,7 @@ const getHeaders = (includeAuth = true, isFormData = false) => {
 // Базовый класс для работы с API
 class ApiService {
   constructor(baseURL = API_URL) {
-    // Принудительно используем порт 1338
-    const strapiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1338/api';
-    this.baseURL = strapiUrl;
-    console.log('🔧 ApiService baseURL установлен:', this.baseURL);
+    this.baseURL = baseURL;
   }
 
   // Улучшенная обработка ошибок с поддержкой нового формата
@@ -843,7 +840,7 @@ export const contactAPI = {
 export const ordersAPI = {
   // Создать заказ из корзины
   createOrder: async (orderData = {}) => {
-    return api.post('/orders/create', orderData, true);
+    return api.post('/orders', orderData, true);
   },
 
   // Получить список заказов пользователя - базовый populate
@@ -898,29 +895,6 @@ export const ordersAPI = {
   },
 };
 
-// Методы для доставки
-export const deliveryAPI = {
-  // Рассчитать стоимость доставки
-  calculateCost: async (provider, weight, dimensions, fromCity, toCity, toAddress = null) => {
-    return api.post('/delivery/calculate', {
-      provider,
-      weight,
-      dimensions,
-      from_city: fromCity,
-      to_city: toCity,
-      to_address: toAddress
-    }, false);
-  },
-};
-
-// Методы для оплаты
-export const paymentAPI = {
-  // Проверить статус оплаты заказа
-  checkPaymentStatus: async (orderId) => {
-    return api.get(`/payment/yoomoney/status/${orderId}`, {}, true);
-  },
-};
-
 // Функция для получения URL изображения из данных Strapi
 export const getImageUrl = (imageData) => {
   console.log('🖼️ Получение URL изображения:', imageData);
@@ -934,13 +908,13 @@ export const getImageUrl = (imageData) => {
   if (imageData.data) {
     // Если это массив (multiple: true)
     if (Array.isArray(imageData.data) && imageData.data.length > 0) {
-      const url = `http://localhost:1338${imageData.data[0].attributes?.url}`;
+      const url = `http://localhost:1339${imageData.data[0].attributes?.url}`;
       console.log('✅ URL из массива данных:', url);
       return url;
     }
     // Если это одиночный файл
     if (imageData.data.attributes?.url) {
-      const url = `http://localhost:1338${imageData.data.attributes.url}`;
+      const url = `http://localhost:1339${imageData.data.attributes.url}`;
       console.log('✅ URL из одиночных данных:', url);
       return url;
     }
@@ -948,21 +922,21 @@ export const getImageUrl = (imageData) => {
 
   // Прямой доступ к attributes (альтернативный формат)
   if (imageData.attributes?.url) {
-    const url = `http://localhost:1338${imageData.attributes.url}`;
+    const url = `http://localhost:1339${imageData.attributes.url}`;
     console.log('✅ URL из прямых attributes:', url);
     return url;
   }
 
   // Прямой URL (для обратной совместимости)
   if (imageData.url) {
-    const url = imageData.startsWith('http') ? imageData : `http://localhost:1338${imageData}`;
+    const url = imageData.startsWith('http') ? imageData : `http://localhost:1339${imageData}`;
     console.log('✅ Прямой URL:', url);
     return url;
   }
 
   // Если это строка (старый формат)
   if (typeof imageData === 'string') {
-    const url = imageData.startsWith('http') ? imageData : `http://localhost:1338${imageData}`;
+    const url = imageData.startsWith('http') ? imageData : `http://localhost:1339${imageData}`;
     console.log('✅ URL из строки:', url);
     return url;
   }

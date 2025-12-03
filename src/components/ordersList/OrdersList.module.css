@@ -25,7 +25,7 @@
   width: 100%;
 }
 
-.ordersGrid > * {
+.ordersGrid>* {
   flex: 0 0 auto;
 }
 
@@ -42,15 +42,76 @@
   color: #9b1e1c;
 }
 
-@media (max-width: 1024px) {
+/* ПК версия - 2 карточки в строке */
+@media (min-width: 1024px) {
   .ordersGrid {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
   }
 
-  .ordersGrid .orderCard {
-    width: 100%;
-    max-width: 100%;
+  .ordersGrid>* {
+    width: calc(50% - 8px);
   }
 }
 
+/* Планшет - 2 карточки в строке */
+@media (max-width: 1023px) and (min-width: 769px) {
+  .ordersGrid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .ordersGrid>* {
+    width: calc(50% - 8px);
+  }
+
+  .title {
+    font-size: 32px;
+    letter-spacing: -0.4px;
+  }
+}
+
+/* Телефон - одна карточка в строке */
+@media (max-width: 768px) {
+  .ordersGrid {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .ordersGrid>* {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .title {
+    font-size: 28px;
+    white-space: normal;
+  }
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+  .ordersList {
+    gap: 16px;
+  }
+
+  .ordersGrid {
+    gap: 12px;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 480px) {
+  .title {
+    font-size: 24px;
+  }
+
+  .loading,
+  .error,
+  .empty {
+    font-size: 14px;
+  }
+}

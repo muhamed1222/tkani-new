@@ -31,11 +31,13 @@
   flex-direction: column;
   gap: 16px;
   width: 474px;
+  /* Для компьютера - ширина */
   flex-shrink: 0;
 }
 
 .mainImage {
   height: 550px;
+  /* Для компьютера - высота */
   width: 100%;
   border-radius: 20px;
   overflow: hidden;
@@ -350,18 +352,14 @@
 .productCard {
   display: flex;
   width: 363px;
-  /* Исправлено с 243px на 363px */
   height: 128px;
-  /* Исправлено с 100px на 128px */
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
   background: white;
   border-radius: 20px;
-  /* Исправлено с 10px на 20px */
   padding: 14px;
-  /* Исправлено с 12px на 14px */
   border: 1px solid #e4e2df;
   gap: 12px;
 }
@@ -395,9 +393,7 @@
   font-family: 'Inter', sans-serif;
   font-style: normal;
   font-weight: 600;
-  /* Исправлено с 500 на 600 */
   font-size: 16px;
-  /* Исправлено с 14px на 16px */
   line-height: 1.2;
   color: #101010;
   margin: 0 0 8px 0;
@@ -446,11 +442,8 @@
 
 .cartButton {
   width: 30px;
-  /* Исправлено с 32px на 30px */
   height: 30px;
-  /* Исправлено с 32px на 30px */
   border-radius: 30px;
-  /* Исправлено с 6px на 30px */
   background: #9b1e1c;
   border: none;
   display: flex;
@@ -462,11 +455,46 @@
   flex-shrink: 0;
   margin-left: 8px;
   padding: 10px;
-  /* Добавлено padding */
 }
 
 .cartButton:hover {
   background: #860202;
+}
+
+/* Стили для секции тканей */
+.fabricsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 30px;
+  width: 100%;
+}
+
+.fabricsTitle {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 120%;
+  letter-spacing: -0.4px;
+  color: #101010;
+  margin: 0;
+}
+
+.workLink {
+  margin-top: 8px;
+}
+
+.link {
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 120%;
+  color: #888888;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  word-break: break-all;
 }
 
 /* Адаптивность */
@@ -477,14 +505,6 @@
 
   .content {
     gap: 40px;
-  }
-
-  .imagesSection {
-    width: 400px;
-  }
-
-  .mainImage {
-    height: 450px;
   }
 
   .workInfo {
@@ -503,11 +523,13 @@
   }
 
   .imagesSection {
-    width: 100%;
+    width: 710px;
+    /* Для планшетов - ширина */
   }
 
   .mainImage {
-    height: 400px;
+    height: 712px;
+    /* Для планшетов - высота */
   }
 
   .thumbnailImages {
@@ -527,7 +549,7 @@
     width: 100%;
   }
 
-  /* Адаптивность для карточек товаров */
+  /* Адаптивность для карточек товаров на планшетах */
   .productsRow {
     flex-wrap: wrap;
     justify-content: center;
@@ -537,7 +559,6 @@
   .productCard {
     width: calc(50% - 8px);
     max-width: 363px;
-    /* Обновлено */
   }
 }
 
@@ -546,8 +567,14 @@
     padding: 24px 16px;
   }
 
+  .imagesSection {
+    width: 372px;
+    /* Для телефонов - ширина */
+  }
+
   .mainImage {
-    height: 300px;
+    height: 480px;
+    /* Для телефонов - высота */
   }
 
   .thumbnail {
@@ -583,7 +610,7 @@
     gap: 10px;
   }
 
-  /* Адаптивность для карточек товаров */
+  /* Адаптивность для карточек товаров на мобильных - один столбец */
   .featuredProducts {
     flex-direction: column;
     align-items: center;
@@ -593,12 +620,18 @@
     flex-direction: column;
     align-items: center;
     gap: 16px;
+    padding-right: 0;
+  }
+
+  .productsRow:first-child,
+  .productsRow:last-child {
+    padding-right: 0;
+    justify-content: center;
   }
 
   .productCard {
     width: 100%;
     max-width: 363px;
-    /* Обновлено */
   }
 }
 
@@ -607,8 +640,14 @@
     padding: 16px 12px;
   }
 
+  .imagesSection {
+    width: 100%;
+    max-width: 372px;
+    margin: 0 auto;
+  }
+
   .mainImage {
-    height: 250px;
+    height: 480px;
   }
 
   .workTitle {
@@ -622,7 +661,6 @@
 
   .productName {
     font-size: 15px;
-    /* Уменьшен немного для мобильных */
   }
 
   .productImage {
@@ -631,22 +669,27 @@
   }
 }
 
-/* Стили для секции тканей */
-.fabricsSection {
+/* Стили для кнопки корзины */
+.cartButton {
+  background: #9b1e1c;
+  border: none;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 30px;
-  width: 100%;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.fabricsTitle {
-  font-family: 'Inter', sans-serif;
-  font-style: normal;
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 120%;
-  letter-spacing: -0.4px;
-  color: #101010;
-  margin: 0;
+.cartButton:hover:not(:disabled) {
+  background: #860202;
+}
+
+.cartButton:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }

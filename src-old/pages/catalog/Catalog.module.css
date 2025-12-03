@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Базовые стили для всех устройств */
+.catalogLayout {
+  flex-direction: row !important;
+  gap: 32px !important;
+}
+
+.sidebar {
+  width: 300px !important;
+  flex-shrink: 0;
+}
+
+.productsGrid {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+}
+
+/* Стили для планшета (744px - 1023px) */
+@media (max-width: 1023px) and (min-width: 744px) {
+  .sidebar {
+    width: 250px !important;
+  }
+
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Стили для мобильных устройств (до 743px) */
+@media (max-width: 743px) {
+  .sidebar {
+    width: 200px !important;
+  }
+
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .containerPadding {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* Десктопные стили (1024px и выше) */
+@media (min-width: 1024px) {
+  .productsGrid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}

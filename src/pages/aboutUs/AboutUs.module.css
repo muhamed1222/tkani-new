@@ -1260,3 +1260,199 @@
         padding: 32px 12px;
     }
 }
+
+/* Стили для планшетов (744px - 1023px) */
+@media (max-width: 1023px) and (min-width: 744px) {
+
+    /* Секция "Мы — магазин натуральных тканей" - делаем как на мобильной версии */
+    .tiles_container {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .tiles_text {
+        height: auto;
+        min-height: 250px;
+        padding: 40px;
+    }
+
+    .tiles_text p {
+        font-size: 17px;
+        line-height: 1.4;
+    }
+
+    .tiles_container:nth-child(2) .tiles_text p {
+        font-size: 16px;
+    }
+
+    .tiles_img {
+        height: 250px;
+    }
+
+    /* Оплата - в один ряд с измененными размерами карточек */
+    .section_pay_cards {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .pay_card {
+        width: 100%;
+        height: 140px;
+        padding: 12px;
+        max-width: none;
+    }
+
+    .pay_card p {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 1.2;
+        padding: 0 8px;
+    }
+
+    .pay_card_img01,
+    .pay_card_img02,
+    .pay_card_img03 {
+        height: 50px;
+        width: 50px;
+    }
+
+    /* Адаптация других элементов для планшета */
+    .wrapper {
+        padding: 32px 24px;
+    }
+
+    .section_about,
+    .section_delivery,
+    .section_pay,
+    .section_questions,
+    .section_contacts {
+        width: 100%;
+    }
+
+    .tiles {
+        padding: 0 24px;
+    }
+
+    .section_delivery,
+    .section_pay,
+    .section_questions,
+    .section_contacts {
+        padding: 48px 0;
+    }
+
+    .title_text h3,
+    .section_delivery_text h3,
+    .section_pay_text h3,
+    .section_questions_title,
+    .section_contacts_title {
+        font-size: 32px;
+    }
+
+    .title_text p {
+        font-size: 16px;
+    }
+
+    .section_delivery_text p,
+    .section_pay_text p {
+        font-size: 15px;
+    }
+
+    .icon_container p {
+        font-size: 16px;
+    }
+
+    .icons {
+        gap: 32px;
+    }
+
+    .icons img {
+        height: 48px;
+        max-width: 120px;
+    }
+
+    /* Доставка - адаптация для планшета */
+    .section_delivery_cards {
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .delivery_card {
+        width: calc(50% - 6px);
+        max-width: none;
+        height: 100px;
+    }
+
+    .delivery_card_title h5 {
+        font-size: 16px;
+    }
+
+    .delivery_card p {
+        font-size: 14px;
+    }
+
+    /* Вопросы - адаптация для планшета */
+    .overlays {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .modal_link_name {
+        max-width: none;
+    }
+
+    /* Контакты - адаптация для планшета */
+    .contacts_container {
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .contacts_info {
+        width: 100%;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+
+    .contacts_form {
+        width: 100%;
+    }
+
+    .form_fields {
+        flex-direction: row;
+    }
+
+    .form_inputs {
+        width: 50%;
+    }
+
+    .input textarea {
+        width: 100%;
+    }
+
+    .contacts_map {
+        height: 350px;
+    }
+}
+
+/* Дополнительная корректировка для планшетов в портретной ориентации */
+@media (max-width: 834px) and (min-width: 744px) {
+    .section_pay_cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .section_pay_cards .pay_card:last-child {
+        grid-column: 1 / -1;
+        max-width: 50%;
+        justify-self: center;
+    }
+
+    .delivery_card {
+        width: calc(50% - 6px);
+    }
+
+    .contacts_info {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

@@ -25,28 +25,6 @@
   width: 100%;
 }
 
-.imagesSection {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 474px;
-  flex-shrink: 0;
-}
-
-.mainImage {
-  height: 550px;
-  width: 100%;
-  border-radius: 20px;
-  overflow: hidden;
-  position: relative;
-}
-
-.mainImage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-}
 
 .thumbnailImages {
   display: flex;
@@ -95,6 +73,22 @@
   align-items: flex-start;
   justify-content: space-between;
   width: 100%;
+}
+
+/* Планшеты и телефоны */
+@media (max-width: 1024px) {
+  .productHeader {
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+  }
+
+  .discountBadge {
+    align-self: flex-start;
+    /* Размещаем слева */
+    order: -1;
+    /* Перемещаем перед названием товара */
+  }
 }
 
 .productTitleSection {
@@ -636,35 +630,7 @@
   /* 20px отступ от модального окна */
 }
 
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-  .modalImage {
-    width: 100%;
-    height: auto;
-    max-height: 70vh;
-  }
-
-  .navButton {
-    width: 40px;
-    height: 40px;
-  }
-
-  .prevButton {
-    left: 10px;
-  }
-
-  .nextButton {
-    right: 10px;
-  }
-
-  .modalFooter {
-    flex-direction: column;
-    gap: 10px;
-  }
-}
-
-
-/* Адаптивность */
+/* Обновите существующие медиа-запросы */
 @media (max-width: 1280px) {
   .container {
     padding: 40px 50px;
@@ -674,13 +640,14 @@
     gap: 40px;
   }
 
-  .imagesSection {
+  /* Уберите или закомментируйте старые стили для imagesSection и mainImage */
+  /* .imagesSection {
     width: 400px;
   }
 
   .mainImage {
     height: 450px;
-  }
+  } */
 
   .productInfo {
     width: calc(100% - 440px);
@@ -698,11 +665,13 @@
   }
 
   .imagesSection {
-    width: 100%;
+    width: 712px;
+    /* Для планшетов */
   }
 
   .mainImage {
-    height: 400px;
+    height: 712px;
+    /* Для планшетов */
   }
 
   .thumbnailImages {
@@ -713,29 +682,7 @@
     width: 100%;
   }
 
-  .productHeader {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .productTitleSection {
-    width: 100%;
-  }
-
-  .actionButtons {
-    flex-direction: column;
-  }
-
-  .addToCartButton,
-  .buyNowButton {
-    padding: 0 16px;
-    width: 100%;
-    min-width: 0;
-  }
-
-  .characteristics {
-    width: 100%;
-  }
+  /* Остальные стили... */
 }
 
 @media (max-width: 768px) {
@@ -743,8 +690,14 @@
     padding: 24px 16px;
   }
 
+  .imagesSection {
+    width: 372px;
+    /* Для телефонов */
+  }
+
   .mainImage {
-    height: 300px;
+    height: 480px;
+    /* Для телефонов */
   }
 
   .thumbnail {
@@ -766,8 +719,14 @@
     padding: 16px 12px;
   }
 
+  .imagesSection {
+    width: 100%;
+    max-width: 372px;
+    margin: 0 auto;
+  }
+
   .mainImage {
-    height: 250px;
+    height: 480px;
   }
 
   .productTitle {
@@ -859,4 +818,69 @@
 .discountInfoLink:hover {
   text-decoration: none;
   opacity: 0.8;
+}
+
+.imagesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 474px;
+  /* Для компьютера */
+  flex-shrink: 0;
+}
+
+.mainImage {
+  height: 550px;
+  /* Для компьютера */
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.mainImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Планшеты */
+@media (max-width: 1024px) {
+  .imagesSection {
+    width: 712px;
+    /* Для планшетов */
+  }
+
+  .mainImage {
+    height: 712px;
+    /* Для планшетов */
+  }
+}
+
+/* Телефоны */
+@media (max-width: 768px) {
+  .imagesSection {
+    width: 372px;
+    /* Для телефонов */
+  }
+
+  .mainImage {
+    height: 480px;
+    /* Для телефонов */
+  }
+}
+
+/* Мелкие телефоны */
+@media (max-width: 480px) {
+  .imagesSection {
+    width: 100%;
+    /* На маленьких экранах занимает всю ширину */
+    max-width: 372px;
+    margin: 0 auto;
+  }
+
+  .mainImage {
+    height: 480px;
+  }
 }

@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import styles from "./Checkout.module.css";
 import { Breadcrumbs } from "../../components/breadcrumbs/Breadcrumbs";
-import { cartAPI, authAPI, ordersAPI, deliveryAPI, paymentAPI } from "../../http/api";
+import { cartAPI, authAPI, ordersAPI } from "../../http/api";
 import { SHOP_ROUTE } from "../../utils/consts";
 import { showToast } from "../../components/ui/Toast";
 
@@ -20,12 +20,8 @@ export const Checkout = observer(() => {
     email: "",
     phone: "",
     deliveryMethod: "pickup",
-    deliveryAddress: "",
     paymentMethod: "card"
   });
-  
-  const [deliveryCost, setDeliveryCost] = useState(0);
-  const [isCalculatingDelivery, setIsCalculatingDelivery] = useState(false);
 
   const [formErrors, setFormErrors] = useState({});
 
@@ -82,9 +78,7 @@ export const Checkout = observer(() => {
         },
         delivery: {
           method: formData.deliveryMethod,
-          address: formData.deliveryMethod === 'pickup' 
-            ? 'ул. Кабардинская 158, Нальчик, КБР' 
-            : formData.deliveryAddress || ''
+          address: formData.deliveryMethod === 'pickup' ? 'ул. Кабардинская 158, Нальчик, КБР' : ''
         },
         payment: {
           method: formData.paymentMethod
@@ -95,13 +89,6 @@ export const Checkout = observer(() => {
       };
 
       const response = await ordersAPI.createOrder(orderData);
-      
-      // Если есть URL для оплаты (ЮMoney), перенаправляем на оплату
-      if (response.payment_url && formData.paymentMethod === 'yoomoney') {
-        showToast('Перенаправление на оплату...', 'info');
-        window.location.href = response.payment_url;
-        return;
-      }
       
       showToast('Заказ успешно оформлен!', 'success');
       
@@ -163,71 +150,19 @@ export const Checkout = observer(() => {
 
   const total = subtotal - discount;
 
-  // Расчет стоимости доставки
-  useEffect(() => {
-    const calculateDelivery = async () => {
-      if (formData.deliveryMethod === 'pickup') {
-        setDeliveryCost(0);
-        return;
-      }
-      
-      if (!cartItems || cartItems.length === 0) {
-        return;
-      }
-      
-      setIsCalculatingDelivery(true);
-      try {
-        // Рассчитываем вес (примерно 0.5 кг на товар)
-        const weight = cartItems.reduce((sum, item) => sum + (item.quantity || 1) * 0.5, 0);
-        
-        // Стандартные размеры
-        const dimensions = {
-          length: 30,
-          width: 20,
-          height: 10
-        };
-        
-        const fromCity = "Нальчик";
-        const toCity = formData.deliveryAddress ? formData.deliveryAddress.split(',')[0] : "Нальчик";
-        
-        const response = await deliveryAPI.calculateCost(
-          formData.deliveryMethod,
-          weight,
-          dimensions,
-          fromCity,
-          toCity,
-          formData.deliveryAddress
-        );
-        
-        if (response && response.cost !== undefined) {
-          setDeliveryCost(response.cost);
-        } else {
-          // Используем значения по умолчанию
-          const defaultCosts = {
-            'russian_post': 190,
-            'cdek': 390,
-            'ozon': 490
-          };
-          setDeliveryCost(defaultCosts[formData.deliveryMethod] || 0);
-        }
-      } catch (error) {
-        console.error('Ошибка расчета доставки:', error);
-        // Используем значения по умолчанию при ошибке
-        const defaultCosts = {
-          'russian_post': 190,
-          'cdek': 390,
-          'ozon': 490
-        };
-        setDeliveryCost(defaultCosts[formData.deliveryMethod] || 0);
-      } finally {
-        setIsCalculatingDelivery(false);
-      }
-    };
-    
-    calculateDelivery();
-  }, [formData.deliveryMethod, formData.deliveryAddress, cartItems]);
+  // Стоимость доставки
+  const getDeliveryCost = () => {
+    switch (formData.deliveryMethod) {
+      case 'pickup': return 0;
+      case 'russian_post': return 190;
+      case 'cdek': return 390;
+      case 'ozon': return 490;
+      default: return 0;
+    }
+  };
 
-  const finalTotal = total - discount + deliveryCost;
+  const deliveryCost = getDeliveryCost();
+  const finalTotal = total + deliveryCost;
 
   if (isLoading) {
     return (
@@ -416,29 +351,10 @@ export const Checkout = observer(() => {
         <div>
           <span className={styles.deliveryRadioDescription}>1-2 дня</span>
         </div>
-        <span className={styles.deliveryRadioPrice}>
-          {isCalculatingDelivery ? '...' : `~${deliveryCost} ₽`}
-        </span>
+        <span className={styles.deliveryRadioPrice}>~490 ₽</span>
       </div>
     </label>
   </div>
-  
-  {/* Поле для адреса доставки (если не самовывоз) */}
-  {formData.deliveryMethod !== 'pickup' && (
-    <div className={styles.formGroup} style={{ marginTop: '1rem' }}>
-      <label className={styles.label}>Адрес доставки</label>
-      <input
-        type="text"
-        name="deliveryAddress"
-        value={formData.deliveryAddress}
-        onChange={handleInputChange}
-        className={styles.input}
-        placeholder="Город, улица, дом, квартира"
-        required={formData.deliveryMethod !== 'pickup'}
-      />
-    </div>
-  )}
-  
   <p className={styles.deliveryNote}>
     *Для курьерской доставки по городу — свяжитесь с менеджером
   </p>
@@ -489,19 +405,6 @@ export const Checkout = observer(() => {
                   <div className={styles.paymentRadioCustom}></div>
                   <span className={styles.paymentRadioTitle}>Оплата по счету на юридическое лицо</span>
                 </label>
-
-                <label className={styles.paymentRadioLabel}>
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="yoomoney"
-                    checked={formData.paymentMethod === 'yoomoney'}
-                    onChange={handleInputChange}
-                    className={styles.paymentRadioInput}
-                  />
-                  <div className={styles.paymentRadioCustom}></div>
-                  <span className={styles.paymentRadioTitle}>ЮMoney (Яндекс.Деньги)</span>
-                </label>
               </div>
 
               <label className={styles.checkboxLabel}>
@@ -547,7 +450,7 @@ export const Checkout = observer(() => {
         // Формируем полный URL изображения
         let imageUrl = '/placeholder-image.jpg';
         if (imageData?.url) {
-          imageUrl = `http://localhost:1338${imageData.url}`;
+          imageUrl = `http://localhost:1337${imageData.url}`;
         }
         
         const productName = product.name || product.title || 'Товар';
@@ -592,9 +495,7 @@ export const Checkout = observer(() => {
       {deliveryCost > 0 && (
         <div className={styles.summaryRow}>
           <span>Доставка</span>
-          <span>
-            {isCalculatingDelivery ? '...' : `${Math.round(deliveryCost)} ₽`}
-          </span>
+          <span>{deliveryCost} ₽</span>
         </div>
       )}
       <div className={styles.summaryTotal}>

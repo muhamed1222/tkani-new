@@ -163,7 +163,7 @@ async fetchWorks(page = 1, limit = 12) {
     const imageData = attributes.image.data;
     const imageAttributes = imageData.attributes || imageData;
     if (imageAttributes.url) {
-      imageUrl = `http://localhost:1338${imageAttributes.url}`;
+      imageUrl = `http://localhost:1337${imageAttributes.url}`;
       console.log('🖼️ Image URL from Strapi v4:', imageUrl);
     }
   } 
@@ -171,14 +171,14 @@ async fetchWorks(page = 1, limit = 12) {
   else if (attributes.image?.url) {
     imageUrl = attributes.image.url.startsWith('http') 
       ? attributes.image.url 
-      : `http://localhost:1338${attributes.image.url}`;
+      : `http://localhost:1337${attributes.image.url}`;
     console.log('🖼️ Image URL from direct object:', imageUrl);
   }
   // Если изображение приходит как строка
   else if (typeof attributes.image === 'string') {
     imageUrl = attributes.image.startsWith('http') 
       ? attributes.image 
-      : `http://localhost:1338${attributes.image}`;
+      : `http://localhost:1337${attributes.image}`;
     console.log('🖼️ Image URL from string:', imageUrl);
   }
 

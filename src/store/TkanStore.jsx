@@ -246,7 +246,7 @@ export default class TkanStore {
     if (typeof imageData === 'string') {
       const url = imageData.startsWith('http') 
         ? imageData 
-        : `http://localhost:1338${imageData}`;
+        : `http://localhost:1337${imageData}`;
       console.log('🖼️ String URL:', url);
       return url;
     }
@@ -255,7 +255,7 @@ export default class TkanStore {
     if (imageData.data) {
       const attributes = imageData.data.attributes || imageData.data;
       if (attributes && attributes.url) {
-        const url = `http://localhost:1338${attributes.url}`;
+        const url = `http://localhost:1337${attributes.url}`;
         console.log('🖼️ Strapi v4 URL from data:', url);
         return url;
       }
@@ -264,7 +264,7 @@ export default class TkanStore {
     // Если это объект с attributes (формат Strapi v4)
     if (imageData.attributes) {
       if (imageData.attributes.url) {
-        const url = `http://localhost:1338${imageData.attributes.url}`;
+        const url = `http://localhost:1337${imageData.attributes.url}`;
         console.log('🖼️ Strapi v4 URL from attributes:', url);
         return url;
       }
@@ -274,7 +274,7 @@ export default class TkanStore {
     if (imageData.url) {
       const url = imageData.url.startsWith('http') 
         ? imageData.url 
-        : `http://localhost:1338${imageData.url}`;
+        : `http://localhost:1337${imageData.url}`;
       console.log('🖼️ Simple object URL:', url);
       return url;
     }

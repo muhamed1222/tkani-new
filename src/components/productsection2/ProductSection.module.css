@@ -51,13 +51,13 @@
 
 .cardItem {
   flex: 0 0 auto;
-  width: 300px;
+  gap: 16px;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
   .cardItem {
-    width: 280px;
+    gap: 13px;
   }
 
   .cardsContainer {
@@ -71,7 +71,7 @@
 
 @media (max-width: 480px) {
   .cardItem {
-    width: 260px;
+    gap: 13px;
   }
 
   .cardsContainer {

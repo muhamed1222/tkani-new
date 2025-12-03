@@ -1,10 +1,10 @@
-// src/pages/WorkPage/WorkPage.jsx
 import { useEffect, useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { observer } from "mobx-react-lite";
 import styles from "./WorkPage.module.css";
 import { Breadcrumbs } from "../../components/breadcrumbs/Breadcrumbs";
 import { Context } from "../../main";
+import { cartAPI } from "../../http/api";
 import { showToast } from "../../components/ui/Toast";
 import { ProductSection } from "../../components/productsection2/ProductSection";
 import { SHOP_ROUTE } from "../../utils/consts";
@@ -12,12 +12,13 @@ import { SHOP_ROUTE } from "../../utils/consts";
 export const WorkPage = observer(() => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { works, tkans } = useContext(Context); 
+  const { works, tkans, cart } = useContext(Context); 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [imageErrors, setImageErrors] = useState(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalImageIndex, setModalImageIndex] = useState(0);
+  const [addingProducts, setAddingProducts] = useState({}); // Состояние для отслеживания добавления каждого товара
 
   useEffect(() => {
     if (id) {
@@ -83,6 +84,26 @@ export const WorkPage = observer(() => {
   const prevImage = () => {
     if (modalImageIndex > 0) {
       setModalImageIndex(modalImageIndex - 1);
+    }
+  };
+
+  // Функция добавления в корзину
+  const handleAddToCart = async (productId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (addingProducts[productId]) return;
+    
+    setAddingProducts(prev => ({ ...prev, [productId]: true }));
+    
+    try {
+      await cartAPI.addToCart(productId, 1.0); // Добавляем 1 метр по умолчанию
+      showToast('Товар добавлен в корзину', 'success');
+      // Обновляем данные корзины в store
+      cart.fetchCart();
+    } catch (error) {
+    } finally {
+      setAddingProducts(prev => ({ ...prev, [productId]: false }));
     }
   };
 
@@ -152,9 +173,16 @@ export const WorkPage = observer(() => {
           <div className={styles.workHeader}>
             <div className={styles.workTitleSection}>
               <h1 className={styles.workTitle}>{work.title}</h1>
+      {work.link && work.link !== '#' && (
+        <div className={styles.workLink}>
+
+            {work.link}
+      
+        </div>
+      )}
             </div>
           </div>
- 
+          
           {/* Заголовок "Ткани, использованные в работе" */}
           {featuredProducts.length > 0 && (
             <div className={styles.fabricsSection}>
@@ -186,7 +214,11 @@ export const WorkPage = observer(() => {
                               <span className={styles.currentPrice}>{product.price} ₽</span>
                             )}
                           </span>
-                          <button className={styles.cartButton}>
+                          <button 
+                            className={styles.cartButton}
+                            onClick={(e) => handleAddToCart(product.id, e)}
+                            disabled={addingProducts[product.id] || (product.stock !== undefined && product.stock <= 0)}
+                          >
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path fillRule="evenodd" clipRule="evenodd" d="M4.99951 4V4.75H3.01238C2.05284 4.75 1.24813 5.47444 1.14768 6.42872L0.38453 14.4287C0.26799 15.5358 1.13603 16.5 2.24922 16.5H13.75C14.8631 16.5 15.7312 15.5358 15.6147 14.4287L14.8515 6.42872C14.751 5.47444 13.9463 4.75 12.9868 4.75H10.9995V4C10.9995 2.34315 9.65636 1 7.99951 1C6.34266 1 4.99951 2.34315 4.99951 4ZM7.99951 2.5C7.17108 2.5 6.49951 3.17157 6.49951 4V4.75H9.49951V4C9.49951 3.17157 8.82794 2.5 7.99951 2.5ZM6.49951 9.25C6.49951 10.0746 7.17493 10.75 7.99951 10.75C8.82409 10.75 9.49951 10.0746 9.49951 9.25V8.5C9.49951 8.08579 9.16373 7.75 8.74951 7.75C8.3353 7.75 7.99951 8.08579 7.99951 8.5V9.25C7.99951 9.66421 7.66373 10 7.24951 10C6.8353 10 6.49951 9.66421 6.49951 9.25V8.5C6.49951 8.08579 6.16373 7.75 5.74951 7.75C5.3353 7.75 4.99951 8.08579 4.99951 8.5V9.25C4.99951 10.0746 5.67493 10.75 6.49951 10.75C7.32409 10.75 7.99951 10.0746 7.99951 9.25V8.5C7.99951 8.08579 8.3353 7.75 8.74951 7.75C9.16373 7.75 9.49951 8.08579 9.49951 8.5V9.25C9.49951 10.9069 8.15636 12.25 6.49951 12.25C4.84266 12.25 3.49951 10.9069 3.49951 9.25V8.5C3.49951 8.08579 3.8353 7.75 4.24951 7.75C4.66373 7.75 4.99951 8.08579 4.99951 8.5V9.25Z" fill="currentColor"/>
                             </svg>
@@ -221,7 +253,11 @@ export const WorkPage = observer(() => {
                               <span className={styles.currentPrice}>{featuredProducts[2].price} ₽</span>
                             )}
                           </span>
-                          <button className={styles.cartButton}>
+                          <button 
+                            className={styles.cartButton}
+                            onClick={(e) => handleAddToCart(featuredProducts[2].id, e)}
+                            disabled={addingProducts[featuredProducts[2].id] || (featuredProducts[2].stock !== undefined && featuredProducts[2].stock <= 0)}
+                          >
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                               <path fillRule="evenodd" clipRule="evenodd" d="M4.99951 4V4.75H3.01238C2.05284 4.75 1.24813 5.47444 1.14768 6.42872L0.38453 14.4287C0.26799 15.5358 1.13603 16.5 2.24922 16.5H13.75C14.8631 16.5 15.7312 15.5358 15.6147 14.4287L14.8515 6.42872C14.751 5.47444 13.9463 4.75 12.9868 4.75H10.9995V4C10.9995 2.34315 9.65636 1 7.99951 1C6.34266 1 4.99951 2.34315 4.99951 4ZM7.99951 2.5C7.17108 2.5 6.49951 3.17157 6.49951 4V4.75H9.49951V4C9.49951 3.17157 8.82794 2.5 7.99951 2.5ZM6.49951 9.25C6.49951 10.0746 7.17493 10.75 7.99951 10.75C8.82409 10.75 9.49951 10.0746 9.49951 9.25V8.5C9.49951 8.08579 9.16373 7.75 8.74951 7.75C8.3353 7.75 7.99951 8.08579 7.99951 8.5V9.25C7.99951 9.66421 7.66373 10 7.24951 10C6.8353 10 6.49951 9.66421 6.49951 9.25V8.5C6.49951 8.08579 6.16373 7.75 5.74951 7.75C5.3353 7.75 4.99951 8.08579 4.99951 8.5V9.25C4.99951 10.0746 5.67493 10.75 6.49951 10.75C7.32409 10.75 7.99951 10.0746 7.99951 9.25V8.5C7.99951 8.08579 8.3353 7.75 8.74951 7.75C9.16373 7.75 9.49951 8.08579 9.49951 8.5V9.25C9.49951 10.9069 8.15636 12.25 6.49951 12.25C4.84266 12.25 3.49951 10.9069 3.49951 9.25V8.5C3.49951 8.08579 3.8353 7.75 4.24951 7.75C4.66373 7.75 4.99951 8.08579 4.99951 8.5V9.25Z" fill="currentColor"/>
                             </svg>
