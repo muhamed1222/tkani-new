@@ -180,6 +180,7 @@ npm run format — форматирование кода с Prettier
 Разработчик полного стека (FullStack)
 Специализация: Frontend, React, TypeScript, JavaScript
 Email: ivan.ziuzichev@gmail.com
+TG: @Ivanziz
 GitHub: @IvanZuzichev
 
 
