@@ -1,0 +1,36 @@
+.productGrid {
+  display: grid;
+  gap: 10px; /* Мобильные - 10px */
+  width: 100%;
+  grid-template-columns: repeat(2, 1fr); /* Мобильные - 2 колонки */
+  grid-auto-flow: row;
+  overflow: visible;
+}
+
+/* Мобильные (до 743px) - 2 колонки */
+@media (max-width: 743px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+/* Планшеты (744px - 1023px) - 3 колонки */
+@media (min-width: 744px) and (max-width: 1023px) {
+  .productGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px; /* Планшеты - 12px */
+    overflow: visible;
+  }
+}
+
+/* Десктоп (1024px и выше) - 4 колонки, всегда показываем 4 карточки */
+@media (min-width: 1024px) {
+  .productGrid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    grid-auto-flow: row;
+    justify-items: stretch;
+    gap: 14px; /* Десктоп - 14px */
+    overflow: visible;
+  }
+}

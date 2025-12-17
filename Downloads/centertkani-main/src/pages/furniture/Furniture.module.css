@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Стили для сетки товаров */
+.productsGrid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Планшет (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+
+/* Мобильный (до 767px) */
+@media (max-width: 767px) {
+  .productsGrid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .containerPadding {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* Десктопные стили (1024px и выше) */
+@media (min-width: 1024px) {
+  .productsGrid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+

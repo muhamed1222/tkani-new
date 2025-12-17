@@ -1,0 +1,138 @@
+.account {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.breadcrumbsContainer {
+  width: 100%;
+}
+
+.tabsRoot {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: flex-start;
+  min-height: auto;
+}
+
+.tabsList {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  width: 100%;
+  padding-bottom: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Десктоп (1024px и выше) */
+@media (min-width: 1024px) {
+  .tabsRoot {
+    flex-direction: row;
+    gap: 32px;
+    align-items: flex-start;
+  }
+
+  .tabsList {
+    flex-direction: column;
+    width: 227px;
+    overflow-x: visible;
+    padding-bottom: 0;
+  }
+
+  .tabButton {
+    font-size: 16px;
+    width: 100%;
+  }
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  min-height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #101010;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Планшет (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .tabsRoot {
+    flex-direction: row;
+    gap: 32px;
+    min-height: 857px;
+  }
+
+  .tabsList {
+    flex-direction: column;
+    width: 227px;
+    overflow-x: visible;
+  }
+
+  .tabButton {
+    font-size: 16px;
+    width: 100%;
+  }
+}
+
+/* Мобильный (до 767px) */
+@media (max-width: 767px) {
+  .account {
+    padding: 20px 14px;
+  }
+}
+
+.tabButton:hover {
+  background-color: rgba(228, 226, 223, 0.5);
+}
+
+.tabButtonActive {
+  background-color: #E4E2DF;
+}
+
+.contentArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.tabContent {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.tabTitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #101010;
+  letter-spacing: -0.8px;
+  margin-bottom: 20px;
+}
+
+.tabDescription {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  color: #888888;
+}
+

@@ -1,0 +1,129 @@
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+}
+
+ol {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 8px;
+    align-items: center;
+}
+
+li {
+    display: flex;
+    align-items: center;
+}
+
+.chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+}
+
+.title {
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #101010;
+    font-family: 'Inter', sans-serif;
+}
+
+.title:hover {
+    color: #9B1E1C;
+}
+
+.title_path {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #101010;
+    font-family: 'Inter', sans-serif;
+    text-decoration: none;
+}
+
+.title_path:hover {
+    color: #9B1E1C;
+    cursor: pointer;
+}
+
+/* Стили для ellipsis */
+.ellipsis {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #101010;
+    font-family: 'Inter', sans-serif;
+    cursor: default;
+    user-select: none;
+}
+
+/* Стили для разделителя */
+.separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.separatorText {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #101010;
+    font-family: 'Inter', sans-serif;
+    margin: 0 4px;
+    white-space: nowrap;
+}
+
+/* Улучшения UI/UX: truncate для длинных текстов */
+.title_path {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .breadcrumbs ol {
+        gap: 4px;
+    }
+    
+    .title_path {
+        max-width: 120px;
+        font-size: 12px;
+    }
+    
+    .chevron {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .separator {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .separator svg {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .title_path {
+        max-width: 80px;
+        font-size: 11px;
+    }
+    
+    .breadcrumbs ol {
+        gap: 2px;
+    }
+}

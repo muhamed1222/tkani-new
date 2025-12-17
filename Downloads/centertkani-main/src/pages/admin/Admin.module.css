@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Планшет (768px - 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+  /* Адаптивные стили для планшета */
+}
+
+/* Мобильный (до 767px) */
+@media (max-width: 767px) {
+  /* Адаптивные стили для мобильных */
+}
+

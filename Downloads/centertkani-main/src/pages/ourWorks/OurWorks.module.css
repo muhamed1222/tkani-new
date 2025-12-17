@@ -1,0 +1,23 @@
+/* Стили для страницы работ из наших тканей */
+.worksGrid {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Планшеты (768px - 1023px) - 3 колонки */
+@media (min-width: 768px) {
+  .worksGrid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+}
+
+/* Десктоп (1024px и выше) - 4 колонки */
+@media (min-width: 1024px) {
+  .worksGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+}
